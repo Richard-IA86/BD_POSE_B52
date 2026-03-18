@@ -1,0 +1,13 @@
+{
+  "server": "DEV-DIRECTORIO\\SQLEXPRESS",
+  "_instrucciones": [
+    "1. Copiar este archivo como 'conexion.json' en esta misma carpeta.",
+    "2. Ajustar 'server' segun la instancia SQL Server del entorno local.",
+    "3. 'conexion.json' esta en .gitignore — no se sube al repositorio.",
+    "",
+    "Ejemplos de valores para 'server':",
+    "  Servidor empresa (Windows Auth): DEV-DIRECTORIO\\SQLEXPRESS",
+    "  PC local con instancia nombrada:  .\\SQLEXPRESS",
+    "  PC local instancia default:       localhost"
+  ]
+}
