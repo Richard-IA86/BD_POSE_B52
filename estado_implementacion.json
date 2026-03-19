@@ -134,9 +134,11 @@
     "ante_error": "Documentar mensaje de error en ultimo_resultado y hacer push. No continuar."
   },
   "ultimo_resultado": {
-    "estado": "VERIFICADO",
-    "detalle": "BD verificada. Datos de prueba confirmados: costos 8204 filas (2021-2022), comprobantes 70055 filas (2021-2022). Decisión: CONSERVAR.",
+    "estado": "OK",
+    "detalle": "Script 04_tipo_cambio_B52.sql ejecutado exitosamente. Output sqlcmd: 'Changed database context to DW_GrupoPOSE_B52.' y '+ Tabla CATALOGO.tipo_cambio creada con índices.' SELECT de verificación en INFORMATION_SCHEMA.TABLES retornó 1 fila: TABLE_SCHEMA=CATALOGO, TABLE_NAME=tipo_cambio.",
     "fecha": "2026-03-19",
+    "script_ejecutado": "02_scripts/sql/04_tipo_cambio_B52.sql",
+    "instancia": "DEV-DIRECTORIO\\SQLEXPRESS",
     "errores": []
   }
 }
