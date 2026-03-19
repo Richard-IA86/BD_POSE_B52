@@ -1,9 +1,9 @@
 # GIT — Instructivo de Administración Básica
 
-> **Proyecto:** ProyVS_CodeRick_2026  
-> **Repositorio:** `Richard-IA86/ProyVS_CodeRick_2026`  
+> **Proyecto:** BD_POSE_B52  
+> **Repositorio:** `Richard-IA86/BD_POSE_B52`  
 > **Rama principal:** `main`  
-> **Actualizado:** 2026-02-27
+> **Actualizado:** 2026-03-19
 
 ---
 
