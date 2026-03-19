@@ -23,7 +23,7 @@ Ejecutar **antes** de comenzar a trabajar.
 
 ```powershell
 # 1. Moverse a la carpeta del proyecto
-cd C:\Dev\ProyVS_CodeRick_2026
+cd C:\Dev\BD_POSE_B52
 
 # 2. Verificar el estado actual del repositorio
 git status
