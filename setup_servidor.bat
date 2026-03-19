@@ -38,10 +38,10 @@ if exist "%ROOT%\.venv\Scripts\activate.bat" (
 )
 
 :: ── 3. Instalar dependencias ──────────────────────────────────
-echo [..] Instalando dependencias desde requirements_B52.txt ...
+echo [..] Instalando dependencias desde requirements.txt ...
 call "%ROOT%\.venv\Scripts\activate.bat"
 pip install --quiet --upgrade pip
-pip install --quiet -r "%ROOT%\requirements_B52.txt"
+pip install --quiet -r "%ROOT%\requirements.txt"
 if errorlevel 1 ( echo [ERROR] Fallo al instalar dependencias. & pause & exit /b 1 )
 echo [OK] Dependencias instaladas.
 
