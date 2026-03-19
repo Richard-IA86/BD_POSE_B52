@@ -72,10 +72,14 @@ try:
         row = cursor.fetchone()
         chk(True, f"SQL Server conectado: {row[0]}")
 
-        # Verificar permiso CREATE DATABASE (permiso de servidor, no de base)
-        cursor.execute(
-            "SELECT HAS_PERMS_BY_NAME(NULL, 'SERVER', 'CREATE ANY DATABASE') AS puede_crear"
-        )
+        # Verificar permiso CREATE DATABASE via rol de servidor o permiso explícito
+        cursor.execute("""
+            SELECT CASE
+                WHEN IS_SRVROLEMEMBER('sysadmin')  = 1 THEN 1
+                WHEN IS_SRVROLEMEMBER('dbcreator') = 1 THEN 1
+                ELSE HAS_PERMS_BY_NAME(NULL, 'SERVER', 'CREATE ANY DATABASE')
+            END AS puede_crear
+        """)
         puede = cursor.fetchone()[0]
         chk(bool(puede), "Permiso CREATE DATABASE disponible")
 
