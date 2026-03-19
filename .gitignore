@@ -35,8 +35,7 @@ config/local_*.json
 config/secrets.*
 *.env
 
-# VS Code (configuración personal del editor)
-.vscode/settings.json
+# VS Code (configuración personal del editor — settings.json se versiona: tiene markdownlint)
 .vscode/launch.json
 
 ## --- Ignorar el resto de la plantilla Visual Studio original ---

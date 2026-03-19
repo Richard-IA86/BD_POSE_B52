@@ -1,0 +1,15 @@
+{
+  // Auto-fix markdownlint al guardar cualquier .md
+  "[markdown]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.markdownlint": "explicit"
+    },
+    "editor.wordWrapColumn": 120,
+    "editor.rulers": [120]
+  },
+  // Markdownlint: apunta al config del repo
+  "markdownlint.config": {
+    "extends": "../.markdownlint.json"
+  }
+}
