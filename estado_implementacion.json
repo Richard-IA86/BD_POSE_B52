@@ -5,8 +5,8 @@
   "base_de_datos": "DW_GrupoPOSE_B52",
   "fecha_inicio": "2026-03-13",
   "fecha_ultima_actualizacion": "2026-03-19",
-  "fase_actual": "FASE_1_COMPLETA",
-  "progreso_porcentaje": 40,
+  "fase_actual": "FASE_1_AJUSTE",
+  "progreso_porcentaje": 45,
   "fases": {
     "FASE_0_prerequisitos": {
       "estado": "COMPLETADA",
@@ -15,13 +15,16 @@
       "observaciones": "Python OK, sqlcmd OK, instancia .\\.SQLEXPRESS OK"
     },
     "FASE_1_estructura": {
-      "estado": "COMPLETADA",
-      "descripcion": "BD + esquemas + tablas + índices + datos semilla",
+      "estado": "EN_AJUSTE",
+      "descripcion": "BD + esquemas + tablas + índices + datos semilla. Pendiente: agregar CATALOGO.tipo_cambio",
       "fecha_completada": "2026-03-13",
       "scripts_ejecutados": [
         "02_scripts/sql/01_crear_estructura_B52.sql",
         "02_scripts/sql/02_indices_B52.sql",
         "02_scripts/sql/03_poblar_referencias_B52.sql"
+      ],
+      "pendientes": [
+        "02_scripts/sql/04_tipo_cambio_B52.sql"
       ],
       "resultados": {
         "esquemas_creados": 5,
@@ -29,6 +32,11 @@
         "registros_fuentes": 6,
         "registros_calendario": 4383,
         "registros_umbrales_ml": 4
+      },
+      "datos_prueba": {
+        "PRODUCCION.costos": "8204 filas — test: 2 años parciales + 2021 y 2022 completos",
+        "PRODUCCION.comprobantes": "70055 filas — test: carga 2021 y 2022",
+        "decision": "CONSERVAR — son datos de prueba válidos. Borrar solo si se detecta corrupción."
       }
     },
     "FASE_2_catalogos": {
@@ -115,19 +123,20 @@
     "6. Validar Fase 1 BD: python 02_scripts/python/validaciones/validar_fase1.py"
   ],
   "siguiente_accion": {
-    "responsable": "Usuario",
-    "descripcion": "Revisar discrepancia de datos en tablas de producción. Las tablas ya tienen datos cargados.",
-    "comandos_a_ejecutar": [],
-    "resultado_esperado": "Decisión sobre limpiar tablas o avanzar fase",
-    "ante_error": ""
+    "responsable": "Copilot Servidor",
+    "descripcion": "Crear la tabla CATALOGO.tipo_cambio ejecutando el nuevo script DDL",
+    "comandos_a_ejecutar": [
+      "git pull origin main",
+      "sqlcmd -S DEV-DIRECTORIO\\SQLEXPRESS -E -i 02_scripts\\sql\\04_tipo_cambio_B52.sql",
+      "sqlcmd -S DEV-DIRECTORIO\\SQLEXPRESS -E -d DW_GrupoPOSE_B52 -Q \"SELECT TABLE_SCHEMA, TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tipo_cambio'\""
+    ],
+    "resultado_esperado": "Mensaje '+ Tabla CATALOGO.tipo_cambio creada con índices.' y SELECT retorna 1 fila.",
+    "ante_error": "Documentar mensaje de error en ultimo_resultado y hacer push. No continuar."
   },
   "ultimo_resultado": {
-    "estado": "ADVERTENCIA",
-    "detalle": "Verificación completada. Se encontraron tablas con datos, contrario a lo esperado (0 filas).",
+    "estado": "VERIFICADO",
+    "detalle": "BD verificada. Datos de prueba confirmados: costos 8204 filas (2021-2022), comprobantes 70055 filas (2021-2022). Decisión: CONSERVAR.",
     "fecha": "2026-03-19",
-    "errores": [
-      "PRODUCCION.costos: 8204 filas encontradas (esperado: 0)",
-      "PRODUCCION.comprobantes: 70055 filas encontradas (esperado: 0)"
-    ]
+    "errores": []
   }
 }
