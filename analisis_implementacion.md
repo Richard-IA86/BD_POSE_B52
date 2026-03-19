@@ -177,7 +177,7 @@ cc_data = [(str(row['CODIGO_CUENTA']), str(row['RUBRO_CONTABLE']), str(row['CUEN
 
 ## 5. Módulos Python faltantes (no creados aún)
 
-```
+```text
 02_scripts/python/
 ├── utils/
 │   ├── auditoria_incremental.py   ← requerido por 03_ y 04_ (registrar inicio/fin)
@@ -219,7 +219,7 @@ El archivo de memoria del repositorio documenta el siguiente pendiente que **dep
 
 ## 8. Mapa de Prioridades y Secuencia de Implementación
 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
 │  DECISIÓN PREVIA (hoy)                              │
 │  ¿Opción A (id_obra INT) o Opción B (VARCHAR FK)?   │

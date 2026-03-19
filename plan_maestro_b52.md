@@ -275,7 +275,7 @@ Crear **DW_GrupoPOSE_B52**, un Data Warehouse de nueva generación que evolucion
 
 ### 2.1 Flujo de Datos End-to-End
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────┐
 │ FASE 1: AutomatizacionETL (Power Query)                         │
 │ · Genera Excel consolidados por período                          │
@@ -986,7 +986,7 @@ if __name__ == '__main__':
 
 #### Paso 3.1: Estructura de directorio
 
-```
+```text
 C:\DW_GrupoPOSE_B52\
 ├── 00_logs/
 ├── 01_input_raw/
@@ -2786,7 +2786,7 @@ GO
 
 ### Estructura de Módulos
 
-```
+```text
 ├── ml/                          # ML Observability
 ├── utils/                       # Utilidades compartidas
     └── ...
@@ -2809,7 +2809,7 @@ GO
 
 ### Arquitectura ML
 
-```
+```text
 Post-Carga → Calcular Features → Generar Alertas → Registrar en BD
 ```
 
@@ -3314,7 +3314,7 @@ def refresh_power_query_B52(archivo_excel):
 
 ### 9.7 Ejemplo de Datos de Salida
 
-```
+```text
 | OBRA_PRONTO | FECHA      | IMPORTE  | anio_dato | mes_dato | periodo_codigo |
 |-------------|------------|----------|-----------|----------|----------------|
 | G01-001     | 2026-03-15 | 125000.50| 2026      | 3        | 202603         |

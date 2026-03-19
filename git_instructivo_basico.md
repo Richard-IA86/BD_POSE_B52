@@ -71,7 +71,7 @@ git status
 
 ### Buenas prácticas para el mensaje de commit
 
-```
+```shell
 # ✔ Mensajes claros y en tiempo presente
 git commit -m "Agrega script de carga de catálogos B52"
 git commit -m "Corrige cálculo de costos en cargar_costos_b52"
@@ -143,7 +143,7 @@ git reset --soft HEAD~1
 
 Cuando el proyecto crezca o trabajes en múltiples funcionalidades en paralelo, considerar adoptar una estrategia de ramas:
 
-```
+```text
 main          ← versión estable
 └── feature/nombre-tarea   ← desarrollo de cada tarea nueva
 ```
