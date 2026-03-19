@@ -127,7 +127,7 @@
   },
   "ultimo_resultado": {
     "estado": "PENDIENTE",
-    "detalle": "Esperando primera ejecución del Copilot Servidor",
+    "detalle": "Esperando ejecución del Copilot Servidor",
     "fecha": null,
     "errores": []
   }
