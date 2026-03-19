@@ -1,12 +1,16 @@
 {
   "server": "DEV-DIRECTORIO\\SQLEXPRESS",
+  "authentication": "Windows Authentication",
+  "user": "DEV-DIRECTORIO\\rrivarola",
   "_instrucciones": [
     "1. Copiar este archivo como 'conexion.json' en esta misma carpeta.",
-    "2. Ajustar 'server' segun la instancia SQL Server del entorno local.",
+    "2. Verificar 'server' segun la instancia SQL Server del entorno.",
     "3. 'conexion.json' esta en .gitignore — no se sube al repositorio.",
     "",
-    "Ejemplos de valores para 'server':",
-    "  Servidor empresa (Windows Auth): DEV-DIRECTORIO\\SQLEXPRESS",
+    "Instancia confirmada del servidor: DEV-DIRECTORIO\\SQLEXPRESS",
+    "Autenticacion: Windows Authentication (DEV-DIRECTORIO\\rrivarola)",
+    "",
+    "Otros ejemplos de valores para 'server':",
     "  PC local con instancia nombrada:  .\\SQLEXPRESS",
     "  PC local instancia default:       localhost"
   ]
