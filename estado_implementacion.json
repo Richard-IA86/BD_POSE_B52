@@ -1,12 +1,12 @@
 {
   "version_plan": "1.1",
   "proyecto": "DW_GrupoPOSE_B52",
-  "instancia_sql": ".\\SQLEXPRESS",
+  "instancia_sql": "DEV-DIRECTORIO\\SQLEXPRESS",
   "base_de_datos": "DW_GrupoPOSE_B52",
   "fecha_inicio": "2026-03-13",
-  "fecha_ultima_actualizacion": "2026-03-13",
+  "fecha_ultima_actualizacion": "2026-03-19",
   "fase_actual": "FASE_1_COMPLETA",
-  "progreso_porcentaje": 35,
+  "progreso_porcentaje": 40,
   "fases": {
     "FASE_0_prerequisitos": {
       "estado": "COMPLETADA",
@@ -113,5 +113,22 @@
     "4. Ejecutar validaciones: python 02_scripts/python/validaciones/00_validar_prerequisitos.py",
     "5. Ejecutar Fase 2: python 02_scripts/python/cargas/00_ejecutar_cargas_B52.py --full --skip-costos",
     "6. Validar Fase 1 BD: python 02_scripts/python/validaciones/validar_fase1.py"
-  ]
+  ],
+  "siguiente_accion": {
+    "responsable": "Copilot Servidor",
+    "descripcion": "Verificar estado actual de la BD — confirmar tablas creadas y limpias para pruebas",
+    "comandos_a_ejecutar": [
+      "git pull origin main",
+      "sqlcmd -S DEV-DIRECTORIO\\SQLEXPRESS -E -d DW_GrupoPOSE_B52 -Q \"SELECT TABLE_SCHEMA, TABLE_NAME FROM INFORMATION_SCHEMA.TABLES ORDER BY TABLE_SCHEMA, TABLE_NAME\"",
+      "sqlcmd -S DEV-DIRECTORIO\\SQLEXPRESS -E -d DW_GrupoPOSE_B52 -Q \"SELECT 'CATALOGO.fuentes' AS tabla, COUNT(*) AS filas FROM CATALOGO.fuentes UNION ALL SELECT 'CATALOGO.calendario', COUNT(*) FROM CATALOGO.calendario UNION ALL SELECT 'ML.umbrales_alertas', COUNT(*) FROM ML.umbrales_alertas UNION ALL SELECT 'PRODUCCION.costos', COUNT(*) FROM PRODUCCION.costos UNION ALL SELECT 'PRODUCCION.comprobantes', COUNT(*) FROM PRODUCCION.comprobantes\""
+    ],
+    "resultado_esperado": "Todas las tablas existen. PRODUCCION.costos y PRODUCCION.comprobantes con 0 filas.",
+    "ante_error": "Documentar en ultimo_resultado y hacer push. No ejecutar pasos adicionales."
+  },
+  "ultimo_resultado": {
+    "estado": "PENDIENTE",
+    "detalle": "Esperando primera ejecución del Copilot Servidor",
+    "fecha": null,
+    "errores": []
+  }
 }
