@@ -115,20 +115,19 @@
     "6. Validar Fase 1 BD: python 02_scripts/python/validaciones/validar_fase1.py"
   ],
   "siguiente_accion": {
-    "responsable": "Copilot Servidor",
-    "descripcion": "Verificar estado actual de la BD — confirmar tablas creadas y limpias para pruebas",
-    "comandos_a_ejecutar": [
-      "git pull origin main",
-      "sqlcmd -S DEV-DIRECTORIO\\SQLEXPRESS -E -d DW_GrupoPOSE_B52 -Q \"SELECT TABLE_SCHEMA, TABLE_NAME FROM INFORMATION_SCHEMA.TABLES ORDER BY TABLE_SCHEMA, TABLE_NAME\"",
-      "sqlcmd -S DEV-DIRECTORIO\\SQLEXPRESS -E -d DW_GrupoPOSE_B52 -Q \"SELECT 'CATALOGO.fuentes' AS tabla, COUNT(*) AS filas FROM CATALOGO.fuentes UNION ALL SELECT 'CATALOGO.calendario', COUNT(*) FROM CATALOGO.calendario UNION ALL SELECT 'ML.umbrales_alertas', COUNT(*) FROM ML.umbrales_alertas UNION ALL SELECT 'PRODUCCION.costos', COUNT(*) FROM PRODUCCION.costos UNION ALL SELECT 'PRODUCCION.comprobantes', COUNT(*) FROM PRODUCCION.comprobantes\""
-    ],
-    "resultado_esperado": "Todas las tablas existen. PRODUCCION.costos y PRODUCCION.comprobantes con 0 filas.",
-    "ante_error": "Documentar en ultimo_resultado y hacer push. No ejecutar pasos adicionales."
+    "responsable": "Usuario",
+    "descripcion": "Revisar discrepancia de datos en tablas de producción. Las tablas ya tienen datos cargados.",
+    "comandos_a_ejecutar": [],
+    "resultado_esperado": "Decisión sobre limpiar tablas o avanzar fase",
+    "ante_error": ""
   },
   "ultimo_resultado": {
-    "estado": "PENDIENTE",
-    "detalle": "Esperando ejecución del Copilot Servidor",
-    "fecha": null,
-    "errores": []
+    "estado": "ADVERTENCIA",
+    "detalle": "Verificación completada. Se encontraron tablas con datos, contrario a lo esperado (0 filas).",
+    "fecha": "2026-03-19",
+    "errores": [
+      "PRODUCCION.costos: 8204 filas encontradas (esperado: 0)",
+      "PRODUCCION.comprobantes: 70055 filas encontradas (esperado: 0)"
+    ]
   }
 }
