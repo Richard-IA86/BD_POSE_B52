@@ -73,8 +73,8 @@ git status
 
 ```
 # ✔ Mensajes claros y en tiempo presente
-git commit -m "Agrega módulo de distribución de gastos"
-git commit -m "Corrige cálculo de quincenas en ProntoPOSE"
+git commit -m "Agrega script de carga de catálogos B52"
+git commit -m "Corrige cálculo de costos en cargar_costos_b52"
 git commit -m "Actualiza README con instrucciones de configuración"
 
 # ✖ Evitar mensajes vagos
