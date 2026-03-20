@@ -58,6 +58,7 @@ cd BD_POSE_B52
 ```
 
 El script realiza automáticamente:
+
 - Verifica Python
 - Crea el entorno virtual `.venv`
 - Instala dependencias (`pandas`, `pyodbc`, `openpyxl`, `psutil`)
@@ -66,6 +67,7 @@ El script realiza automáticamente:
 - Ejecuta el validador de prerequisitos
 
 **Resultado esperado al finalizar:**
+
 ```text
 ============================================================
   SETUP COMPLETADO
@@ -104,6 +106,7 @@ python 02_scripts\python\validaciones\00_validar_prerequisitos.py
 ```
 
 **Resultado esperado:**
+
 ```text
 [OK] Python OK
 [OK] Driver ODBC detectado: ODBC Driver XX for SQL Server
@@ -112,6 +115,7 @@ python 02_scripts\python\validaciones\00_validar_prerequisitos.py
 ```
 
 **Si falla la conexión SQL:** verificar que el servicio `SQLEXPRESS` esté corriendo en el servidor:
+
 ```powershell
 Get-Service -Name 'MSSQL$SQLEXPRESS'
 ```
@@ -128,6 +132,7 @@ git log --oneline -3
 ```
 
 **Resultado esperado:**
+
 ```text
 On branch main
 Your branch is up to date with 'origin/main'.
