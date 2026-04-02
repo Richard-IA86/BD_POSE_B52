@@ -462,3 +462,4 @@ FodyWeavers.xsd
 # Usar prefijo _temp_ para scripts one-shot → se eliminan tras uso
 _temp_*.py
 _temp_*.sh
+.pytest_cache/
