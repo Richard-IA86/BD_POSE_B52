@@ -1,5 +1,5 @@
 """
-04_cargar_comprobantes_B52.py — Carga Incremental ANUAL de PRODUCCION.comprobantes.
+04_cargar_comprobantes_B52.py — Carga Incremental ANUAL de PRODUCCION.comprobantes.  # noqa: E501
 
 Estrategia: DELETE WHERE anio_dato=X → INSERT batch
 """
@@ -14,16 +14,16 @@ import pandas as pd
 import pyodbc
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "utils"))
-from auditoria_incremental import (
+from auditoria_incremental import (  # noqa: E402
     registrar_inicio_periodo,
     registrar_fin_periodo,
     verificar_procesado_periodo,
 )
-from conexion import get_connection
-from metricas_rendimiento import MedidorRendimiento
-from validaciones import validar_schema_comprobantes  # type: ignore[attr-defined]
+from conexion import get_connection  # noqa: E402
+from metricas_rendimiento import MedidorRendimiento  # noqa: E402
+from validaciones import validar_schema_comprobantes  # type: ignore[attr-defined]  # noqa: E402, E501
 
-# Raíz del repositorio: resuelve independientemente del directorio de instalación
+# Raíz del repositorio: resuelve independientemente del directorio de instalación  # noqa: E501
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ARCHIVO = REPO_ROOT / "01_input_raw" / "ComprobantesPOSE_Acum.xlsx"
 HOJA = "Hoja1"
@@ -38,7 +38,7 @@ logging.basicConfig(
         logging.StreamHandler(),
         logging.FileHandler(
             LOG_DIR
-            / f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_04_comprobantes.log",
+            / f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_04_comprobantes.log",  # noqa: E501
             encoding="utf-8",
         ),
     ],
@@ -55,10 +55,10 @@ def cargar_mapeo_obras(conn) -> dict:
     cursor = conn.cursor()
     cursor.execute(
         "SELECT obra_pronto, id_obra FROM CATALOGO.obras WHERE activo=1"
-    )
+    )  # noqa: E501
     mapeo = {
         str(r[0]).strip().upper(): r[1] for r in cursor.fetchall() if r[0]
-    }
+    }  # noqa: E501
     logging.info("Obras cargadas en mapeo: %d", len(mapeo))
     return mapeo
 
@@ -85,7 +85,7 @@ def leer_comprobantes() -> pd.DataFrame:
 
     df["FECHA_COMPROBANTE"] = pd.to_datetime(
         df["FECHA_COMPROBANTE"], errors="coerce"
-    )
+    )  # noqa: E501
     df["anio_dato"] = df["FECHA_COMPROBANTE"].dt.year.astype("Int64")
     df = validar_schema_comprobantes(df)
     logging.info(
@@ -105,7 +105,7 @@ def borrar_anio(conn, anio: int) -> int:
     if n > 0:
         cursor.execute(
             "DELETE FROM PRODUCCION.comprobantes WHERE anio_dato=?", anio
-        )
+        )  # noqa: E501
         conn.commit()
         logging.info("  Borrados %d registros (año %d)", n, anio)
     else:
@@ -117,7 +117,7 @@ def insertar_batch(
     conn, df_anio: pd.DataFrame, id_log_carga: int, anio: int, obra_map: dict
 ) -> int:
     """
-    Inserta batch en PRODUCCION.comprobantes usando surrogate keys (Star Schema).
+    Inserta batch en PRODUCCION.comprobantes usando surrogate keys (Star Schema).  # noqa: E501
 
     Args:
         obra_map: dict {obra_pronto: id_obra} para mapeo de claves naturales
@@ -125,8 +125,8 @@ def insertar_batch(
     cursor = conn.cursor()
     query = """
         INSERT INTO PRODUCCION.comprobantes (
-            id_log_carga, id_obra, obra_pronto_crudo, numero_comprobante, numero_comprobante_norm,
-            fecha_comprobante, cod_proveedor, nombre_proveedor, nombre_proveedor_norm,
+            id_log_carga, id_obra, obra_pronto_crudo, numero_comprobante, numero_comprobante_norm,  # noqa: E501
+            fecha_comprobante, cod_proveedor, nombre_proveedor, nombre_proveedor_norm,  # noqa: E501
             importe, archivo_origen, hoja_origen, fila_excel, fecha_carga,
             usuario_carga, anio_dato
         ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,GETDATE(),?,?)
@@ -134,7 +134,7 @@ def insertar_batch(
     total = 0
     skipped = 0
     for i in range(0, len(df_anio), BATCH_SIZE):
-        batch = df_anio.iloc[i : i + BATCH_SIZE]
+        batch = df_anio.iloc[i : i + BATCH_SIZE]  # noqa: E203
         rows_batch = []
 
         for idx, row in batch.iterrows():
@@ -149,10 +149,10 @@ def insertar_batch(
             # Solo si es valor único y válido, sino id_obra=NULL
             obra_pronto_str = (
                 obra_pronto_crudo.upper() if obra_pronto_crudo else None
-            )
+            )  # noqa: E501
             id_obra = (
                 obra_map.get(obra_pronto_str) if obra_pronto_str else None
-            )
+            )  # noqa: E501
 
             # Si no se puede resolver FK, seguir con id_obra=NULL (NO rechazar)
             if not id_obra and obra_pronto_str and " " not in obra_pronto_str:
@@ -163,7 +163,7 @@ def insertar_batch(
                 )
 
             try:
-                # Convertir Timestamp a datetime nativo (pyodbc no soporta pandas Timestamp)
+                # Convertir Timestamp a datetime nativo (pyodbc no soporta pandas Timestamp)  # noqa: E501
                 fecha_comp = row.get("FECHA_COMPROBANTE")
                 if pd.notna(fecha_comp):
                     fecha_comp = (
@@ -174,7 +174,7 @@ def insertar_batch(
                 else:
                     fecha_comp = None
 
-                # Normalizar campos de texto (patrón A2 - manejar NaN explícitamente)
+                # Normalizar campos de texto (patrón A2 - manejar NaN explícitamente)  # noqa: E501
                 nro_comp = (
                     str(row.get("NRO_COMPROBANTE", "")).strip()
                     if pd.notna(row.get("NRO_COMPROBANTE"))
@@ -198,7 +198,7 @@ def insertar_batch(
                 proveedor = (
                     str(proveedor_val)[:600]
                     if pd.notna(proveedor_val)
-                    else None
+                    else None  # noqa: E501
                 )
 
                 proveedor_norm_val = row.get("PROVEEDOR_NORM")
@@ -223,18 +223,18 @@ def insertar_batch(
                         proveedor_norm,
                         row.get(
                             "IMPORTE"
-                        ),  # Directo del DataFrame (patrón A2)
+                        ),  # Directo del DataFrame (patrón A2)  # noqa: E501
                         str(ARCHIVO.name),
                         HOJA,  # hoja_origen (Excel)
                         int(idx)
-                        + 2,  # fila_excel (header=row 1, data starts row 2)
+                        + 2,  # fila_excel (header=row 1, data starts row 2)  # noqa: E501
                         USUARIO,
                         anio,
                     )
                 )
             except Exception as e:
                 logging.error(
-                    f"  Error preparando fila {row.get('NRO_COMPROBANTE')}: {str(e)[:200]}"
+                    f"  Error preparando fila {row.get('NRO_COMPROBANTE')}: {str(e)[:200]}"  # noqa: E501
                 )
                 skipped += 1
                 continue
@@ -259,7 +259,7 @@ def insertar_batch(
         conn.commit()
         if (i // BATCH_SIZE) % 2 == 1:  # Log cada 2 batches (10K registros)
             logging.info(
-                f"    Procesados {min(i + BATCH_SIZE, len(df_anio))}/{len(df_anio)} registros..."
+                f"    Procesados {min(i + BATCH_SIZE, len(df_anio))}/{len(df_anio)} registros..."  # noqa: E501
             )
 
     logging.info(
@@ -273,7 +273,7 @@ def insertar_batch(
     if skipped > 0:
         logging.warning(
             "  ⚠ %d registros omitidos por obra_pronto inválido", skipped
-        )
+        )  # noqa: E501
     return total
 
 

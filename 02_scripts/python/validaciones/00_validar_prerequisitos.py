@@ -4,7 +4,7 @@
 Comprueba:
   ✅ Python 3.9+
   ✅ Librerías: pandas, pyodbc, openpyxl, psutil
-  ✅ SQL Server accesible (.\SQLEXPRESS)
+  ✅ SQL Server accesible (.\\SQLEXPRESS)
   ✅ Permisos CREATE DATABASE
   ✅ Espacio en disco > 2 GB en C:\
   ✅ Estructura de directorios B52 presente
@@ -18,7 +18,7 @@ import sys
 import shutil
 from pathlib import Path
 
-# Raíz del repositorio: resuelve independientemente del directorio de instalación
+# Raíz del repositorio: resuelve independientemente del directorio de instalación  # noqa: E501
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
 VERDE = "\033[92m"
@@ -37,7 +37,7 @@ def chk(condicion: bool, descripcion: str) -> None:
         errores.append(descripcion)
 
 
-# ── Python version ────────────────────────────────────────────────────────────
+# ── Python version ────────────────────────────────────────────────────────────  # noqa: E501
 print("\n🔍 Verificando prerequisitos DW_GrupoPOSE_B52...\n")
 major, minor = sys.version_info[:2]
 chk(major == 3 and minor >= 9, f"Python 3.9+ (detectado {major}.{minor})")
@@ -51,12 +51,12 @@ for lib in ("pandas", "pyodbc", "openpyxl"):
         chk(False, f"Librería {lib} NO instalada — pip install {lib}")
 
 try:
-    import psutil
+    import psutil  # noqa: F401
 
     chk(True, "Librería psutil disponible (métricas de memoria)")
 except ImportError:
     print(
-        f"  ⚠️  psutil no instalada — métricas de memoria deshabilitadas (no crítico)"
+        "  ⚠️  psutil no instalada — métricas de memoria deshabilitadas (no crítico)"  # noqa: E501
     )
 
 # ── SQL Server ───────────────────────────────────────────────────────────────
@@ -66,7 +66,7 @@ try:
     drivers = [d for d in pyodbc.drivers() if "SQL Server" in d]
     chk(
         bool(drivers),
-        f"Driver ODBC SQL Server encontrado: {drivers[-1] if drivers else 'NINGUNO'}",
+        f"Driver ODBC SQL Server encontrado: {drivers[-1] if drivers else 'NINGUNO'}",  # noqa: E501
     )
 
     # Intentar conexión real
@@ -82,7 +82,7 @@ try:
         row = cursor.fetchone()
         chk(True, f"SQL Server conectado: {row[0]}")
 
-        # Verificar permiso CREATE DATABASE via rol de servidor o permiso explícito
+        # Verificar permiso CREATE DATABASE via rol de servidor o permiso explícito  # noqa: E501
         cursor.execute("""
             SELECT CASE
                 WHEN IS_SRVROLEMEMBER('sysadmin')  = 1 THEN 1
@@ -99,7 +99,7 @@ try:
 except Exception as e:
     chk(False, f"pyodbc error: {e}")
 
-# ── Espacio en disco ──────────────────────────────────────────────────────────
+# ── Espacio en disco ──────────────────────────────────────────────────────────  # noqa: E501
 drv = REPO_ROOT.anchor  # letra de unidad donde está instalado el repo
 total, usado, libre = shutil.disk_usage(drv)
 libre_gb = libre / (1024**3)
@@ -117,7 +117,7 @@ dirs_requeridos = [
 for d in dirs_requeridos:
     chk(d.exists(), f"Directorio existente: {d}")
 
-# ── Resultado ─────────────────────────────────────────────────────────────────
+# ── Resultado ─────────────────────────────────────────────────────────────────  # noqa: E501
 print()
 if errores:
     print(f"{ROJO}❌ {len(errores)} prerequisito(s) fallaron:{RESET}")

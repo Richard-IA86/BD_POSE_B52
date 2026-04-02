@@ -61,7 +61,7 @@ class MedidorRendimiento:
     @property
     def velocidad_registros_seg(self) -> float:
         """Registros por segundo de la fase INSERT (si existe)."""
-        return 0.0  # Se calcula externamente con total_insertados / duracion_total
+        return 0.0  # Se calcula externamente con total_insertados / duracion_total  # noqa: E501
 
     def calcular_velocidad(self, total_registros: int) -> float:
         if self.duracion_total > 0:

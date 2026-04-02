@@ -17,7 +17,7 @@ _DRIVERS = [
 # Lee el servidor desde config/conexion.json si existe (ignorado en Git).
 # Permite que cada entorno (dev local / servidor) use su propia instancia
 # sin modificar código fuente.
-# Si el archivo no existe, usa el default .\SQLEXPRESS (válido en DEV-DIRECTORIO).
+# Si el archivo no existe, usa el default .\SQLEXPRESS (válido en DEV-DIRECTORIO).  # noqa: E501
 _CONFIG_FILE = Path(__file__).resolve().parents[3] / "config" / "conexion.json"
 
 

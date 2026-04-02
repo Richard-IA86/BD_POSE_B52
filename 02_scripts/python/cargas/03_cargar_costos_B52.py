@@ -15,16 +15,16 @@ from pathlib import Path
 
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).parent.parent / "utils"))
-from auditoria_incremental import (
+sys.path.insert(0, str(Path(__file__).parent.parent / "utils"))  # noqa: E402
+from auditoria_incremental import (  # noqa: E402
     registrar_inicio_periodo,
     registrar_fin_periodo,
     verificar_procesado_periodo,
 )
-from conexion import get_connection
-from metricas_rendimiento import MedidorRendimiento
+from conexion import get_connection  # noqa: E402
+from metricas_rendimiento import MedidorRendimiento  # noqa: E402
 
-# Raíz del repositorio: resuelve independientemente del directorio de instalación
+# Raíz del repositorio: resuelve independientemente del directorio de instalación  # noqa: E501
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ARCHIVO_COSTOS = REPO_ROOT / "01_input_raw" / "BaseCostosPOSE.xlsx"
 HOJA_COSTOS = "BaseCostosPOSE"  # Nombre de hoja; si falla se usa índice 0
@@ -314,7 +314,7 @@ def _insertar_rows(
             cursor.execute(
                 """
                 INSERT INTO PRODUCCION.costos (
-                    id_log_carga, id_obra, fecha, importe, tipo_cambio, importe_usd,
+                    id_log_carga, id_obra, fecha, importe, tipo_cambio, importe_usd,  # noqa: E501
                     nombre_proveedor, numero_comprobante, observacion,
                     descripcion_obra, detalle,
                     archivo_origen, fila_excel, fecha_carga, usuario_carga,
@@ -350,7 +350,7 @@ def _insertar_rows(
 
 
 def sincronizar_fuentes(conn, df: pd.DataFrame) -> dict:
-    """Registra en CATALOGO.fuentes las fuentes nuevas del Excel (es_automatica=1).
+    """Registra en CATALOGO.fuentes las fuentes nuevas del Excel (es_automatica=1).  # noqa: E501
     Retorna dict {codigo_fuente: id_fuente} para resolución de FK en cada fila.
     """
     fuentes_excel = (
@@ -373,7 +373,7 @@ def sincronizar_fuentes(conn, df: pd.DataFrame) -> dict:
     for cod in sorted(nuevas):
         cursor.execute(
             """
-            INSERT INTO CATALOGO.fuentes (codigo_fuente, nombre_fuente, es_automatica, activo)
+            INSERT INTO CATALOGO.fuentes (codigo_fuente, nombre_fuente, es_automatica, activo)  # noqa: E501
             OUTPUT INSERTED.id_fuente
             VALUES (?, ?, 1, 1)
             """,
@@ -407,7 +407,7 @@ def sincronizar_fuentes(conn, df: pd.DataFrame) -> dict:
 def borrar_periodo(conn, anio: int, mes: int) -> int:
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT COUNT(*) FROM PRODUCCION.costos WHERE anio_dato=? AND mes_dato=?",
+        "SELECT COUNT(*) FROM PRODUCCION.costos WHERE anio_dato=? AND mes_dato=?",  # noqa: E501
         anio,
         mes,
     )
@@ -528,7 +528,7 @@ def cargar_periodo(
         df_validas = df_p.loc[validas]
         insertados = 0
         for i in range(0, len(df_validas), BATCH_SIZE):
-            batch = df_validas.iloc[i : i + BATCH_SIZE]
+            batch = df_validas.iloc[i : i + BATCH_SIZE]  # noqa: E203
             _insertar_rows(conn, id_log, batch, fuente_map, obra_map)
             insertados += len(batch)
             logging.info(
@@ -540,17 +540,17 @@ def cargar_periodo(
 
         _registrar_rechazos(conn, id_log, rechazos)
 
-        # Verificación de integridad: filas en BD deben coincidir con insertados
+        # Verificación de integridad: filas en BD deben coincidir con insertados  # noqa: E501
         cur_check = conn.cursor()
         cur_check.execute(
-            "SELECT COUNT(*) FROM PRODUCCION.costos WHERE anio_dato=? AND mes_dato=?",
+            "SELECT COUNT(*) FROM PRODUCCION.costos WHERE anio_dato=? AND mes_dato=?",  # noqa: E501
             anio,
             mes,
         )
         filas_en_bd = cur_check.fetchone()[0]
         if filas_en_bd != insertados:
             logging.warning(
-                "  ⚠ DISCREPANCIA en %s: Python insertó %d filas pero BD tiene %d",
+                "  ⚠ DISCREPANCIA en %s: Python insertó %d filas pero BD tiene %d",  # noqa: E501
                 periodo_codigo,
                 insertados,
                 filas_en_bd,
@@ -574,7 +574,7 @@ def cargar_periodo(
             insertados,
             medidor.duracion_total,
             estado_final,
-            f"Val:{len(validas)} Rech:{len(rechazos)} BD:{filas_en_bd} Vel:{vel:.0f}reg/s",
+            f"Val:{len(validas)} Rech:{len(rechazos)} BD:{filas_en_bd} Vel:{vel:.0f}reg/s",  # noqa: E501
         )
         logging.info(
             "  ✅ %s — %d insertados, %d rechazados, %.1fs",
@@ -614,7 +614,7 @@ def recuperar_rechazos_obra(
     fuente_map: dict,
     obra_map: dict,
 ) -> None:
-    """Recupera registros rechazados de una obra recién dada de alta en catálogo.
+    """Recupera registros rechazados de una obra recién dada de alta en catálogo.  # noqa: E501
 
     Consulta AUDITORIA.rechazos para obtener los períodos donde la obra fue
     rechazada, luego fuerza la recarga de esos períodos con force=True.
@@ -624,8 +624,8 @@ def recuperar_rechazos_obra(
     cursor.execute(
         """
         SELECT DISTINCT
-            YEAR(CAST(JSON_VALUE(datos_rechazo, '$.FECHA') AS datetime))  AS anio,
-            MONTH(CAST(JSON_VALUE(datos_rechazo, '$.FECHA') AS datetime)) AS mes
+            YEAR(CAST(JSON_VALUE(datos_rechazo, '$.FECHA') AS datetime))  AS anio,  # noqa: E501
+            MONTH(CAST(JSON_VALUE(datos_rechazo, '$.FECHA') AS datetime)) AS mes  # noqa: E501
         FROM AUDITORIA.rechazos
         WHERE JSON_VALUE(datos_rechazo, '$.OBRA_PRONTO') = ?
           AND JSON_VALUE(datos_rechazo, '$.FECHA') IS NOT NULL
@@ -765,7 +765,7 @@ def main():
                 )
         else:
             logging.error(
-                "Especificar --periodos YYYYMM,... o --full o --recuperar-obra OBRA"
+                "Especificar --periodos YYYYMM,... o --full o --recuperar-obra OBRA"  # noqa: E501
             )
             sys.exit(1)
     finally:

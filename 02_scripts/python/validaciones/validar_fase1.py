@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "utils"))
-from conexion import get_connection
+from conexion import get_connection  # noqa: E402
 
 VERDE = "\033[92m"
 ROJO = "\033[91m"
@@ -49,7 +49,7 @@ try:
 
     if not bd_existe:
         print(
-            f"\n{ROJO}❌ Fase 1 INCOMPLETA — BD no existe. Ejecutar 01_crear_estructura_B52.sql{RESET}"
+            f"\n{ROJO}❌ Fase 1 INCOMPLETA — BD no existe. Ejecutar 01_crear_estructura_B52.sql{RESET}"  # noqa: E501
         )
         sys.exit(1)
 
@@ -60,7 +60,7 @@ try:
     # Esquemas
     ESQUEMAS = ("CATALOGO", "PRODUCCION", "AUDITORIA", "TEMPORAL", "ML")
     cursor.execute(
-        f"SELECT name FROM sys.schemas WHERE name IN ({','.join(['?']*len(ESQUEMAS))})",
+        f"SELECT name FROM sys.schemas WHERE name IN ({','.join(['?']*len(ESQUEMAS))})",  # noqa: E501
         *ESQUEMAS,
     )
     esquemas_encontrados = {row[0] for row in cursor.fetchall()}
@@ -85,7 +85,7 @@ try:
     cursor.execute("""
         SELECT SCHEMA_NAME(schema_id) + '.' + name AS full_name
         FROM sys.tables
-        WHERE SCHEMA_NAME(schema_id) IN ('CATALOGO','PRODUCCION','AUDITORIA','TEMPORAL','ML')
+        WHERE SCHEMA_NAME(schema_id) IN ('CATALOGO','PRODUCCION','AUDITORIA','TEMPORAL','ML')  # noqa: E501
         """)
     tablas_bd = {row[0] for row in cursor.fetchall()}
     chk(
@@ -127,6 +127,6 @@ else:
     tablas_count = len(tablas_bd) if "tablas_bd" in dir() else "?"
     print(
         f"{VERDE}✅ Fase 1 validada: esquemas={len(ESQUEMAS)}, "
-        f"tablas={tablas_count}, fuentes={n_fuentes}, calendario={n_cal} registros{RESET}\n"
+        f"tablas={tablas_count}, fuentes={n_fuentes}, calendario={n_cal} registros{RESET}\n"  # noqa: E501
     )
     sys.exit(0)

@@ -1,21 +1,19 @@
 import sys
 from pathlib import Path
 import pandas as pd
-import pyodbc
-from datetime import datetime
 
 # Agregar utils al path
 sys.path.insert(0, str(Path(__file__).parent.parent / "utils"))
-from conexion import get_connection
+from conexion import get_connection  # noqa: E402
 
 # ============================================================
 # Script: 01_cargar_catalogos_B52.py
-# Propósito: Ingesta dinámica de catálogos desde Excel funcionales sin desperdicio
+# Propósito: Ingesta dinámica de catálogos desde Excel funcionales sin desperdicio  # noqa: E501
 # Archivos Origen: Obras_Gerencias.xlsx y BaseCostosPOSE.xlsx
 # Arquitectura B52: Desnormaliza las FK estáticas en catálogos y aplica UPSERT
 # ============================================================
 
-# Raíz del repositorio: resuelve independientemente del directorio de instalación
+# Raíz del repositorio: resuelve independientemente del directorio de instalación  # noqa: E501
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 FILE_OBRAS_GERENCIAS = _REPO_ROOT / "01_input_raw" / "Obras_Gerencias.xlsx"
 FILE_COSTOS = _REPO_ROOT / "01_input_raw" / "BaseCostosPOSE.xlsx"
@@ -117,12 +115,12 @@ def procesar_obras_gerencias(conn):
     # Leer mapeos de catálogos recién insertados
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT codigo_gerencia, id_gerencia FROM CATALOGO.gerencias WHERE activo=1"
+        "SELECT codigo_gerencia, id_gerencia FROM CATALOGO.gerencias WHERE activo=1"  # noqa: E501
     )
     gerencia_map = {str(r[0]).upper().strip(): r[1] for r in cursor.fetchall()}
 
     cursor.execute(
-        "SELECT estado_compensable, id_compensable FROM CATALOGO.compensables WHERE activo=1"
+        "SELECT estado_compensable, id_compensable FROM CATALOGO.compensables WHERE activo=1"  # noqa: E501
     )
     compensable_map = {
         str(r[0]).upper().strip(): r[1] for r in cursor.fetchall()
@@ -175,8 +173,8 @@ def procesar_obras_gerencias(conn):
 
         # Insert nueva obra (descripcion_obra ya está en MAYÚSCULAS)
         cursor.execute(
-            """INSERT INTO CATALOGO.obras 
-               (obra_pronto, descripcion_obra, nro_obra, id_compensable, id_gerencia, activo)
+            """INSERT INTO CATALOGO.obras
+               (obra_pronto, descripcion_obra, nro_obra, id_compensable, id_gerencia, activo)  # noqa: E501
                VALUES (?, ?, ?, ?, ?, 1)""",
             obra_pronto,
             (
@@ -192,13 +190,13 @@ def procesar_obras_gerencias(conn):
 
     conn.commit()
     print(
-        f"   ✓ {insertadas} obras insertadas (total en catálogo con duplicados omitidos)"
+        f"   ✓ {insertadas} obras insertadas (total en catálogo con duplicados omitidos)"  # noqa: E501
     )
 
 
 def procesar_dimensiones_dinamicas(conn):
     print(
-        "🚀 Procesando Dimensiones desde Archivo Base de Costos (Solo Columnas Categoricas)..."
+        "🚀 Procesando Dimensiones desde Archivo Base de Costos (Solo Columnas Categoricas)..."  # noqa: E501
     )
     # Para optimizar RAM en B52, solo leemos estas columnas
     # CODIGO_CUENTA se lee como string para evitar conversión a float
@@ -255,7 +253,7 @@ def procesar_dimensiones_dinamicas(conn):
         .drop_duplicates()
     )
 
-    # Limpiar código_cuenta: eliminar ".0" al final si existe (ej: "521300002.0" → "521300002")
+    # Limpiar código_cuenta: eliminar ".0" al final si existe (ej: "521300002.0" → "521300002")  # noqa: E501
     def limpiar_codigo(val):
         s = str(val).strip()
         if s.endswith(".0"):

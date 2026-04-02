@@ -3,12 +3,11 @@ auditoria_incremental.py — Funciones de auditoría para carga incremental B52.
 
 Provee:
   - registrar_inicio / registrar_fin   → log_cargas (nivel archivo)
-  - registrar_inicio_periodo / registrar_fin_periodo → periodos_carga (nivel partición)
+  - registrar_inicio_periodo / registrar_fin_periodo → periodos_carga (nivel partición)  # noqa: E501
   - verificar_procesado_periodo        → idempotencia
 """
 
 import logging
-from datetime import datetime
 from typing import Optional, Tuple
 
 import pyodbc

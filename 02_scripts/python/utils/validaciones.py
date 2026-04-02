@@ -86,7 +86,7 @@ def validar_schema_comprobantes(df: pd.DataFrame) -> pd.DataFrame:
     descartados = n_antes - len(df_valido)
     if descartados:
         logging.warning(
-            "Comprobantes: %d filas descartadas (FECHA/NRO_COMPROBANTE/IMPORTE nulo)",
+            "Comprobantes: %d filas descartadas (FECHA/NRO_COMPROBANTE/IMPORTE nulo)",  # noqa: E501
             descartados,
         )
 
