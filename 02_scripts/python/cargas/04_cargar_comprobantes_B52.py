@@ -3,6 +3,7 @@
 
 Estrategia: DELETE WHERE anio_dato=X → INSERT batch
 """
+
 import argparse
 import logging
 import sys
@@ -20,13 +21,13 @@ from auditoria_incremental import (
 )
 from conexion import get_connection
 from metricas_rendimiento import MedidorRendimiento
-from validaciones import validar_schema_comprobantes
+from validaciones import validar_schema_comprobantes  # type: ignore[attr-defined]
 
 # Raíz del repositorio: resuelve independientemente del directorio de instalación
 REPO_ROOT = Path(__file__).resolve().parents[3]
-ARCHIVO   = REPO_ROOT / "01_input_raw" / "ComprobantesPOSE_Acum.xlsx"
-HOJA      = "Hoja1"
-LOG_DIR   = REPO_ROOT / "00_logs"
+ARCHIVO = REPO_ROOT / "01_input_raw" / "ComprobantesPOSE_Acum.xlsx"
+HOJA = "Hoja1"
+LOG_DIR = REPO_ROOT / "00_logs"
 BATCH_SIZE = 5000
 USUARIO = "SCRIPT_04_COMPROBANTES_B52"
 
@@ -36,7 +37,8 @@ logging.basicConfig(
     handlers=[
         logging.StreamHandler(),
         logging.FileHandler(
-            LOG_DIR / f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_04_comprobantes.log",
+            LOG_DIR
+            / f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_04_comprobantes.log",
             encoding="utf-8",
         ),
     ],
@@ -47,11 +49,16 @@ logging.basicConfig(
 # Mapeo de claves naturales a surrogate keys (Star Schema v2.1)
 # ---------------------------------------------------------------------------
 
+
 def cargar_mapeo_obras(conn) -> dict:
     """Carga mapeo obra_pronto → id_obra para resolución de FK."""
     cursor = conn.cursor()
-    cursor.execute("SELECT obra_pronto, id_obra FROM CATALOGO.obras WHERE activo=1")
-    mapeo = {str(r[0]).strip().upper(): r[1] for r in cursor.fetchall() if r[0]}
+    cursor.execute(
+        "SELECT obra_pronto, id_obra FROM CATALOGO.obras WHERE activo=1"
+    )
+    mapeo = {
+        str(r[0]).strip().upper(): r[1] for r in cursor.fetchall() if r[0]
+    }
     logging.info("Obras cargadas en mapeo: %d", len(mapeo))
     return mapeo
 
@@ -59,37 +66,46 @@ def cargar_mapeo_obras(conn) -> dict:
 def leer_comprobantes() -> pd.DataFrame:
     """Lee comprobantes desde Excel (patrón A2)"""
     logging.info("Leyendo: %s", ARCHIVO)
-    
+
     # Leer Excel con openpyxl (igual que A2)
-    df = pd.read_excel(ARCHIVO, sheet_name=HOJA, engine='openpyxl')
-    
+    df = pd.read_excel(ARCHIVO, sheet_name=HOJA, engine="openpyxl")
+
     # Mapeo de columnas (nombres exactos del Excel)
     mapeo_columnas = {
-        'Fecha comp.': 'FECHA_COMPROBANTE',
-        'Obras': 'OBRA_PRONTO',
-        'Numero': 'NRO_COMPROBANTE',
-        'Proveedor / Cuenta': 'PROVEEDOR',
-        'Cod.prov.': 'COD_PROVEEDOR',
-        'Total': 'IMPORTE'
+        "Fecha comp.": "FECHA_COMPROBANTE",
+        "Obras": "OBRA_PRONTO",
+        "Numero": "NRO_COMPROBANTE",
+        "Proveedor / Cuenta": "PROVEEDOR",
+        "Cod.prov.": "COD_PROVEEDOR",
+        "Total": "IMPORTE",
     }
-    
+
     # Renombrar columnas según mapeo
     df.rename(columns=mapeo_columnas, inplace=True)
-    
-    df["FECHA_COMPROBANTE"] = pd.to_datetime(df["FECHA_COMPROBANTE"], errors="coerce")
+
+    df["FECHA_COMPROBANTE"] = pd.to_datetime(
+        df["FECHA_COMPROBANTE"], errors="coerce"
+    )
     df["anio_dato"] = df["FECHA_COMPROBANTE"].dt.year.astype("Int64")
     df = validar_schema_comprobantes(df)
-    logging.info("Registros válidos: %d | Años únicos: %d",
-                 len(df), df["anio_dato"].nunique())
+    logging.info(
+        "Registros válidos: %d | Años únicos: %d",
+        len(df),
+        df["anio_dato"].nunique(),
+    )
     return df
 
 
 def borrar_anio(conn, anio: int) -> int:
     cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(*) FROM PRODUCCION.comprobantes WHERE anio_dato=?", anio)
+    cursor.execute(
+        "SELECT COUNT(*) FROM PRODUCCION.comprobantes WHERE anio_dato=?", anio
+    )
     n = cursor.fetchone()[0]
     if n > 0:
-        cursor.execute("DELETE FROM PRODUCCION.comprobantes WHERE anio_dato=?", anio)
+        cursor.execute(
+            "DELETE FROM PRODUCCION.comprobantes WHERE anio_dato=?", anio
+        )
         conn.commit()
         logging.info("  Borrados %d registros (año %d)", n, anio)
     else:
@@ -97,10 +113,12 @@ def borrar_anio(conn, anio: int) -> int:
     return n
 
 
-def insertar_batch(conn, df_anio: pd.DataFrame, id_log_carga: int, anio: int, obra_map: dict) -> int:
+def insertar_batch(
+    conn, df_anio: pd.DataFrame, id_log_carga: int, anio: int, obra_map: dict
+) -> int:
     """
     Inserta batch en PRODUCCION.comprobantes usando surrogate keys (Star Schema).
-    
+
     Args:
         obra_map: dict {obra_pronto: id_obra} para mapeo de claves naturales
     """
@@ -116,9 +134,9 @@ def insertar_batch(conn, df_anio: pd.DataFrame, id_log_carga: int, anio: int, ob
     total = 0
     skipped = 0
     for i in range(0, len(df_anio), BATCH_SIZE):
-        batch = df_anio.iloc[i: i + BATCH_SIZE]
+        batch = df_anio.iloc[i : i + BATCH_SIZE]
         rows_batch = []
-        
+
         for idx, row in batch.iterrows():
             # Extraer dato crudo de obra (mantener original)
             obra_pronto_raw = row.get("OBRA_PRONTO")
@@ -126,27 +144,42 @@ def insertar_batch(conn, df_anio: pd.DataFrame, id_log_carga: int, anio: int, ob
                 obra_pronto_crudo = str(obra_pronto_raw).strip()[:200]
             else:
                 obra_pronto_crudo = None
-            
+
             # Intentar mapeo obra_pronto → id_obra (Star Schema v2.1)
             # Solo si es valor único y válido, sino id_obra=NULL
-            obra_pronto_str = obra_pronto_crudo.upper() if obra_pronto_crudo else None
-            id_obra = obra_map.get(obra_pronto_str) if obra_pronto_str else None
-            
+            obra_pronto_str = (
+                obra_pronto_crudo.upper() if obra_pronto_crudo else None
+            )
+            id_obra = (
+                obra_map.get(obra_pronto_str) if obra_pronto_str else None
+            )
+
             # Si no se puede resolver FK, seguir con id_obra=NULL (NO rechazar)
-            if not id_obra and obra_pronto_str and ' ' not in obra_pronto_str:
-                logging.debug("Fila %d: obra_pronto '%s' no en catálogo → id_obra=NULL",
-                            idx, obra_pronto_str[:50])
-            
+            if not id_obra and obra_pronto_str and " " not in obra_pronto_str:
+                logging.debug(
+                    "Fila %d: obra_pronto '%s' no en catálogo → id_obra=NULL",
+                    idx,
+                    obra_pronto_str[:50],
+                )
+
             try:
                 # Convertir Timestamp a datetime nativo (pyodbc no soporta pandas Timestamp)
                 fecha_comp = row.get("FECHA_COMPROBANTE")
                 if pd.notna(fecha_comp):
-                    fecha_comp = fecha_comp.to_pydatetime() if hasattr(fecha_comp, 'to_pydatetime') else fecha_comp
+                    fecha_comp = (
+                        fecha_comp.to_pydatetime()
+                        if hasattr(fecha_comp, "to_pydatetime")
+                        else fecha_comp
+                    )
                 else:
                     fecha_comp = None
-                
+
                 # Normalizar campos de texto (patrón A2 - manejar NaN explícitamente)
-                nro_comp = str(row.get("NRO_COMPROBANTE", "")).strip() if pd.notna(row.get("NRO_COMPROBANTE")) else None
+                nro_comp = (
+                    str(row.get("NRO_COMPROBANTE", "")).strip()
+                    if pd.notna(row.get("NRO_COMPROBANTE"))
+                    else None
+                )
                 nro_comp_norm = row.get("NRO_COMPROBANTE_NORM")
                 if pd.isna(nro_comp_norm) and nro_comp:
                     nro_comp_norm = nro_comp.upper()
@@ -154,12 +187,20 @@ def insertar_batch(conn, df_anio: pd.DataFrame, id_log_carga: int, anio: int, ob
                     nro_comp_norm = None
                 else:
                     nro_comp_norm = str(nro_comp_norm)
-                
-                cod_prov = str(row.get("COD_PROVEEDOR"))[:100] if pd.notna(row.get("COD_PROVEEDOR")) else None
-                
+
+                cod_prov = (
+                    str(row.get("COD_PROVEEDOR"))[:100]
+                    if pd.notna(row.get("COD_PROVEEDOR"))
+                    else None
+                )
+
                 proveedor_val = row.get("PROVEEDOR")
-                proveedor = str(proveedor_val)[:600] if pd.notna(proveedor_val) else None
-                
+                proveedor = (
+                    str(proveedor_val)[:600]
+                    if pd.notna(proveedor_val)
+                    else None
+                )
+
                 proveedor_norm_val = row.get("PROVEEDOR_NORM")
                 if pd.isna(proveedor_norm_val) and proveedor:
                     proveedor_norm = proveedor.upper()[:600]
@@ -167,30 +208,37 @@ def insertar_batch(conn, df_anio: pd.DataFrame, id_log_carga: int, anio: int, ob
                     proveedor_norm = str(proveedor_norm_val)[:600]
                 else:
                     proveedor_norm = None
-                
+
                 # Agregar a batch (tupla con todos los parámetros)
-                rows_batch.append((
-                    id_log_carga,
-                    id_obra,  # NULL si no se pudo resolver FK
-                    obra_pronto_crudo,  # Dato original del Excel
-                    nro_comp,
-                    nro_comp_norm,
-                    fecha_comp,
-                    cod_prov,
-                    proveedor,
-                    proveedor_norm,
-                    row.get("IMPORTE"),  # Directo del DataFrame (patrón A2)
-                    str(ARCHIVO.name),
-                    HOJA,  # hoja_origen (Excel)
-                    int(idx) + 2,  # fila_excel (header=row 1, data starts row 2)
-                    USUARIO,
-                    anio,
-                ))
+                rows_batch.append(
+                    (
+                        id_log_carga,
+                        id_obra,  # NULL si no se pudo resolver FK
+                        obra_pronto_crudo,  # Dato original del Excel
+                        nro_comp,
+                        nro_comp_norm,
+                        fecha_comp,
+                        cod_prov,
+                        proveedor,
+                        proveedor_norm,
+                        row.get(
+                            "IMPORTE"
+                        ),  # Directo del DataFrame (patrón A2)
+                        str(ARCHIVO.name),
+                        HOJA,  # hoja_origen (Excel)
+                        int(idx)
+                        + 2,  # fila_excel (header=row 1, data starts row 2)
+                        USUARIO,
+                        anio,
+                    )
+                )
             except Exception as e:
-                logging.error(f"  Error preparando fila {row.get('NRO_COMPROBANTE')}: {str(e)[:200]}")
+                logging.error(
+                    f"  Error preparando fila {row.get('NRO_COMPROBANTE')}: {str(e)[:200]}"
+                )
                 skipped += 1
                 continue
-        
+
         # Insertar registros uno por uno para manejar duplicados (patrón A2)
         for row_data in rows_batch:
             try:
@@ -206,35 +254,57 @@ def insertar_batch(conn, df_anio: pd.DataFrame, id_log_carga: int, anio: int, ob
             except Exception as e:
                 logging.error(f"  Error SQL: {str(e)[:150]}")
                 skipped += 1
-        
+
         # Commit cada batch de 5000
         conn.commit()
         if (i // BATCH_SIZE) % 2 == 1:  # Log cada 2 batches (10K registros)
-            logging.info(f"    Procesados {min(i + BATCH_SIZE, len(df_anio))}/{len(df_anio)} registros...")
-    
-    logging.info("  Inserción: %d/%d (%.0f%%) [%d skipped]", total, len(df_anio),
-                 100 * total / len(df_anio) if len(df_anio) > 0 else 0, skipped)
-    
+            logging.info(
+                f"    Procesados {min(i + BATCH_SIZE, len(df_anio))}/{len(df_anio)} registros..."
+            )
+
+    logging.info(
+        "  Inserción: %d/%d (%.0f%%) [%d skipped]",
+        total,
+        len(df_anio),
+        100 * total / len(df_anio) if len(df_anio) > 0 else 0,
+        skipped,
+    )
+
     if skipped > 0:
-        logging.warning("  ⚠ %d registros omitidos por obra_pronto inválido", skipped)
+        logging.warning(
+            "  ⚠ %d registros omitidos por obra_pronto inválido", skipped
+        )
     return total
 
 
-def cargar_anio(conn, df: pd.DataFrame, obra_map: dict, anio: int, force: bool = False) -> None:
+def cargar_anio(
+    conn, df: pd.DataFrame, obra_map: dict, anio: int, force: bool = False
+) -> None:
     periodo_codigo = str(anio)
     logging.info("=" * 60)
     logging.info("AÑO: %d", anio)
 
     if not force:
-        ya, id_prev = verificar_procesado_periodo(conn, "PRODUCCION.comprobantes", periodo_codigo)
+        ya, id_prev = verificar_procesado_periodo(
+            conn, "PRODUCCION.comprobantes", periodo_codigo
+        )
         if ya:
-            logging.info("  ⚠ Ya procesado (id=%s) — use --force para recargar.", id_prev)
+            logging.info(
+                "  ⚠ Ya procesado (id=%s) — use --force para recargar.",
+                id_prev,
+            )
             return
 
     medidor = MedidorRendimiento(f"comprobantes_{anio}")
     medidor.iniciar()
     id_log, id_periodo = registrar_inicio_periodo(
-        conn, "PRODUCCION.comprobantes", "ANUAL", anio, None, periodo_codigo, USUARIO
+        conn,
+        "PRODUCCION.comprobantes",
+        "ANUAL",
+        anio,
+        None,
+        periodo_codigo,
+        USUARIO,
     )
     try:
         medidor.marcar_fase("DELETE")
@@ -243,8 +313,16 @@ def cargar_anio(conn, df: pd.DataFrame, obra_map: dict, anio: int, force: bool =
         df_a = df[df["anio_dato"] == anio].copy()
         if len(df_a) == 0:
             logging.warning("  Sin datos para año %d", anio)
-            registrar_fin_periodo(conn, id_log, id_periodo, borrados, 0,
-                                  medidor.duracion_total, "VACIO", "Sin datos en Excel")
+            registrar_fin_periodo(
+                conn,
+                id_log,
+                id_periodo,
+                borrados,
+                0,
+                medidor.duracion_total,
+                "VACIO",
+                "Sin datos en Excel",
+            )
             return
 
         medidor.marcar_fase("INSERT")
@@ -253,26 +331,52 @@ def cargar_anio(conn, df: pd.DataFrame, obra_map: dict, anio: int, force: bool =
         medidor.finalizar()
         vel = medidor.calcular_velocidad(insertados)
         registrar_fin_periodo(
-            conn, id_log, id_periodo, borrados, insertados,
-            medidor.duracion_total, "EXITOSO", f"Vel: {vel:.1f} reg/s",
+            conn,
+            id_log,
+            id_periodo,
+            borrados,
+            insertados,
+            medidor.duracion_total,
+            "EXITOSO",
+            f"Vel: {vel:.1f} reg/s",
         )
-        logging.info("  ✅ Año %d OK — %d insertados en %.2fs",
-                     anio, insertados, medidor.duracion_total)
+        logging.info(
+            "  ✅ Año %d OK — %d insertados en %.2fs",
+            anio,
+            insertados,
+            medidor.duracion_total,
+        )
         medidor.imprimir_resumen()
 
     except Exception as exc:
         medidor.finalizar()
-        registrar_fin_periodo(conn, id_log, id_periodo, 0, 0,
-                              medidor.duracion_total, "ERROR", str(exc))
+        registrar_fin_periodo(
+            conn,
+            id_log,
+            id_periodo,
+            0,
+            0,
+            medidor.duracion_total,
+            "ERROR",
+            str(exc),
+        )
         logging.error("  ❌ Error año %d: %s", anio, exc)
         raise
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Carga incremental ANUAL de comprobantes B52")
+    parser = argparse.ArgumentParser(
+        description="Carga incremental ANUAL de comprobantes B52"
+    )
     parser.add_argument("--anio", type=int, help="Año a cargar (YYYY)")
-    parser.add_argument("--full", action="store_true", help="Todos los años del archivo")
-    parser.add_argument("--force", action="store_true", help="Re-cargar aunque ya esté procesado")
+    parser.add_argument(
+        "--full", action="store_true", help="Todos los años del archivo"
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Re-cargar aunque ya esté procesado",
+    )
     args = parser.parse_args()
 
     df = leer_comprobantes()
@@ -280,7 +384,7 @@ def main():
     try:
         # Cargar mapeo obra_pronto → id_obra (Star Schema v2.1)
         obra_map = cargar_mapeo_obras(conn)
-        
+
         if args.full:
             anios = sorted(df["anio_dato"].dropna().unique().astype(int))
             logging.info("Modo FULL: %d años detectados", len(anios))

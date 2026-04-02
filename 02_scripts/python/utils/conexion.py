@@ -1,6 +1,7 @@
 """
 conexion.py — Fábrica de conexiones para DW_GrupoPOSE_B52
 """
+
 import json
 import logging
 import pyodbc
@@ -19,14 +20,18 @@ _DRIVERS = [
 # Si el archivo no existe, usa el default .\SQLEXPRESS (válido en DEV-DIRECTORIO).
 _CONFIG_FILE = Path(__file__).resolve().parents[3] / "config" / "conexion.json"
 
+
 def _get_server() -> str:
     if _CONFIG_FILE.exists():
         try:
             with open(_CONFIG_FILE, encoding="utf-8") as f:
                 return json.load(f).get("server", r".\SQLEXPRESS")
         except Exception as e:
-            logging.warning("No se pudo leer %s: %s — usando default", _CONFIG_FILE, e)
+            logging.warning(
+                "No se pudo leer %s: %s — usando default", _CONFIG_FILE, e
+            )
     return r".\SQLEXPRESS"
+
 
 _SERVER = _get_server()
 
@@ -44,7 +49,9 @@ def _find_driver() -> str:
     )
 
 
-def get_connection(database: str = "DW_GrupoPOSE_B52", server: str = _SERVER) -> pyodbc.Connection:
+def get_connection(
+    database: str = "DW_GrupoPOSE_B52", server: str = _SERVER
+) -> pyodbc.Connection:
     """
     Devuelve una conexión pyodbc al servidor SQL Server.
 

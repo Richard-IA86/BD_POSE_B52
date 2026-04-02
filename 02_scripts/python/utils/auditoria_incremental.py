@@ -6,16 +6,17 @@ Provee:
   - registrar_inicio_periodo / registrar_fin_periodo → periodos_carga (nivel partición)
   - verificar_procesado_periodo        → idempotencia
 """
+
 import logging
 from datetime import datetime
 from typing import Optional, Tuple
 
 import pyodbc
 
-
 # ---------------------------------------------------------------------------
 # log_cargas  (nivel archivo)
 # ---------------------------------------------------------------------------
+
 
 def registrar_inicio(
     conn: pyodbc.Connection,
@@ -32,11 +33,15 @@ def registrar_inicio(
         OUTPUT INSERTED.id_log_carga
         VALUES (?, ?, ?, 'EN_PROCESO', GETDATE())
         """,
-        tabla_destino, archivo_origen, usuario_carga,
+        tabla_destino,
+        archivo_origen,
+        usuario_carga,
     )
     id_log = int(cursor.fetchone()[0])
     conn.commit()
-    logging.info("Auditoría inicio: id_log_carga=%d tabla=%s", id_log, tabla_destino)
+    logging.info(
+        "Auditoría inicio: id_log_carga=%d tabla=%s", id_log, tabla_destino
+    )
     return id_log
 
 
@@ -61,16 +66,23 @@ def registrar_fin(
                observaciones = ?
          WHERE id_log_carga = ?
         """,
-        registros_procesados, registros_insertados, registros_rechazados,
-        estado, observaciones, id_log_carga,
+        registros_procesados,
+        registros_insertados,
+        registros_rechazados,
+        estado,
+        observaciones,
+        id_log_carga,
     )
     conn.commit()
-    logging.info("Auditoría fin: id_log_carga=%d estado=%s", id_log_carga, estado)
+    logging.info(
+        "Auditoría fin: id_log_carga=%d estado=%s", id_log_carga, estado
+    )
 
 
 # ---------------------------------------------------------------------------
 # periodos_carga  (nivel partición temporal)
 # ---------------------------------------------------------------------------
+
 
 def registrar_inicio_periodo(
     conn: pyodbc.Connection,
@@ -104,11 +116,18 @@ def registrar_inicio_periodo(
         OUTPUT INSERTED.id_periodo_carga
         VALUES (?, ?, ?, ?, ?, 'EN_PROCESO', GETDATE(), ?)
         """,
-        tabla, tipo_particion, anio, mes, periodo_codigo, usuario,
+        tabla,
+        tipo_particion,
+        anio,
+        mes,
+        periodo_codigo,
+        usuario,
     )
     id_periodo = int(cursor.fetchone()[0])
     conn.commit()
-    logging.info("Período inicio: id_periodo=%d periodo=%s", id_periodo, periodo_codigo)
+    logging.info(
+        "Período inicio: id_periodo=%d periodo=%s", id_periodo, periodo_codigo
+    )
     return id_log, id_periodo
 
 
@@ -141,9 +160,13 @@ def registrar_fin_periodo(
                observaciones            = ?
          WHERE id_periodo_carga = ?
         """,
-        registros_borrados, registros_insertados,
-        round(duracion_segundos, 2), round(velocidad, 2),
-        estado, observaciones, id_periodo_carga,
+        registros_borrados,
+        registros_insertados,
+        round(duracion_segundos, 2),
+        round(velocidad, 2),
+        estado,
+        observaciones,
+        id_periodo_carga,
     )
     conn.commit()
 
@@ -159,13 +182,17 @@ def registrar_fin_periodo(
     )
     logging.info(
         "Período fin: id_periodo=%d estado=%s insertados=%d dur=%.2fs",
-        id_periodo_carga, estado, registros_insertados, duracion_segundos,
+        id_periodo_carga,
+        estado,
+        registros_insertados,
+        duracion_segundos,
     )
 
 
 # ---------------------------------------------------------------------------
 # Idempotencia
 # ---------------------------------------------------------------------------
+
 
 def verificar_procesado_periodo(
     conn: pyodbc.Connection,
@@ -188,7 +215,8 @@ def verificar_procesado_periodo(
            AND estado = 'EXITOSO'
          ORDER BY id_periodo_carga DESC
         """,
-        tabla, periodo_codigo,
+        tabla,
+        periodo_codigo,
     )
     row = cursor.fetchone()
     if row:

@@ -13,6 +13,7 @@ Salida:
   exit(0) si todo OK
   exit(1) con descripción del problema
 """
+
 import sys
 import shutil
 from pathlib import Path
@@ -21,10 +22,10 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
 VERDE = "\033[92m"
-ROJO  = "\033[91m"
+ROJO = "\033[91m"
 RESET = "\033[0m"
-OK    = f"{VERDE}✅{RESET}"
-FAIL  = f"{ROJO}❌{RESET}"
+OK = f"{VERDE}✅{RESET}"
+FAIL = f"{ROJO}❌{RESET}"
 
 errores: list[str] = []
 
@@ -51,20 +52,29 @@ for lib in ("pandas", "pyodbc", "openpyxl"):
 
 try:
     import psutil
+
     chk(True, "Librería psutil disponible (métricas de memoria)")
 except ImportError:
-    print(f"  ⚠️  psutil no instalada — métricas de memoria deshabilitadas (no crítico)")
+    print(
+        f"  ⚠️  psutil no instalada — métricas de memoria deshabilitadas (no crítico)"
+    )
 
 # ── SQL Server ───────────────────────────────────────────────────────────────
 try:
     import pyodbc
+
     drivers = [d for d in pyodbc.drivers() if "SQL Server" in d]
-    chk(bool(drivers), f"Driver ODBC SQL Server encontrado: {drivers[-1] if drivers else 'NINGUNO'}")
+    chk(
+        bool(drivers),
+        f"Driver ODBC SQL Server encontrado: {drivers[-1] if drivers else 'NINGUNO'}",
+    )
 
     # Intentar conexión real
     import sys as _sys
+
     _sys.path.insert(0, str(Path(__file__).parent.parent / "utils"))
     from conexion import get_connection
+
     try:
         conn = get_connection("master")
         cursor = conn.cursor()
@@ -92,7 +102,7 @@ except Exception as e:
 # ── Espacio en disco ──────────────────────────────────────────────────────────
 drv = REPO_ROOT.anchor  # letra de unidad donde está instalado el repo
 total, usado, libre = shutil.disk_usage(drv)
-libre_gb = libre / (1024 ** 3)
+libre_gb = libre / (1024**3)
 chk(libre_gb >= 2.0, f"Espacio libre en {drv} {libre_gb:.1f} GB (mínimo 2 GB)")
 
 # ── Directorios ────────────────────────────────────────────
@@ -111,9 +121,11 @@ for d in dirs_requeridos:
 print()
 if errores:
     print(f"{ROJO}❌ {len(errores)} prerequisito(s) fallaron:{RESET}")
-    for e in errores:
-        print(f"   • {e}")
+    for err in errores:
+        print(f"   • {err}")
     sys.exit(1)
 else:
-    print(f"{VERDE}✅ Todos los prerequisitos OK — puede iniciar Fase 1.{RESET}\n")
+    print(
+        f"{VERDE}✅ Todos los prerequisitos OK — puede iniciar Fase 1.{RESET}\n"
+    )
     sys.exit(0)
