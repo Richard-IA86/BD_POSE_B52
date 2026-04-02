@@ -124,14 +124,14 @@
   ],
   "siguiente_accion": {
     "responsable": "Copilot Servidor",
-    "descripcion": "Crear la tabla CATALOGO.tipo_cambio ejecutando el nuevo script DDL",
+    "descripcion": "Validar prerrequisitos del entorno BD y validar que la Fase 1 estructura esté correcta y con todos los índices.",
     "comandos_a_ejecutar": [
       "git pull origin main",
-      "sqlcmd -S DEV-DIRECTORIO\\SQLEXPRESS -E -i 02_scripts\\sql\\04_tipo_cambio_B52.sql",
-      "sqlcmd -S DEV-DIRECTORIO\\SQLEXPRESS -E -d DW_GrupoPOSE_B52 -Q \"SELECT TABLE_SCHEMA, TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tipo_cambio'\""
+      "python 02_scripts/python/validaciones/00_validar_prerequisitos.py",
+      "python 02_scripts/python/validaciones/validar_fase1.py"
     ],
-    "resultado_esperado": "Mensaje '+ Tabla CATALOGO.tipo_cambio creada con índices.' y SELECT retorna 1 fila.",
-    "ante_error": "Documentar mensaje de error en ultimo_resultado y hacer push. No continuar."
+    "resultado_esperado": "Ambos scripts retornan exit code 0 confirmando que el entorno y la estructura de DB están OK.",
+    "ante_error": "Revisar logs en 00_logs/errores/, clasificar el error y documentar en ultimo_resultado. No continuar con la Fase 2."
   },
   "ultimo_resultado": {
     "estado": "OK",
