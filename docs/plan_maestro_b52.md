@@ -1,4 +1,5 @@
 # 🚀 PLAN MAESTRO: DW_GrupoPOSE_B52
+
 ## Sistema de Data Warehouse con Carga Incremental y ML Observability
 
 **Fecha creación:** 13 de marzo de 2026  
@@ -10,35 +11,44 @@
 
 ## 📋 Índice
 
-0. [**Instrucciones para GitHub Copilot (Agente Ejecutor)**](#0-instrucciones-para-github-copilot-agente-ejecutor) 🤖
-1. [Resumen Ejecutivo](#1-resumen-ejecutivo)
-2. [Arquitectura B52](#2-arquitectura-b52)
-3. [Especificaciones Técnicas](#3-especificaciones-técnicas)
-4. [Plan de Implementación por Fases](#4-plan-de-implementación-por-fases)
-5. [Código SQL: Estructura Completa](#5-código-sql-estructura-completa)
+1. [**Instrucciones para GitHub Copilot (Agente Ejecutor)**](#0-instrucciones-para-github-copilot-agente-ejecutor) 🤖
+2. [Resumen Ejecutivo](#1-resumen-ejecutivo)
+3. [Arquitectura B52](#2-arquitectura-b52)
+4. [Especificaciones Técnicas](#3-especificaciones-técnicas)
+5. [Plan de Implementación por Fases](#4-plan-de-implementación-por-fases)
+6. [Código SQL: Estructura Completa](#5-código-sql-estructura-completa)
 7. [Sistema ML Observability](#7-sistema-ml-observability)
 8. [**Configuración del Servidor de Producción**](#8-configuración-del-servidor-de-producción) ⚙️
 9. [Power Query B52 - Metadata](#9-power-query-b52---metadata)
-11. [**Procedimientos de Rollback y Recuperación**](#11-procedimientos-de-rollback-y-recuperación) 🔄
-12. [Testing y Validación](#12-testing-y-validación)
-13. [Anexos](#13-anexos)
+10. [**Procedimientos de Rollback y Recuperación**](#11-procedimientos-de-rollback-y-recuperación) 🔄
+11. [Testing y Validación](#12-testing-y-validación)
+12. [Anexos](#13-anexos)
 
 ---
 
 ## 0. Instrucciones para GitHub Copilot (Agente Ejecutor)
 
 ### 🚨 CONTEXTO CRÍTICO DE ARQUITECTURA B52
+
 - **Rol:** Eres un Ingeniero de Datos Senior a cargo del Data Warehouse "DW_GrupoPOSE_B52".
-- **Arquitectura Estricta:** Este proyecto usa DE MANERA ESTRICTA un Modelo de Estrella Puro (Star Schema) en SQL Server. Las tablas de hechos (Fact Tables) NUNCA deben contener strings/varchar (excepto descripciones crudas como `detalle`); TODAS las dimensiones se cruzan mediante Claves Foráneas de tipo `INT` (`id_obra`, `id_fuente`, `id_cuenta_contable`, etc.).
-- **Stack Tecnológico:** Python (Pandas para pre-procesamiento) y `pyodbc` con `fast_executemany = True` para alta velocidad de inserción hacia SQL Server. 
-- **Flujo de Trabajo:** Las dimensiones (catálogos) se extraen usando `pandas.drop_duplicates()` de los Excels y se actualizan dinámicamente con una lógica UPSERT en BDD **ANTES** de cargar las tablas de hechos.
-- **Regla de oro:** Lee el resto de este documento como tu única "Fuente de la Verdad" arquitectónica. Evita sugerir lógicas viejas o desnormalizadas (sistemas A1/A2).
+- **Arquitectura Estricta:** Este proyecto usa DE MANERA ESTRICTA un Modelo de Estrella Puro
+  (Star Schema) en SQL Server. Las tablas de hechos (Fact Tables) NUNCA deben contener
+  strings/varchar (excepto descripciones crudas como `detalle`); TODAS las dimensiones se
+  cruzan mediante Claves Foráneas de tipo `INT` (`id_obra`, `id_fuente`, etc.).
+- **Stack Tecnológico:** Python (Pandas para pre-procesamiento) y `pyodbc` con
+  `fast_executemany = True` para alta velocidad de inserción hacia SQL Server.
+- **Flujo de Trabajo:** Las dimensiones (catálogos) se extraen usando
+  `pandas.drop_duplicates()` de los Excels y se actualizan dinámicamente con lógica UPSERT
+  en BDD **ANTES** de cargar las tablas de hechos.
+- **Regla de oro:** Lee el resto de este documento como tu única "Fuente de la Verdad"
+  arquitectónica. Evita sugerir lógicas viejas o desnormalizadas (sistemas A1/A2).
 
 ---
 
 ### 🎯 Objetivo General
 
 Este documento es un **plan de implementación ejecutable paso a paso** que serás responsable de completar en el servidor de producción. Cada fase contiene:
+
 - Validaciones automatizables que DEBES ejecutar
 - Criterios de éxito medibles
 - Procedimientos de rollback si algo falla
@@ -101,6 +111,7 @@ Si encuentras un error:
 No continúes con siguientes pasos automáticamente.
 
 **2. CAPTURA CONTEXTO COMPLETO**
+
 ```python
 # Ejemplo de captura correcta
 try:
@@ -120,17 +131,20 @@ except Exception as e:
 ```
 
 **3. CLASIFICA EL ERROR**
+
 - `ERROR_SQL`: Error en base de datos (conexión, query, constraints)
 - `ERROR_PYTHON`: Excepción en código Python (TypeError, ValueError, etc.)
 - `ERROR_CONEXION`: Timeout, red, permisos
 - `ERROR_DATOS`: Datos faltantes, formato incorrecto, validación fallida
 
 **4. INTENTA RECUPERACIÓN AUTOMÁTICA** (solo si es seguro)
+
 - Reintentos con backoff exponencial (max 3 intentos)
 - Rollback de transacción parcial
 - Skip de registro problemático (con logging)
 
 **5. SI FALLA RECUPERACIÓN**
+
 - Genera reporte de error detallado
 - SOLICITA INSTRUCCIÓN al usuario antes de continuar
 
@@ -141,6 +155,7 @@ except Exception as e:
 - Se ejecuta ANTES de marcar fase como completa
 
 **Ejemplo de uso:**
+
 ```bash
 # Salida esperada: "✅ Fase 1 validada: 5 esquemas, 15 tablas, 12 índices, 0 errores"
 # Exit code: 0
@@ -149,6 +164,7 @@ except Exception as e:
 ### 🚦 Criterios para Continuar
 
 SOLO avanza al siguiente paso si:
+
 - ✅ Todas las validaciones retornan exit code 0
 - ✅ No hay errores críticos en logs
 - ✅ Reporte de estado generado y guardado
@@ -179,11 +195,13 @@ Mantén actualizado `C:\DW_GrupoPOSE_B52\estado_implementacion.json`:
 ### 🎓 Buenas Prácticas Específicas
 
 1. **Antes de crear archivos/directorios**  
+
    ```python
    Path(directorio).mkdir(parents=True, exist_ok=True)
    ```
 
 2. **Antes de ejecutar SQL DDL**  
+
    ```sql
    IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'DW_GrupoPOSE_B52')
    BEGIN
@@ -194,6 +212,7 @@ Mantén actualizado `C:\DW_GrupoPOSE_B52\estado_implementacion.json`:
 3. **Transacciones Atómicas y Carga Masiva Rápida**
    Las cargas incrementales requieren proteger el estado previo mediante el uso de transacciones. O todo se carga bien, o la base de datos vuelve a su estado anterior.
    Además, es CRÍTICO activar `fast_executemany` en pyodbc para acelerar las inserciones masivas de datos.
+
    ```python
    conn.autocommit = False
    cursor = conn.cursor()
@@ -212,6 +231,7 @@ Mantén actualizado `C:\DW_GrupoPOSE_B52\estado_implementacion.json`:
    ```
 
 4. **Validación de datos antes de cargar**  
+
    ```python
    # Verificar columnas requeridas existen
    columnas_requeridas = ['anio_dato', 'mes_dato', 'periodo_codigo']
@@ -395,15 +415,18 @@ INSERT INTO PRODUCCION.costos (...) VALUES (...);
 ```
 
 **Ejemplo:** Cargar marzo 2026
+
 ```bash
 ```
+
 → Borra solo `WHERE anio_dato = 2026 AND mes_dato = 3`  
 → Inserta datos de marzo 2026
 
 > 💡 **Estrategia Detección Dinámica de Particiones (Soporte Multi-Mes/Multi-Año)**
 > Si llega un archivo con un gran porcentaje de años históricos modificados (ej. rearmado contable retroactivo donde se modifica el 80% de los datos de un año entero):
+>
 > 1. El script Python debe buscar en el `DataFrame` todas las combinaciones únicas de años y meses que existen.
-> 2. Iterar sobre esas combinaciones únicas y lanzar el `DELETE` de esa partición específica. 
+> 2. Iterar sobre esas combinaciones únicas y lanzar el `DELETE` de esa partición específica.
 > 3. Hacer el `BULK INSERT (fast_executemany)` masivo.
 > Esto toma exactamente el mismo tiempo que insertar un Excel con registros nuevos, y reemplaza de forma súper veloz años completos sin sufrir los costos computacionales de un `MERGE` o `UPSERT` individual.
 
@@ -425,8 +448,10 @@ INSERT INTO PRODUCCION.comprobantes (...) VALUES (...);
 ```
 
 **Ejemplo:** Cargar año 2026
+
 ```bash
 ```
+
 → Borra solo `WHERE anio_dato = 2026`  
 → Inserta datos del año completo
 
@@ -445,6 +470,7 @@ categoria_riesgo VARCHAR(20),            -- LOW, MEDIUM, HIGH, CRITICAL
 ```
 
 **Ejemplo de detección:**
+
 ```python
 # Post-carga: calcular features ML
 df['z_score'] = (df['importe'] - df.groupby('obra_pronto')['importe'].transform('mean')) / \
@@ -531,35 +557,40 @@ CREATE INDEX IX_jerarquia_gerencia ON CATALOGO.jerarquia_org(id_gerencia);
 Para garantizar la integridad y retrocompatibilidad de los datos, la "FASE 2: Pre_IngestaBD" debe implementar estructuralmente las siguientes reglas de normalización históricas consolidadas en A2. Todo esto debe procesarse *antes* de que el dato toque la Base de Datos.
 
 #### A) Particularidades del Campo `OBRA_PRONTO` (Crítico)
-*   **Tratamiento de Tipo:** Siempre debe procesarse como `string` (`VARCHAR(50)`). **Nunca** castear o convertir a tipo numérico o intero, ya que destruye información.
-*   **Leading Zeros (Ceros a la izquierda):** Si el valor es puramente numérico (ej. `00000001`), se deben **preservar rigurosamente** los ceros a la izquierda.
-*   **Alfanuméricos Válidos:** Se aceptan palabras puras o con guiones/espacios (ej. `HYDRA`, `ACTIVOS PERON`, `DAVID-GUSTAV`).
-*   **Formatos Mixtos PROHIBIDOS:** Rechazar inmediatamente registros que mezclen números con letras (ej. `000HYDRA` o `00TALLER`). Las validaciones exigen o "solo dígitos" o "letras/espacios".
-*   **Limpieza de Nulos Ocultos:** Al hacer `astype(str)` en Pandas, los nulos (`NaN` o `None`) se convierten en el texto string `'nan'`. Se debe aplicar un filtro explícito: `df.loc[df["OBRA_PRONTO"].str.lower() == 'nan', "OBRA_PRONTO"] = None`.
+
+* **Tratamiento de Tipo:** Siempre debe procesarse como `string` (`VARCHAR(50)`). **Nunca** castear o convertir a tipo numérico o intero, ya que destruye información.
+- **Leading Zeros (Ceros a la izquierda):** Si el valor es puramente numérico (ej. `00000001`), se deben **preservar rigurosamente** los ceros a la izquierda.
+- **Alfanuméricos Válidos:** Se aceptan palabras puras o con guiones/espacios (ej. `HYDRA`, `ACTIVOS PERON`, `DAVID-GUSTAV`).
+- **Formatos Mixtos PROHIBIDOS:** Rechazar inmediatamente registros que mezclen números con letras (ej. `000HYDRA` o `00TALLER`). Las validaciones exigen o "solo dígitos" o "letras/espacios".
+- **Limpieza de Nulos Ocultos:** Al hacer `astype(str)` en Pandas, los nulos (`NaN` o `None`) se convierten en el texto string `'nan'`. Se debe aplicar un filtro explícito: `df.loc[df["OBRA_PRONTO"].str.lower() == 'nan', "OBRA_PRONTO"] = None`.
 
 #### B) Conversión de Importes ("Formato Argentino")
+
 Los archivos Excel provienen de diversas fuentes (humanas y sistemas) con inconsistencias en los formatos numéricos y configuración regional.
-*   **Limpieza Regex:** Se deben sanitizar los montos quitando cualquier carácter que no sea un dígito, un punto o una coma mediante expresiones regulares: `re.sub(r"[^\d,.]", "", valor)`.
-*   **Regla de Coma y Punto Invertida:** 
-    *   Si el string contiene "," y ".", y la coma está *después* del punto (ej. `1.234,56`), el punto es separador de miles. Se debe normalizar al estándar internacional float quitando puntos y cambiando la coma por punto.
-    *   Si la puntuación está invertida (`1,234.56`) típico de software en inglés, se asume que el punto es decimal y se quita la coma.
-*   **Límites de Seguridad (TC e Importe):** Restringir los montos entre `-100,000,000,000` y `100,000,000,000` para prevenir desbordamientos `OverflowError` en SQL. El `TC` (Tipo de Cambio) puede ser `0` pero no puede exceder `10,000`.
+- **Limpieza Regex:** Se deben sanitizar los montos quitando cualquier carácter que no sea un dígito, un punto o una coma mediante expresiones regulares: `re.sub(r"[^\d,.]", "", valor)`.
+- **Regla de Coma y Punto Invertida:**
+  - Si el string contiene "," y ".", y la coma está *después* del punto (ej. `1.234,56`), el punto es separador de miles. Se debe normalizar al estándar internacional float quitando puntos y cambiando la coma por punto.
+  - Si la puntuación está invertida (`1,234.56`) típico de software en inglés, se asume que el punto es decimal y se quita la coma.
+- **Límites de Seguridad (TC e Importe):** Restringir los montos entre `-100,000,000,000` y `100,000,000,000` para prevenir desbordamientos `OverflowError` en SQL. El `TC` (Tipo de Cambio) puede ser `0` pero no puede exceder `10,000`.
 
 #### C) Normalización de Fechas (Y2K Bug local)
+
 El sistema no puede confiar en los formatos nativos de fecha de Excel debido a errores de captura de usuario.
-*   **Parseo Iterativo:** Si la fecha viene como texto, testear secuencialmente: `"%d/%m/%Y"`, `"%d/%m/%y"`, `"%d-%m-%Y"`, `"%d-%m-%y"`.
-*   **Corrección de Milenios:** Existen casos donde el Excel emite años de 2 dígitos. La regla de herencia es: Si el año detectado es de 2 dígitos y menor a 50 (ej. "24"), asumir que es el siglo XXI sumándole 2000 (->2024). Si es mayor a 50 (ej. "98"), atribuirle el siglo XX (-> 1998).
+- **Parseo Iterativo:** Si la fecha viene como texto, testear secuencialmente: `"%d/%m/%Y"`, `"%d/%m/%y"`, `"%d-%m-%Y"`, `"%d-%m-%y"`.
+- **Corrección de Milenios:** Existen casos donde el Excel emite años de 2 dígitos. La regla de herencia es: Si el año detectado es de 2 dígitos y menor a 50 (ej. "24"), asumir que es el siglo XXI sumándole 2000 (->2024). Si es mayor a 50 (ej. "98"), atribuirle el siglo XX (-> 1998).
 
 #### D) Unificación de Columnas
+
 Apenas el script de pre-ingesta cargue el DataFrame, debe estandarizar las cabeceras para prevenir errores de tipeo humano:
-*   Pasar todas las columnas a `.upper()` y quitar espacios laterales (`.strip()`).
-*   Reemplazar espacios múltiples en blanco por un solo guion bajo.
-*   Reemplazar las diferentes codificaciones ASCII de "Número": Quitar el símbolo de grado (`°`) y estandarizar variaciones como `"N°"`, `"Nº"`, `"#"`, u otras hacia `"NRO"`.
+- Pasar todas las columnas a `.upper()` y quitar espacios laterales (`.strip()`).
+- Reemplazar espacios múltiples en blanco por un solo guion bajo.
+- Reemplazar las diferentes codificaciones ASCII de "Número": Quitar el símbolo de grado (`°`) y estandarizar variaciones como `"N°"`, `"Nº"`, `"#"`, u otras hacia `"NRO"`.
 
 #### E) Idempotencia de Errores (Manejo de Rechazos en Cargas Incrementales)
-En un modelo incremental por reemplazo de partición, si un registro defectuoso es insertado en la tabla de `rechazos`, el usuario irá al Excel origen a solucionarlo. En su próxima ejecución, la base de datos reemplazará el mes completo con éxito, pero la tabla de rechazos debe "enterarse" de que su error histórico caducó gracias a la recarga. 
-*   **Regla de Limpieza Acoplada:** Cuando en la BD se ejecuta el `DELETE` masivo de la partición (ej. Enero 2026 en Costos), en la **misma transacción atómica**, se debe ejecutar un `UPDATE` en la tabla de `AUDITORIA.rechazos` marcando como `OBSOLETO_POR_RECARGA` cualquier rechazo pendiente que perteneciera a Enero 2026.
-*   **Aislamiento:** La tabla de rechazos actúa solo como *tablero de lectura para humanos*. Nunca se debe usar su contenido para intentar "reprocesar e inyectar" automáticamente a Producción (los datos siempre se corrigen en la fuente y viajan por el flujo principal normalizado).
+
+En un modelo incremental por reemplazo de partición, si un registro defectuoso es insertado en la tabla de `rechazos`, el usuario irá al Excel origen a solucionarlo. En su próxima ejecución, la base de datos reemplazará el mes completo con éxito, pero la tabla de rechazos debe "enterarse" de que su error histórico caducó gracias a la recarga.
+- **Regla de Limpieza Acoplada:** Cuando en la BD se ejecuta el `DELETE` masivo de la partición (ej. Enero 2026 en Costos), en la **misma transacción atómica**, se debe ejecutar un `UPDATE` en la tabla de `AUDITORIA.rechazos` marcando como `OBSOLETO_POR_RECARGA` cualquier rechazo pendiente que perteneciera a Enero 2026.
+- **Aislamiento:** La tabla de rechazos actúa solo como *tablero de lectura para humanos*. Nunca se debe usar su contenido para intentar "reprocesar e inyectar" automáticamente a Producción (los datos siempre se corrigen en la fuente y viajan por el flujo principal normalizado).
 
 ---
 
@@ -660,9 +691,8 @@ CREATE INDEX IX_alertas_tipo ON ML.historial_alertas(tipo_alerta, severidad);
 
 **Objetivo:** Crear estructura completa de DW_GrupoPOSE_B52 vacía
 
-
-
 **Tareas:**
+
 - [ ] Crear base de datos B52
 - [ ] Crear esquemas: CATALOGO, PRODUCCION, AUDITORIA, TEMPORAL, ML
 - [ ] Crear todas las tablas dimensionales (ver sección 5.1)
@@ -671,6 +701,7 @@ CREATE INDEX IX_alertas_tipo ON ML.historial_alertas(tipo_alerta, severidad);
 - [ ] Crear esquema ML completo (ver sección 5.4)
 
 **Verificación:**
+
 ```sql
 -- Verificar estructura creada
 SELECT s.name AS esquema, t.name AS tabla, 
@@ -690,8 +721,8 @@ ORDER BY s.name, t.name;
 
 #### Paso 1.2: Crear índices optimizados
 
-
 **Índices críticos para carga incremental:**
+
 ```sql
 -- Costos (particionamiento mensual)
 CREATE NONCLUSTERED INDEX IX_costos_particion 
@@ -723,6 +754,7 @@ ON ML.historial_alertas (fecha_generacion, tipo_alerta, severidad);
 ```
 
 **Verificación:**
+
 ```sql
 SELECT 
     SCHEMA_NAME(t.schema_id) AS esquema,
@@ -740,8 +772,8 @@ ORDER BY esquema, tabla, indice;
 
 #### Paso 1.3: Poblar dimensiones de referencia
 
-
 **Tareas:**
+
 - [ ] Insertar fuentes iniciales (6-10 registros)
 - [ ] Generar calendario (2019-2030)
 - [ ] Crear parámetros ML por defecto
@@ -795,13 +827,14 @@ INSERT INTO ML.umbrales_alertas (tipo_alerta, campo_medicion, valor_min, valor_m
 **Objetivo:** Adaptar scripts Python para procesar Catálogos duales y manejar metadatos de particionamiento.
 
 #### 2.0 Ingesta de Catálogos Dinámica (Obras, Gerencias, Compensables, Fuentes, Cuentas Contables y Tipos de Comprobantes)
+
 La arquitectura de B52 promueve la auto-generación y normalización de catálogos sin requerir trabajo extra del usuario.
 
 **A. Catálogos desde "Obras_Gerencias.xlsx" (Gerencias, Compensables y Obras):**
 Dado que en B52 eliminamos la dependencia rígida (Foreign Key) de Gerencias a nivel Tabla Obras, usamos **este único archivo Excel** (un RDP sin desperdicio) para dar de alta registros en tres tablas en una sola pasada.
 
 1. **Lectura única:** `df_excel = pd.read_excel('Obras_Gerencias.xlsx')`
-2. **Proceso Gerencias:** 
+2. **Proceso Gerencias:**
    - Se aísla la columna `GERENCIA`, se hace un `drop_duplicates()`.
    - Se limpian strings y se insertan las nuevas en `CATALOGO.gerencias` (ignorando existentes).
 3. **Proceso Compensables (NUEVA DIMENSIÓN):**
@@ -829,12 +862,11 @@ Las dimensiones internas de los hechos se auto-completarán escaneando el archiv
 
 #### 2.1 Procesamiento de Particiones (Costos/Comprobantes)
 
-
-
 **⚠️ CAMBIO IMPORTANTE:**  
 Los metadatos de particionamiento (`anio_dato`, `mes_dato`, `periodo_codigo`) **YA VIENEN calculados desde Power Query B52** (ver Sección 9).  
 
 **Funcionalidad simplificada:**
+
 ```python
 """
 Adaptador para B52: Distribuye archivos a output_ready_for_B52
@@ -929,6 +961,7 @@ if __name__ == '__main__':
 ```
 
 **Verificación:**
+
 ```bash
 # Salida esperada:
 # ✅ Metadata B52 validada: archivo1.xlsx
@@ -982,8 +1015,6 @@ if __name__ == '__main__':
 
 ---
 
-
-
 #### Paso 3.1: Estructura de directorio
 
 ```text
@@ -1008,8 +1039,6 @@ C:\DW_GrupoPOSE_B52\
 ```
 
 ---
-
-
 
 ```python
 """
@@ -1143,6 +1172,7 @@ if __name__ == '__main__':
 ```
 
 **Uso:**
+
 ```bash
 # Cargar marzo 2026 (costos) + año 2026 (comprobantes)
 
@@ -1154,8 +1184,6 @@ if __name__ == '__main__':
 ```
 
 ---
-
-
 
 ```python
 """
@@ -1440,6 +1468,7 @@ if __name__ == '__main__':
 ```
 
 **Uso:**
+
 ```bash
 # Cargar marzo 2026
 
@@ -1451,8 +1480,6 @@ if __name__ == '__main__':
 ```
 
 ---
-
-
 
 ```python
 """
@@ -1639,8 +1666,6 @@ if __name__ == '__main__':
 
 ---
 
-
-
 ```python
 """
 Carga de CATALOGO.proveedores con estrategia UPSERT
@@ -1790,8 +1815,6 @@ if __name__ == '__main__':
 
 **Objetivo:** Implementar detección automática de anomalías y generación de alertas
 
-
-
 ```python
 """
 Calcula features de ML Observability post-carga
@@ -1906,8 +1929,6 @@ if __name__ == '__main__':
 ```
 
 ---
-
-
 
 ```python
 """
@@ -2027,7 +2048,6 @@ if __name__ == '__main__':
 
 ### Fase 5: Utilidades y Validaciones (Semana 6)
 
-
 ```python
 """
 Utilidades para auditoría de cargas incrementales B52
@@ -2110,7 +2130,6 @@ def registrar_fin_periodo(conn, id_log_carga, id_periodo_carga, registros_borrad
 ```
 
 ---
-
 
 ```python
 """
@@ -2255,8 +2274,10 @@ SELECT * FROM ML.historial_alertas ORDER BY fecha_generacion DESC;
 2. Ejecutar carga del mes anterior:
    ```bash
    ```
+
 3. Verificar log en `00_logs/`
-4. Consultar auditoría:
+2. Consultar auditoría:
+
    ```sql
    SELECT * FROM AUDITORIA.periodos_carga
    WHERE periodo_codigo = '202603';
@@ -2267,27 +2288,34 @@ SELECT * FROM ML.historial_alertas ORDER BY fecha_generacion DESC;
 **Frecuencia:** Anual (enero)
 **Responsable:** Operador ETL
 
-### Procedimiento:
+### Procedimiento
 
 1. Verificar archivo en `01_input_raw/ComprobantesPOSE_B52.xlsx`
 2. Ejecutar carga del año completo:
+
    ```bash
    ```
+
 3. Verificar volumetría anual
 
 ## Monitoreo de Alertas
 
 **Frecuencia:** Diaria (post-carga)
 
-### Procedimiento:
+### Procedimiento
 
 1. Calcular features ML:
+
    ```bash
    ```
+
 2. Generar alertas:
+
    ```bash
    ```
+
 3. Revisar alertas críticas:
+
    ```sql
    SELECT * FROM ML.historial_alertas
    WHERE severidad = 'CRITICAL' AND estado = 'ACTIVA';
@@ -2301,6 +2329,7 @@ En caso de fallo en B52:
 2. Investigar error en B52
 3. Corregir y re-testear
 4. Volver a B52 cuando esté estable
+
 ```
 
 ---
@@ -2782,8 +2811,6 @@ GO
 
 ---
 
-
-
 ### Estructura de Módulos
 
 ```text
@@ -2853,7 +2880,6 @@ Post-Carga → Calcular Features → Generar Alertas → Registrar en BD
 | Espacio disco | 50 GB | `Get-PSDrive C` |
 | Memoria RAM | 16 GB | `(Get-CimInstance Win32_PhysicalMemory \| Measure-Object -Property capacity -Sum).sum /1gb` |
 
-
 ```bash
 # Ejecutar en PowerShell como Administrador
 pip install --upgrade pandas==2.1.4 pyodbc==5.0.1 openpyxl==3.1.2 psutil==5.9.6
@@ -2887,6 +2913,7 @@ Write-Host "`n✅ Estructura de directorios creada exitosamente" -ForegroundColo
 ```
 
 **Ejecutar:**
+
 ```powershell
 ```
 
@@ -2968,7 +2995,6 @@ Write-Host "`n✅ Estructura de directorios creada exitosamente" -ForegroundColo
   }
 }
 ```
-
 
 ```python
 import json
@@ -3084,6 +3110,7 @@ Write-Host "✅ Permisos asignados a $usuario en $ruta" -ForegroundColor Green
 ### 9.1 Objetivo
 
 Crear consulta Power Query que **agregue las 3 columnas de metadata** necesarias para carga incremental:
+
 - `anio_dato`: Año extraído de campo FECHA
 - `mes_dato`: Mes extraído de campo FECHA (1-12)
 - `periodo_codigo`: String concatenado "YYYYMM" (ej: "202603")
@@ -3325,6 +3352,7 @@ def refresh_power_query_B52(archivo_excel):
 ### 9.8 Troubleshooting
 
 **Error: "Columna FECHA no es tipo date"**
+
 ```powerquery
 // Solución: Forzar conversión
 #"Fecha corregida" = Table.TransformColumns(
@@ -3334,6 +3362,7 @@ def refresh_power_query_B52(archivo_excel):
 ```
 
 **Error: "periodo_codigo tiene valores null"**
+
 ```powerquery
 // Solución: Filtrar nulls antes de agregar metadata
 #"Filas filtradas" = Table.SelectRows(
@@ -3343,15 +3372,14 @@ def refresh_power_query_B52(archivo_excel):
 ```
 
 **Error: "Refresh muy lento (>10 min)"**
+
 - Verificar que BaseCostoUnificada.xlsx no tenga >500K filas
 - Considerar segmentar por período en fuente
 - Deshabilitar caché de consultas si archivo es volátil
 
 ---
 
-
 ### 10.1 Validador de Prerequisitos
-
 
 ```python
 """
@@ -3517,7 +3545,6 @@ if __name__ == '__main__':
 
 ### 10.2 Validador Fase 1
 
-
 ```python
 """
 Valida que Fase 1 (Estructura BD) se completó correctamente
@@ -3675,7 +3702,6 @@ if __name__ == '__main__':
 
 **Situación:** B52 falla completamente, necesitas volver a operar con A2.
 
-
 ```powershell
 # ============================================================================
 # ROLLBACK COMPLETO: Restaurar Operación en A2
@@ -3769,7 +3795,6 @@ exit 0
 ### 11.2 Rollback Parcial (Solo Período Específico)
 
 **Situación:** Una carga incremental específica falló, necesitas revertir solo ese período.
-
 
 ```python
 """
@@ -3916,6 +3941,7 @@ if __name__ == '__main__':
 ```
 
 **Uso:**
+
 ```bash
 # Rollback período mensual de costos
 
@@ -3974,7 +4000,6 @@ if ($LASTEXITCODE -eq 0) {
 ## 12. Testing y Validación
 
 ### Suite de Tests de Integración
-
 
 ```python
 """
@@ -4065,22 +4090,24 @@ if __name__ == '__main__':
 ### B. Checklist de Entrega
 
 **Infraestructura:**
+
 - [ ] Base de datos B52 creada en SQL Server
 - [ ] Esquemas CATALOGO, PRODUCCION, AUDITORIA, ML, TEMPORAL
 - [ ] Índices optimizados para particionamiento
 - [ ] Tabla calendario poblada (2019-2030)
 - [ ] Fuentes iniciales cargadas
 
-
 **Utilidades:**
 
 **Testing:**
+
 - [ ] Suite de tests de integración
 - [ ] Tests de idempotencia
 - [ ] Tests de ML features
 - [ ] Validación de rendimiento
 
 **Documentación:**
+
 - [ ] Manual de Operación B52
 - [ ] Guía de Despliegue
 - [ ] Troubleshooting común
@@ -4090,7 +4117,7 @@ if __name__ == '__main__':
 
 | Rol | Responsable | Contacto |
 |-----|-------------|----------|
-| **Arquitecto BD** | Richard | richard@example.com |
+| **Arquitecto BD** | Richard | <richard@example.com> |
 | **Desarrollador ETL** | Richard | - |
 | **Operador Cargas** | TBD | - |
 | **Revisor Testing** | TBD | - |
@@ -4111,6 +4138,7 @@ if __name__ == '__main__':
 **Optimizado para Ejecución por GitHub Copilot**
 
 Documento completo actualizado:
+
 - **Versión:** 2.0  
 - **Líneas:** 3,500+ (expandido desde 2,368)
 - **Nuevas secciones:** 7 (0, 6, 7, 8, 9, 10, 11)
@@ -4119,6 +4147,7 @@ Documento completo actualizado:
 - **Listo para:** Implementación en servidor de producción
 
 **Cambios principales v2.0:**
+
 - ✅ Sección 0: Instrucciones completas para agente IA ejecutor
 - ✅ Sección 8: Configuración del servidor de producción
 - ✅ Sección 9: Power Query B52 con código M completo
@@ -4127,4 +4156,3 @@ Documento completo actualizado:
 - ✅ Formato de reportes JSON para tracking de progreso
 - ✅ Manejo de errores estructurado con clasificación
 - ✅ Validaciones post-fase obligatorias
-
