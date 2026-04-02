@@ -1,0 +1,153 @@
+{
+    "auditoria_qa": [],
+    "desarrollo_local": [
+        {
+            "version_plan": "1.1",
+            "proyecto": "DW_GrupoPOSE_B52",
+            "instancia_sql": "DEV-DIRECTORIO\\SQLEXPRESS",
+            "base_de_datos": "DW_GrupoPOSE_B52",
+            "fecha_inicio": "2026-03-13",
+            "fecha_ultima_actualizacion": "2026-03-19",
+            "fase_actual": "FASE_1_AJUSTE",
+            "progreso_porcentaje": 45,
+            "fases": {
+                "FASE_0_prerequisitos": {
+                    "estado": "COMPLETADA",
+                    "descripcion": "Verificación de entorno (Python 3.11.9, sqlcmd 16, SQL Server 2022 Express)",
+                    "fecha_completada": "2026-03-13",
+                    "observaciones": "Python OK, sqlcmd OK, instancia .\\.SQLEXPRESS OK"
+                },
+                "FASE_1_estructura": {
+                    "estado": "EN_AJUSTE",
+                    "descripcion": "BD + esquemas + tablas + índices + datos semilla. Pendiente: agregar CATALOGO.tipo_cambio",
+                    "fecha_completada": "2026-03-13",
+                    "scripts_ejecutados": [
+                        "02_scripts/sql/01_crear_estructura_B52.sql",
+                        "02_scripts/sql/02_indices_B52.sql",
+                        "02_scripts/sql/03_poblar_referencias_B52.sql"
+                    ],
+                    "pendientes": [
+                        "02_scripts/sql/04_tipo_cambio_B52.sql"
+                    ],
+                    "resultados": {
+                        "esquemas_creados": 5,
+                        "tablas_creadas": 18,
+                        "registros_fuentes": 6,
+                        "registros_calendario": 4383,
+                        "registros_umbrales_ml": 4
+                    },
+                    "datos_prueba": {
+                        "PRODUCCION.costos": "8204 filas — test: 2 años parciales + 2021 y 2022 completos",
+                        "PRODUCCION.comprobantes": "70055 filas — test: carga 2021 y 2022",
+                        "decision": "CONSERVAR — son datos de prueba válidos. Borrar solo si se detecta corrupción."
+                    }
+                },
+                "FASE_2_catalogos": {
+                    "estado": "PENDIENTE",
+                    "descripcion": "Carga full de gerencias, obras, proveedores desde ETL externo",
+                    "scripts_disponibles": [
+                        "02_scripts/python/cargas/01_cargar_gerencias_B52.py",
+                        "02_scripts/python/cargas/02_cargar_obras_B52.py",
+                        "02_scripts/python/cargas/05_cargar_proveedores_B52.py",
+                        "02_scripts/python/cargas/06_cargar_fuentes_B52.py"
+                    ],
+                    "prerequisitos": [
+                        "Archivos de datos en 01_input_raw/",
+                        "Validar 00_validar_prerequisitos.py"
+                    ]
+                },
+                "FASE_3_historico": {
+                    "estado": "PENDIENTE",
+                    "descripcion": "Carga incremental histórica costos/comprobantes 2019-2024",
+                    "scripts_disponibles": [
+                        "02_scripts/python/cargas/03_cargar_costos_B52.py",
+                        "02_scripts/python/cargas/04_cargar_comprobantes_B52.py"
+                    ],
+                    "prerequisitos": [
+                        "FASE_2_catalogos completada"
+                    ]
+                },
+                "FASE_4_ml_observability": {
+                    "estado": "PENDIENTE",
+                    "descripcion": "Activación de ML Observability: z-scores, percentiles, detección de anomalías",
+                    "prerequisitos": [
+                        "FASE_3_historico con >1000 registros en costos"
+                    ]
+                },
+                "FASE_5_validacion_final": {
+                    "estado": "PENDIENTE",
+                    "descripcion": "Validación integral y generación de reporte de implementación",
+                    "scripts_disponibles": [
+                        "02_scripts/python/validaciones/00_validar_prerequisitos.py",
+                        "02_scripts/python/validaciones/validar_fase1.py"
+                    ]
+                }
+            },
+            "infraestructura_creada": {
+                "directorios": [
+                    "00_logs/",
+                    "00_logs/errores/",
+                    "01_input_raw/",
+                    "02_scripts/sql/",
+                    "02_scripts/python/cargas/",
+                    "02_scripts/python/ml/",
+                    "02_scripts/python/utils/",
+                    "02_scripts/python/validaciones/",
+                    "03_output/"
+                ],
+                "scripts_sql": [
+                    "02_scripts/sql/01_crear_estructura_B52.sql",
+                    "02_scripts/sql/02_indices_B52.sql",
+                    "02_scripts/sql/03_poblar_referencias_B52.sql"
+                ],
+                "utils_python": [
+                    "02_scripts/python/utils/__init__.py",
+                    "02_scripts/python/utils/conexion.py",
+                    "02_scripts/python/utils/auditoria_incremental.py",
+                    "02_scripts/python/utils/metricas_rendimiento.py",
+                    "02_scripts/python/utils/validaciones.py"
+                ],
+                "cargas_python": [
+                    "02_scripts/python/cargas/00_ejecutar_cargas_B52.py",
+                    "02_scripts/python/cargas/01_cargar_gerencias_B52.py",
+                    "02_scripts/python/cargas/02_cargar_obras_B52.py",
+                    "02_scripts/python/cargas/03_cargar_costos_B52.py",
+                    "02_scripts/python/cargas/04_cargar_comprobantes_B52.py",
+                    "02_scripts/python/cargas/05_cargar_proveedores_B52.py",
+                    "02_scripts/python/cargas/06_cargar_fuentes_B52.py"
+                ],
+                "validaciones_python": [
+                    "02_scripts/python/validaciones/00_validar_prerequisitos.py",
+                    "02_scripts/python/validaciones/validar_fase1.py"
+                ]
+            },
+            "proximos_pasos": [
+                "1. Copiar archivos de datos de producción a 01_input_raw/",
+                "2. Verificar driver ODBC: python -c \"import pyodbc; print(pyodbc.drivers())\"",
+                "3. Instalar dependencias si faltan: pip install pyodbc pandas openpyxl",
+                "4. Ejecutar validaciones: python 02_scripts/python/validaciones/00_validar_prerequisitos.py",
+                "5. Ejecutar Fase 2: python 02_scripts/python/cargas/00_ejecutar_cargas_B52.py --full --skip-costos",
+                "6. Validar Fase 1 BD: python 02_scripts/python/validaciones/validar_fase1.py"
+            ],
+            "siguiente_accion": {
+                "responsable": "Copilot Servidor",
+                "descripcion": "Validar prerrequisitos del entorno BD y validar que la Fase 1 estructura esté correcta y con todos los índices.",
+                "comandos_a_ejecutar": [
+                    "git pull origin main",
+                    "python 02_scripts/python/validaciones/00_validar_prerequisitos.py",
+                    "python 02_scripts/python/validaciones/validar_fase1.py"
+                ],
+                "resultado_esperado": "Ambos scripts retornan exit code 0 confirmando que el entorno y la estructura de DB están OK.",
+                "ante_error": "Revisar logs en 00_logs/errores/, clasificar el error y documentar en ultimo_resultado. No continuar con la Fase 2."
+            },
+            "ultimo_resultado": {
+                "estado": "OK",
+                "detalle": "Script 04_tipo_cambio_B52.sql ejecutado exitosamente. Output sqlcmd: 'Changed database context to DW_GrupoPOSE_B52.' y '+ Tabla CATALOGO.tipo_cambio creada con índices.' SELECT de verificación en INFORMATION_SCHEMA.TABLES retornó 1 fila: TABLE_SCHEMA=CATALOGO, TABLE_NAME=tipo_cambio.",
+                "fecha": "2026-03-19",
+                "script_ejecutado": "02_scripts/sql/04_tipo_cambio_B52.sql",
+                "instancia": "DEV-DIRECTORIO\\SQLEXPRESS",
+                "errores": []
+            }
+        }
+    ]
+}
