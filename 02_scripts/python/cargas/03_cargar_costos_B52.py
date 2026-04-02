@@ -1,4 +1,4 @@
-﻿"""
+"""
 03_cargar_costos_B52.py — Carga Incremental MENSUAL de PRODUCCION.costos.
 
 Estrategia: DELETE WHERE anio_dato=X AND mes_dato=Y → INSERT batch
