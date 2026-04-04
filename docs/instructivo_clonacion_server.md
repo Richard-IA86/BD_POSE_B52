@@ -1,8 +1,8 @@
 # Instructivo — Clonación en Servidor
 
-> **Proyecto:** BD_POSE_B52  
-> **Repositorio:** `Richard-IA86/BD_POSE_B52`  
-> **Instancia SQL:** `DEV-DIRECTORIO\SQLEXPRESS` — Windows Auth  
+> **Proyecto:** BD_POSE_B52
+> **Repositorio:** `Richard-IA86/BD_POSE_B52`
+> **Instancia SQL:** `DEV-DIRECTORIO\SQLEXPRESS` — Windows Auth
 > **Actualizado:** 2026-03-19
 
 Ejecutar **una sola vez** al configurar el servidor por primera vez.
@@ -15,9 +15,9 @@ Ejecutar **una sola vez** al configurar el servidor por primera vez.
 
 ```powershell
 git --version
-```
+```text
 
-**Resultado esperado:** `git version 2.x.x`  
+**Resultado esperado:** `git version 2.x.x`
 **Si no está instalado:** descargar e instalar desde `https://git-scm.com/download/win`, reiniciar PowerShell y repetir.
 
 ---
@@ -28,10 +28,11 @@ git --version
 
 ```powershell
 python --version
-```
+```text
 
-**Resultado esperado:** `Python 3.9.x` o superior  
-**Si no está instalado:** descargar desde `https://www.python.org/downloads/`, marcar **"Add Python to PATH"** durante la instalación, reiniciar PowerShell y repetir.
+**Resultado esperado:** `Python 3.9.x` o superior
+**Si no está instalado:** descargar desde `https://www.python.org/downloads/`, marcar **"Add Python to PATH"** durante
+la instalación, reiniciar PowerShell y repetir.
 
 ---
 
@@ -43,7 +44,7 @@ python --version
 cd C:\Dev
 git clone https://github.com/Richard-IA86/BD_POSE_B52.git
 cd BD_POSE_B52
-```
+```text
 
 **Resultado esperado:** carpeta `C:\Dev\BD_POSE_B52` creada con todos los archivos del proyecto.
 
@@ -55,7 +56,7 @@ cd BD_POSE_B52
 
 ```powershell
 .\setup_servidor.bat
-```
+```text
 
 El script realiza automáticamente:
 
@@ -66,14 +67,13 @@ El script realiza automáticamente:
 - Genera `config\conexion.json` desde el template
 - Ejecuta el validador de prerequisitos
 
-**Resultado esperado al finalizar:**
+## Resultado esperado al finalizar:
 
 ```text
 ============================================================
   SETUP COMPLETADO
 ============================================================
-```
-
+```text
 ---
 
 ## Paso 5 — Verificar config\conexion.json
@@ -81,18 +81,21 @@ El script realiza automáticamente:
 **App:** Bloc de notas / VS Code
 
 ```powershell
-notepad config\conexion.json
-```
 
+notepad config\conexion.json
+
+```text
 Confirmar que el archivo contiene:
 
 ```json
+
 {
   "server": "DEV-DIRECTORIO\\SQLEXPRESS"
 }
-```
 
-> El setup crea este archivo automáticamente desde el template con el valor correcto. Solo verificar — normalmente no requiere edición.
+```text
+> El setup crea este archivo automáticamente desde el template con el valor correcto. Solo verificar — normalmente no
+requiere edición.
 
 ---
 
@@ -101,25 +104,27 @@ Confirmar que el archivo contiene:
 **App:** PowerShell (con `.venv` activado)
 
 ```powershell
+
 .venv\Scripts\activate
 python 02_scripts\python\validaciones\00_validar_prerequisitos.py
-```
 
-**Resultado esperado:**
+```text
+
+## Resultado esperado:
 
 ```text
 [OK] Python OK
 [OK] Driver ODBC detectado: ODBC Driver XX for SQL Server
 [OK] Conexion SQL Server exitosa: DEV-DIRECTORIO\SQLEXPRESS
 [OK] Espacio en disco suficiente
-```
-
+```text
 **Si falla la conexión SQL:** verificar que el servicio `SQLEXPRESS` esté corriendo en el servidor:
 
 ```powershell
-Get-Service -Name 'MSSQL$SQLEXPRESS'
-```
 
+Get-Service -Name 'MSSQL$SQLEXPRESS'
+
+```text
 ---
 
 ## Verificación final — estado del entorno
@@ -127,18 +132,19 @@ Get-Service -Name 'MSSQL$SQLEXPRESS'
 **App:** PowerShell
 
 ```powershell
+
 git status
 git log --oneline -3
-```
 
-**Resultado esperado:**
+```text
+
+## Resultado esperado:
 
 ```text
 On branch main
 Your branch is up to date with 'origin/main'.
 nothing to commit, working tree clean
-```
-
+```text
 ---
 
 ## Flujo de actualización diaria (post-clonación)
@@ -146,10 +152,11 @@ nothing to commit, working tree clean
 Una vez configurado el servidor, las actualizaciones son un solo comando:
 
 ```powershell
+
 cd C:\Dev\BD_POSE_B52
 git pull origin main
-```
 
+```text
 > Todo el desarrollo se hace en la **PC local**. El servidor solo ejecuta `git pull`.
 
 ---
