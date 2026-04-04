@@ -2,9 +2,9 @@
 
 ## Sistema de Data Warehouse con Carga Incremental y ML Observability
 
-**Fecha creación:** 13 de marzo de 2026  
-**Versión:** 2.0 - Optimizado para Ejecución por GitHub Copilot  
-**Estado:** Listo para implementación  
+**Fecha creación:** 13 de marzo de 2026
+**Versión:** 2.0 - Optimizado para Ejecución por GitHub Copilot
+**Estado:** Listo para implementación
 **Autor:** Richard + GitHub Copilot
 
 ---
@@ -35,11 +35,14 @@
   (Star Schema) en SQL Server. Las tablas de hechos (Fact Tables) NUNCA deben contener
   strings/varchar (excepto descripciones crudas como `detalle`); TODAS las dimensiones se
   cruzan mediante Claves Foráneas de tipo `INT` (`id_obra`, `id_fuente`, etc.).
+
 - **Stack Tecnológico:** Python (Pandas para pre-procesamiento) y `pyodbc` con
   `fast_executemany = True` para alta velocidad de inserción hacia SQL Server.
+
 - **Flujo de Trabajo:** Las dimensiones (catálogos) se extraen usando
   `pandas.drop_duplicates()` de los Excels y se actualizan dinámicamente con lógica UPSERT
   en BDD **ANTES** de cargar las tablas de hechos.
+
 - **Regla de oro:** Lee el resto de este documento como tu única "Fuente de la Verdad"
   arquitectónica. Evita sugerir lógicas viejas o desnormalizadas (sistemas A1/A2).
 
@@ -47,7 +50,8 @@
 
 ### 🎯 Objetivo General
 
-Este documento es un **plan de implementación ejecutable paso a paso** que serás responsable de completar en el servidor de producción. Cada fase contiene:
+Este documento es un **plan de implementación ejecutable paso a paso** que serás responsable de completar en el servidor
+de producción. Cada fase contiene:
 
 - Validaciones automatizables que DEBES ejecutar
 - Criterios de éxito medibles
@@ -55,26 +59,26 @@ Este documento es un **plan de implementación ejecutable paso a paso** que ser�
 
 ### 🔴 Principios Mandatorios de Ejecución
 
-1. **Secuencialidad Estricta**  
-   ❌ NO avances a la siguiente fase sin completar todas las validaciones  
+1. **Secuencialidad Estricta**
+   ❌ NO avances a la siguiente fase sin completar todas las validaciones
    ✅ Solo continúa si exit code = 0
 
-2. **Idempotencia**  
-   ✅ Verifica existencia antes de crear (IF NOT EXISTS)  
+2. **Idempotencia**
+   ✅ Verifica existencia antes de crear (IF NOT EXISTS)
    ✅ Usa UPSERT en lugar de INSERT cuando corresponda
 
-3. **Logging Obligatorio**  
-   ✅ TODOS los comandos registran salida en `C:\DW_GrupoPOSE_B52\00_logs\`  
+3. **Logging Obligatorio**
+   ✅ TODOS los comandos registran salida en `C:\DW_GrupoPOSE_B52\00_logs\`
    ✅ Incluye timestamps, parámetros usados, y resultados
 
-4. **Manejo de Errores**  
-   ✅ Captura TODAS las excepciones con stack trace completo  
-   ✅ Clasifica error: SQL | PYTHON | CONEXION | DATOS  
-   ✅ NO continúes automáticamente después de error crítico  
+4. **Manejo de Errores**
+   ✅ Captura TODAS las excepciones con stack trace completo
+   ✅ Clasifica error: SQL | PYTHON | CONEXION | DATOS
+   ✅ NO continúes automáticamente después de error crítico
    ✅ Ejecuta procedimiento de rollback documentado en Sección 11
 
-5. **Reporte de Estado**  
-   ✅ Después de cada fase, genera reporte JSON (ver formato abajo)  
+5. **Reporte de Estado**
+   ✅ Después de cada fase, genera reporte JSON (ver formato abajo)
    ✅ Actualiza archivo `estado_implementacion.json` en raíz
 
 ### 📊 Formato de Reporte Esperado
@@ -101,19 +105,22 @@ Después de cada paso/fase, genera:
   "errores": [],
   "siguiente_accion": "Proceder a Paso 1.2 - Crear índices optimizados"
 }
-```
+```text
 
 ### ⚠️ Manejo de Errores - Protocolo
 
 Si encuentras un error:
 
-**1. DETENTE INMEDIATAMENTE**  
+## 1. DETENTE INMEDIATAMENTE
+
 No continúes con siguientes pasos automáticamente.
 
-**2. CAPTURA CONTEXTO COMPLETO**
+## 2. CAPTURA CONTEXTO COMPLETO
 
 ```python
+
 # Ejemplo de captura correcta
+
 try:
     # ... operación ...
 except Exception as e:
@@ -128,9 +135,9 @@ except Exception as e:
     }
     logging.error(json.dumps(error_info, indent=2))
     # Guardar en C:\DW_GrupoPOSE_B52\00_logs\errores\
-```
+```text
 
-**3. CLASIFICA EL ERROR**
+## 3. CLASIFICA EL ERROR
 
 - `ERROR_SQL`: Error en base de datos (conexión, query, constraints)
 - `ERROR_PYTHON`: Excepción en código Python (TypeError, ValueError, etc.)
@@ -143,7 +150,7 @@ except Exception as e:
 - Rollback de transacción parcial
 - Skip de registro problemático (con logging)
 
-**5. SI FALLA RECUPERACIÓN**
+## 5. SI FALLA RECUPERACIÓN
 
 - Genera reporte de error detallado
 - SOLICITA INSTRUCCIÓN al usuario antes de continuar
@@ -154,12 +161,15 @@ except Exception as e:
 - Retorna `exit(1)` con mensaje si falla
 - Se ejecuta ANTES de marcar fase como completa
 
-**Ejemplo de uso:**
+## Ejemplo de uso:
 
 ```bash
+
 # Salida esperada: "✅ Fase 1 validada: 5 esquemas, 15 tablas, 12 índices, 0 errores"
+
 # Exit code: 0
-```
+
+```text
 
 ### 🚦 Criterios para Continuar
 
@@ -190,17 +200,19 @@ Mantén actualizado `C:\DW_GrupoPOSE_B52\estado_implementacion.json`:
   "errores_acumulados": 0,
   "tiempo_total_min": 25.5
 }
-```
+```text
 
 ### 🎓 Buenas Prácticas Específicas
 
-1. **Antes de crear archivos/directorios**  
+<!-- pyml disable md029 -->
+
+1. **Antes de crear archivos/directorios**
 
    ```python
    Path(directorio).mkdir(parents=True, exist_ok=True)
    ```
 
-2. **Antes de ejecutar SQL DDL**  
+1. Antes de ejecutar SQL DDL
 
    ```sql
    IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'DW_GrupoPOSE_B52')
@@ -210,16 +222,17 @@ Mantén actualizado `C:\DW_GrupoPOSE_B52\estado_implementacion.json`:
    ```
 
 3. **Transacciones Atómicas y Carga Masiva Rápida**
-   Las cargas incrementales requieren proteger el estado previo mediante el uso de transacciones. O todo se carga bien, o la base de datos vuelve a su estado anterior.
+Las cargas incrementales requieren proteger el estado previo mediante el uso de transacciones. O todo se carga bien, o
+la base de datos vuelve a su estado anterior.
    Además, es CRÍTICO activar `fast_executemany` en pyodbc para acelerar las inserciones masivas de datos.
 
    ```python
    conn.autocommit = False
    cursor = conn.cursor()
-   
+
    # OBLIGATORIO: Habilita inserción por lotes ultra-rápida (100x más rápido)
-   cursor.fast_executemany = True 
-   
+   cursor.fast_executemany = True
+
    try:
        # Las dos operaciones van en el mismo bloque transaccional
        cursor.execute("DELETE FROM tabla WHERE periodo = ?", [periodo])
@@ -230,7 +243,7 @@ Mantén actualizado `C:\DW_GrupoPOSE_B52\estado_implementacion.json`:
        raise e
    ```
 
-4. **Validación de datos antes de cargar**  
+4. Validación de datos antes de cargar
 
    ```python
    # Verificar columnas requeridas existen
@@ -240,12 +253,14 @@ Mantén actualizado `C:\DW_GrupoPOSE_B52\estado_implementacion.json`:
        raise ValueError(f"Columnas faltantes: {faltantes}")
    ```
 
+<!-- pyml enable md029 -->
+
 ### 🔍 Checkpoint de Inicio
 
 Antes de comenzar Fase 1, ejecuta:
 
 ```bash
-```
+```text
 
 - ✅ Python 3.9+ instalado
 - ✅ Librerías requeridas: pandas, pyodbc, openpyxl, psutil
@@ -254,7 +269,7 @@ Antes de comenzar Fase 1, ejecuta:
 - ✅ Espacio en disco suficiente (>50GB)
 - ✅ Estructura de directorios creada
 
-**Solo si exit code = 0, inicia Fase 1.**
+## Solo si exit code = 0, inicia Fase 1.
 
 ---
 
@@ -262,7 +277,8 @@ Antes de comenzar Fase 1, ejecuta:
 
 ### Objetivo
 
-Crear **DW_GrupoPOSE_B52**, un Data Warehouse de nueva generación que evoluciona desde la arquitectura A2 (FULL LOAD) hacia un sistema optimizado con:
+Crear **DW_GrupoPOSE_B52**, un Data Warehouse de nueva generación que evoluciona desde la arquitectura A2 (FULL LOAD)
+hacia un sistema optimizado con:
 
 - ✅ **Carga Incremental Mixta:** Mensual para costos, anual para comprobantes
 - ✅ **ML Observability:** Detección automática de anomalías en datos
@@ -350,7 +366,7 @@ Crear **DW_GrupoPOSE_B52**, un Data Warehouse de nueva generación que evolucion
 │   - Costos fuera de rangos históricos                            │
 │   - Registrar en AUDITORIA.alertas                               │
 └──────────────────────────────────────────────────────────────────┘
-```
+```text
 
 ### 2.2 Esquemas y Tablas
 
@@ -399,60 +415,64 @@ Crear **DW_GrupoPOSE_B52**, un Data Warehouse de nueva generación que evolucion
 #### Tabla: PRODUCCION.costos (MENSUAL)
 
 ```sql
+
 -- Columnas de particionamiento
 anio_dato INT NOT NULL,          -- Año del campo FECHA
 mes_dato INT NOT NULL,           -- Mes del campo FECHA (1-12)
 fecha_carga DATETIME2 DEFAULT GETDATE(),
 
 -- Índice para particionamiento lógico
-CREATE NONCLUSTERED INDEX IX_costos_particion 
+CREATE NONCLUSTERED INDEX IX_costos_particion
 ON PRODUCCION.costos (anio_dato, mes_dato, fecha)
 INCLUDE (importe, obra_pronto);
 
 -- Estrategia de carga
 DELETE FROM PRODUCCION.costos WHERE anio_dato = @anio AND mes_dato = @mes;
 INSERT INTO PRODUCCION.costos (...) VALUES (...);
-```
 
+```text
 **Ejemplo:** Cargar marzo 2026
 
 ```bash
-```
 
-→ Borra solo `WHERE anio_dato = 2026 AND mes_dato = 3`  
+```text
+→ Borra solo `WHERE anio_dato = 2026 AND mes_dato = 3`
 → Inserta datos de marzo 2026
 
 > 💡 **Estrategia Detección Dinámica de Particiones (Soporte Multi-Mes/Multi-Año)**
-> Si llega un archivo con un gran porcentaje de años históricos modificados (ej. rearmado contable retroactivo donde se modifica el 80% de los datos de un año entero):
+> Si llega un archivo con un gran porcentaje de años históricos modificados (ej. rearmado contable retroactivo donde se
+modifica el 80% de los datos de un año entero):
 >
 > 1. El script Python debe buscar en el `DataFrame` todas las combinaciones únicas de años y meses que existen.
 > 2. Iterar sobre esas combinaciones únicas y lanzar el `DELETE` de esa partición específica.
 > 3. Hacer el `BULK INSERT (fast_executemany)` masivo.
-> Esto toma exactamente el mismo tiempo que insertar un Excel con registros nuevos, y reemplaza de forma súper veloz años completos sin sufrir los costos computacionales de un `MERGE` o `UPSERT` individual.
+> Esto toma exactamente el mismo tiempo que insertar un Excel con registros nuevos, y reemplaza de forma súper veloz
+años completos sin sufrir los costos computacionales de un `MERGE` o `UPSERT` individual.
 
 #### Tabla: PRODUCCION.comprobantes (ANUAL)
 
 ```sql
+
 -- Columnas de particionamiento
 anio_dato INT NOT NULL,          -- Año del campo fecha_comprobante
 fecha_carga DATETIME2 DEFAULT GETDATE(),
 
 -- Índice
-CREATE NONCLUSTERED INDEX IX_comprobantes_particion 
+CREATE NONCLUSTERED INDEX IX_comprobantes_particion
 ON PRODUCCION.comprobantes (anio_dato, fecha_comprobante)
 INCLUDE (importe, proveedor_id);
 
 -- Estrategia de carga
 DELETE FROM PRODUCCION.comprobantes WHERE anio_dato = @anio;
 INSERT INTO PRODUCCION.comprobantes (...) VALUES (...);
-```
 
+```text
 **Ejemplo:** Cargar año 2026
 
 ```bash
-```
 
-→ Borra solo `WHERE anio_dato = 2026`  
+```text
+→ Borra solo `WHERE anio_dato = 2026`
 → Inserta datos del año completo
 
 ### 3.2 ML Observability - Columnas Calculadas
@@ -460,6 +480,7 @@ INSERT INTO PRODUCCION.comprobantes (...) VALUES (...);
 Cada registro en `PRODUCCION.costos` tendrá:
 
 ```sql
+
 -- Campos ML (calculados post-carga)
 z_score_importe DECIMAL(10,6),           -- (importe - media) / stddev por obra
 percentil_importe INT,                   -- Percentil del importe (0-100)
@@ -467,22 +488,27 @@ dias_desde_ultima_carga INT,             -- Días desde última transacción
 es_outlier_estadistico BIT DEFAULT 0,    -- Flag: |z_score| > 3
 es_valor_inusual BIT DEFAULT 0,          -- Flag: fuera de rango típico
 categoria_riesgo VARCHAR(20),            -- LOW, MEDIUM, HIGH, CRITICAL
-```
 
-**Ejemplo de detección:**
+```text
+
+## Ejemplo de detección:
 
 ```python
+
 # Post-carga: calcular features ML
+
 df['z_score'] = (df['importe'] - df.groupby('obra_pronto')['importe'].transform('mean')) / \
                 df.groupby('obra_pronto')['importe'].transform('std')
 df['es_outlier'] = df['z_score'].abs() > 3
-```
+
+```text
 
 ### 3.3 Nuevas Dimensiones - Estructuras
 
 #### CATALOGO.proveedores
 
 ```sql
+
 CREATE TABLE CATALOGO.proveedores (
     id_proveedor BIGINT IDENTITY(1,1) PRIMARY KEY,
     cuit NVARCHAR(20) UNIQUE,                    -- Identificador fiscal
@@ -504,11 +530,13 @@ CREATE TABLE CATALOGO.proveedores (
 CREATE INDEX IX_proveedores_nombre_norm ON CATALOGO.proveedores(nombre_proveedor_norm);
 CREATE INDEX IX_proveedores_categoria ON CATALOGO.proveedores(categoria);
 CREATE INDEX IX_proveedores_cuit ON CATALOGO.proveedores(cuit);
-```
+
+```text
 
 #### CATALOGO.fuentes
 
 ```sql
+
 CREATE TABLE CATALOGO.fuentes (
     id_fuente INT IDENTITY(1,1) PRIMARY KEY,
     codigo_fuente NVARCHAR(50) UNIQUE NOT NULL,  -- 'COMP', 'OP', 'GASTOS', etc.
@@ -530,11 +558,13 @@ INSERT INTO CATALOGO.fuentes (codigo_fuente, nombre_fuente, tipo_movimiento) VAL
 ('DBG', 'Movimientos Bancarios', 'MIXTO'),
 ('PRONTO', 'Sistema ProntoPOSE', 'EGRESO'),
 ('DISTR', 'Distribución Gastos Sede', 'EGRESO');
-```
+
+```text
 
 #### CATALOGO.jerarquia_org
 
 ```sql
+
 CREATE TABLE CATALOGO.jerarquia_org (
     id_jerarquia INT IDENTITY(1,1) PRIMARY KEY,
     codigo_jerarquia NVARCHAR(50) UNIQUE NOT NULL,
@@ -550,47 +580,73 @@ CREATE TABLE CATALOGO.jerarquia_org (
 );
 
 CREATE INDEX IX_jerarquia_gerencia ON CATALOGO.jerarquia_org(id_gerencia);
-```
+
+```text
 
 ### 3.4 Reglas de Negocio y Normalización (Herencia A2)
 
-Para garantizar la integridad y retrocompatibilidad de los datos, la "FASE 2: Pre_IngestaBD" debe implementar estructuralmente las siguientes reglas de normalización históricas consolidadas en A2. Todo esto debe procesarse *antes* de que el dato toque la Base de Datos.
+Para garantizar la integridad y retrocompatibilidad de los datos, la "FASE 2: Pre_IngestaBD" debe implementar
+estructuralmente las siguientes reglas de normalización históricas consolidadas en A2. Todo esto debe procesarse *antes*
+de que el dato toque la Base de Datos.
 
 #### A) Particularidades del Campo `OBRA_PRONTO` (Crítico)
 
-* **Tratamiento de Tipo:** Siempre debe procesarse como `string` (`VARCHAR(50)`). **Nunca** castear o convertir a tipo numérico o intero, ya que destruye información.
-- **Leading Zeros (Ceros a la izquierda):** Si el valor es puramente numérico (ej. `00000001`), se deben **preservar rigurosamente** los ceros a la izquierda.
-- **Alfanuméricos Válidos:** Se aceptan palabras puras o con guiones/espacios (ej. `HYDRA`, `ACTIVOS PERON`, `DAVID-GUSTAV`).
-- **Formatos Mixtos PROHIBIDOS:** Rechazar inmediatamente registros que mezclen números con letras (ej. `000HYDRA` o `00TALLER`). Las validaciones exigen o "solo dígitos" o "letras/espacios".
-- **Limpieza de Nulos Ocultos:** Al hacer `astype(str)` en Pandas, los nulos (`NaN` o `None`) se convierten en el texto string `'nan'`. Se debe aplicar un filtro explícito: `df.loc[df["OBRA_PRONTO"].str.lower() == 'nan', "OBRA_PRONTO"] = None`.
+* **Tratamiento de Tipo:** Siempre debe procesarse como `string` (`VARCHAR(50)`). **Nunca** castear o convertir a tipo
+  numérico o intero, ya que destruye información.
+- **Leading Zeros (Ceros a la izquierda):** Si el valor es puramente numérico (ej. `00000001`), se deben **preservar
+  rigurosamente** los ceros a la izquierda.
+- **Alfanuméricos Válidos:** Se aceptan palabras puras o con guiones/espacios (ej. `HYDRA`, `ACTIVOS PERON`,
+  `DAVID-GUSTAV`).
+- **Formatos Mixtos PROHIBIDOS:** Rechazar inmediatamente registros que mezclen números con letras (ej. `000HYDRA` o
+  `00TALLER`). Las validaciones exigen o "solo dígitos" o "letras/espacios".
+- **Limpieza de Nulos Ocultos:** Al hacer `astype(str)` en Pandas, los nulos (`NaN` o `None`) se convierten en el texto
+  string `'nan'`. Se debe aplicar un filtro explícito: `df.loc[df["OBRA_PRONTO"].str.lower() == 'nan', "OBRA_PRONTO"] =
+  None`.
 
 #### B) Conversión de Importes ("Formato Argentino")
 
-Los archivos Excel provienen de diversas fuentes (humanas y sistemas) con inconsistencias en los formatos numéricos y configuración regional.
-- **Limpieza Regex:** Se deben sanitizar los montos quitando cualquier carácter que no sea un dígito, un punto o una coma mediante expresiones regulares: `re.sub(r"[^\d,.]", "", valor)`.
+Los archivos Excel provienen de diversas fuentes (humanas y sistemas) con inconsistencias en los formatos numéricos y
+configuración regional.
+- **Limpieza Regex:** Se deben sanitizar los montos quitando cualquier carácter que no sea un dígito, un punto o una
+  coma mediante expresiones regulares: `re.sub(r"[^\d,.]", "", valor)`.
 - **Regla de Coma y Punto Invertida:**
-  - Si el string contiene "," y ".", y la coma está *después* del punto (ej. `1.234,56`), el punto es separador de miles. Se debe normalizar al estándar internacional float quitando puntos y cambiando la coma por punto.
-  - Si la puntuación está invertida (`1,234.56`) típico de software en inglés, se asume que el punto es decimal y se quita la coma.
-- **Límites de Seguridad (TC e Importe):** Restringir los montos entre `-100,000,000,000` y `100,000,000,000` para prevenir desbordamientos `OverflowError` en SQL. El `TC` (Tipo de Cambio) puede ser `0` pero no puede exceder `10,000`.
+  - Si el string contiene "," y ".", y la coma está *después* del punto (ej. `1.234,56`), el punto es separador de
+    miles. Se debe normalizar al estándar internacional float quitando puntos y cambiando la coma por punto.
+  - Si la puntuación está invertida (`1,234.56`) típico de software en inglés, se asume que el punto es decimal y se
+    quita la coma.
+- **Límites de Seguridad (TC e Importe):** Restringir los montos entre `-100,000,000,000` y `100,000,000,000` para
+  prevenir desbordamientos `OverflowError` en SQL. El `TC` (Tipo de Cambio) puede ser `0` pero no puede exceder
+  `10,000`.
 
 #### C) Normalización de Fechas (Y2K Bug local)
 
 El sistema no puede confiar en los formatos nativos de fecha de Excel debido a errores de captura de usuario.
-- **Parseo Iterativo:** Si la fecha viene como texto, testear secuencialmente: `"%d/%m/%Y"`, `"%d/%m/%y"`, `"%d-%m-%Y"`, `"%d-%m-%y"`.
-- **Corrección de Milenios:** Existen casos donde el Excel emite años de 2 dígitos. La regla de herencia es: Si el año detectado es de 2 dígitos y menor a 50 (ej. "24"), asumir que es el siglo XXI sumándole 2000 (->2024). Si es mayor a 50 (ej. "98"), atribuirle el siglo XX (-> 1998).
+- **Parseo Iterativo:** Si la fecha viene como texto, testear secuencialmente: `"%d/%m/%Y"`, `"%d/%m/%y"`,
+  `"%d-%m-%Y"`, `"%d-%m-%y"`.
+- **Corrección de Milenios:** Existen casos donde el Excel emite años de 2 dígitos. La regla de herencia es: Si el año
+  detectado es de 2 dígitos y menor a 50 (ej. "24"), asumir que es el siglo XXI sumándole 2000 (->2024). Si es mayor a
+  50 (ej. "98"), atribuirle el siglo XX (-> 1998).
 
 #### D) Unificación de Columnas
 
-Apenas el script de pre-ingesta cargue el DataFrame, debe estandarizar las cabeceras para prevenir errores de tipeo humano:
+Apenas el script de pre-ingesta cargue el DataFrame, debe estandarizar las cabeceras para prevenir errores de tipeo
+humano:
 - Pasar todas las columnas a `.upper()` y quitar espacios laterales (`.strip()`).
 - Reemplazar espacios múltiples en blanco por un solo guion bajo.
-- Reemplazar las diferentes codificaciones ASCII de "Número": Quitar el símbolo de grado (`°`) y estandarizar variaciones como `"N°"`, `"Nº"`, `"#"`, u otras hacia `"NRO"`.
+- Reemplazar las diferentes codificaciones ASCII de "Número": Quitar el símbolo de grado (`°`) y estandarizar
+  variaciones como `"N°"`, `"Nº"`, `"#"`, u otras hacia `"NRO"`.
 
 #### E) Idempotencia de Errores (Manejo de Rechazos en Cargas Incrementales)
 
-En un modelo incremental por reemplazo de partición, si un registro defectuoso es insertado en la tabla de `rechazos`, el usuario irá al Excel origen a solucionarlo. En su próxima ejecución, la base de datos reemplazará el mes completo con éxito, pero la tabla de rechazos debe "enterarse" de que su error histórico caducó gracias a la recarga.
-- **Regla de Limpieza Acoplada:** Cuando en la BD se ejecuta el `DELETE` masivo de la partición (ej. Enero 2026 en Costos), en la **misma transacción atómica**, se debe ejecutar un `UPDATE` en la tabla de `AUDITORIA.rechazos` marcando como `OBSOLETO_POR_RECARGA` cualquier rechazo pendiente que perteneciera a Enero 2026.
-- **Aislamiento:** La tabla de rechazos actúa solo como *tablero de lectura para humanos*. Nunca se debe usar su contenido para intentar "reprocesar e inyectar" automáticamente a Producción (los datos siempre se corrigen en la fuente y viajan por el flujo principal normalizado).
+En un modelo incremental por reemplazo de partición, si un registro defectuoso es insertado en la tabla de `rechazos`,
+el usuario irá al Excel origen a solucionarlo. En su próxima ejecución, la base de datos reemplazará el mes completo con
+éxito, pero la tabla de rechazos debe "enterarse" de que su error histórico caducó gracias a la recarga.
+- **Regla de Limpieza Acoplada:** Cuando en la BD se ejecuta el `DELETE` masivo de la partición (ej. Enero 2026 en
+  Costos), en la **misma transacción atómica**, se debe ejecutar un `UPDATE` en la tabla de `AUDITORIA.rechazos`
+  marcando como `OBSOLETO_POR_RECARGA` cualquier rechazo pendiente que perteneciera a Enero 2026.
+- **Aislamiento:** La tabla de rechazos actúa solo como *tablero de lectura para humanos*. Nunca se debe usar su
+  contenido para intentar "reprocesar e inyectar" automáticamente a Producción (los datos siempre se corrigen en la
+  fuente y viajan por el flujo principal normalizado).
 
 ---
 
@@ -599,6 +655,7 @@ En un modelo incremental por reemplazo de partición, si un registro defectuoso 
 #### AUDITORIA.rechazos (Estructura Adaptada para Carga Incremental)
 
 ```sql
+
 CREATE TABLE AUDITORIA.rechazos (
     id_rechazo BIGINT IDENTITY(1,1) PRIMARY KEY,
     id_log_carga BIGINT,                         -- FK a log_cargas
@@ -614,11 +671,13 @@ CREATE TABLE AUDITORIA.rechazos (
 );
 
 CREATE INDEX IX_rechazos_estado ON AUDITORIA.rechazos(tabla_destino, anio_dato, mes_dato, estado_resolucion);
-```
+
+```text
 
 #### AUDITORIA.periodos_carga
 
 ```sql
+
 CREATE TABLE AUDITORIA.periodos_carga (
     id_periodo_carga BIGINT IDENTITY(1,1) PRIMARY KEY,
     tabla_destino NVARCHAR(100) NOT NULL,        -- 'PRODUCCION.costos'
@@ -638,11 +697,13 @@ CREATE TABLE AUDITORIA.periodos_carga (
 );
 
 CREATE INDEX IX_periodos_tabla ON AUDITORIA.periodos_carga(tabla_destino, anio, mes);
-```
+
+```text
 
 #### AUDITORIA.metricas_rendimiento
 
 ```sql
+
 CREATE TABLE AUDITORIA.metricas_rendimiento (
     id_metrica BIGINT IDENTITY(1,1) PRIMARY KEY,
     id_log_carga BIGINT,                         -- FK a log_cargas
@@ -658,11 +719,13 @@ CREATE TABLE AUDITORIA.metricas_rendimiento (
     FOREIGN KEY (id_log_carga) REFERENCES AUDITORIA.log_cargas(id_log_carga),
     FOREIGN KEY (id_periodo_carga) REFERENCES AUDITORIA.periodos_carga(id_periodo_carga)
 );
-```
+
+```text
 
 #### ML.historial_alertas
 
 ```sql
+
 CREATE TABLE ML.historial_alertas (
     id_alerta BIGINT IDENTITY(1,1) PRIMARY KEY,
     fecha_generacion DATETIME2 DEFAULT GETDATE(),
@@ -681,8 +744,8 @@ CREATE TABLE ML.historial_alertas (
 
 CREATE INDEX IX_alertas_fecha ON ML.historial_alertas(fecha_generacion);
 CREATE INDEX IX_alertas_tipo ON ML.historial_alertas(tipo_alerta, severidad);
-```
 
+```text
 ---
 
 ## 4. Plan de Implementación por Fases
@@ -691,7 +754,7 @@ CREATE INDEX IX_alertas_tipo ON ML.historial_alertas(tipo_alerta, severidad);
 
 **Objetivo:** Crear estructura completa de DW_GrupoPOSE_B52 vacía
 
-**Tareas:**
+## Tareas:
 
 - [ ] Crear base de datos B52
 - [ ] Crear esquemas: CATALOGO, PRODUCCION, AUDITORIA, TEMPORAL, ML
@@ -700,11 +763,12 @@ CREATE INDEX IX_alertas_tipo ON ML.historial_alertas(tipo_alerta, severidad);
 - [ ] Crear tablas de auditoría avanzada (ver sección 5.3)
 - [ ] Crear esquema ML completo (ver sección 5.4)
 
-**Verificación:**
+## Verificación:
 
 ```sql
+
 -- Verificar estructura creada
-SELECT s.name AS esquema, t.name AS tabla, 
+SELECT s.name AS esquema, t.name AS tabla,
        SUM(p.rows) AS registros
 FROM sys.tables t
 INNER JOIN sys.schemas s ON t.schema_id = s.schema_id
@@ -713,50 +777,53 @@ WHERE s.name IN ('CATALOGO', 'PRODUCCION', 'AUDITORIA', 'ML')
   AND p.index_id IN (0,1)
 GROUP BY s.name, t.name
 ORDER BY s.name, t.name;
-```
 
+```text
 **Entregable:** BD B52 creada con 0 registros, estructura completa
 
 ---
 
 #### Paso 1.2: Crear índices optimizados
 
-**Índices críticos para carga incremental:**
+## Índices críticos para carga incremental:
 
 ```sql
+
 -- Costos (particionamiento mensual)
-CREATE NONCLUSTERED INDEX IX_costos_particion 
+CREATE NONCLUSTERED INDEX IX_costos_particion
 ON PRODUCCION.costos (anio_dato, mes_dato, fecha)
 INCLUDE (importe, obra_pronto, proveedor_id);
 
-CREATE NONCLUSTERED INDEX IX_costos_obra 
+CREATE NONCLUSTERED INDEX IX_costos_obra
 ON PRODUCCION.costos (obra_pronto)
 INCLUDE (fecha, importe);
 
 -- Comprobantes (particionamiento anual)
-CREATE NONCLUSTERED INDEX IX_comprobantes_particion 
+CREATE NONCLUSTERED INDEX IX_comprobantes_particion
 ON PRODUCCION.comprobantes (anio_dato, fecha_comprobante)
 INCLUDE (importe, proveedor_id);
 
 -- Proveedores (búsquedas rápidas)
-CREATE NONCLUSTERED INDEX IX_proveedores_nombre_norm 
+CREATE NONCLUSTERED INDEX IX_proveedores_nombre_norm
 ON CATALOGO.proveedores (nombre_proveedor_norm);
 
-CREATE NONCLUSTERED INDEX IX_proveedores_cuit 
+CREATE NONCLUSTERED INDEX IX_proveedores_cuit
 ON CATALOGO.proveedores (cuit) WHERE cuit IS NOT NULL;
 
 -- Auditoría (queries de monitoreo)
-CREATE NONCLUSTERED INDEX IX_periodos_tabla_fecha 
+CREATE NONCLUSTERED INDEX IX_periodos_tabla_fecha
 ON AUDITORIA.periodos_carga (tabla_destino, anio, mes, fecha_inicio_carga);
 
-CREATE NONCLUSTERED INDEX IX_alertas_fecha_tipo 
+CREATE NONCLUSTERED INDEX IX_alertas_fecha_tipo
 ON ML.historial_alertas (fecha_generacion, tipo_alerta, severidad);
-```
 
-**Verificación:**
+```text
+
+## Verificación:
 
 ```sql
-SELECT 
+
+SELECT
     SCHEMA_NAME(t.schema_id) AS esquema,
     t.name AS tabla,
     i.name AS indice,
@@ -766,19 +833,20 @@ INNER JOIN sys.tables t ON i.object_id = t.object_id
 WHERE SCHEMA_NAME(t.schema_id) IN ('CATALOGO', 'PRODUCCION', 'AUDITORIA', 'ML')
   AND i.name IS NOT NULL
 ORDER BY esquema, tabla, indice;
-```
 
+```text
 ---
 
 #### Paso 1.3: Poblar dimensiones de referencia
 
-**Tareas:**
+## Tareas:
 
 - [ ] Insertar fuentes iniciales (6-10 registros)
 - [ ] Generar calendario (2019-2030)
 - [ ] Crear parámetros ML por defecto
 
 ```sql
+
 -- Fuentes iniciales
 INSERT INTO CATALOGO.fuentes (codigo_fuente, nombre_fuente, tipo_movimiento, es_automatica) VALUES
 ('COMP', 'Comprobantes de Compra', 'EGRESO', 1),
@@ -797,7 +865,7 @@ WITH fechas AS (
     WHERE fecha < '2030-12-31'
 )
 INSERT INTO CATALOGO.calendario (fecha, anio, mes, dia, nombre_mes, trimestre, semestre, dia_semana, nombre_dia_semana, es_fin_semana, semana_anio)
-SELECT 
+SELECT
     fecha,
     YEAR(fecha),
     MONTH(fecha),
@@ -818,8 +886,8 @@ INSERT INTO ML.umbrales_alertas (tipo_alerta, campo_medicion, valor_min, valor_m
 ('TC_ANORMAL', 'tipo_cambio', 0, 10000, 5),                   -- ±5% variación diaria
 ('PROVEEDOR_NUEVO', 'importe_primera_factura', 0, 5000000, NULL),  -- Alerta si > $5M
 ('DIAS_SIN_ACTIVIDAD', 'dias_desde_ultima', 90, 9999, NULL);      -- Alerta si > 90 días
-```
 
+```text
 ---
 
 ### Fase 2: Adaptación del Pipeline ETL (Semana 2)
@@ -830,8 +898,10 @@ INSERT INTO ML.umbrales_alertas (tipo_alerta, campo_medicion, valor_min, valor_m
 
 La arquitectura de B52 promueve la auto-generación y normalización de catálogos sin requerir trabajo extra del usuario.
 
-**A. Catálogos desde "Obras_Gerencias.xlsx" (Gerencias, Compensables y Obras):**
-Dado que en B52 eliminamos la dependencia rígida (Foreign Key) de Gerencias a nivel Tabla Obras, usamos **este único archivo Excel** (un RDP sin desperdicio) para dar de alta registros en tres tablas en una sola pasada.
+## A. Catálogos desde "Obras_Gerencias.xlsx" (Gerencias, Compensables y Obras):
+
+Dado que en B52 eliminamos la dependencia rígida (Foreign Key) de Gerencias a nivel Tabla Obras, usamos **este único
+archivo Excel** (un RDP sin desperdicio) para dar de alta registros en tres tablas en una sola pasada.
 
 1. **Lectura única:** `df_excel = pd.read_excel('Obras_Gerencias.xlsx')`
 2. **Proceso Gerencias:**
@@ -841,33 +911,46 @@ Dado que en B52 eliminamos la dependencia rígida (Foreign Key) de Gerencias a n
    - Se aísla la columna `COMPENSABLE`, se hace un `drop_duplicates()`.
    - Se insertan en `CATALOGO.compensables` los nuevos valores (ej. 'SI', 'NO', 'ADMINISTRACION').
 4. **Proceso Obras:**
-   - Se aíslan `OBRA_PRONTO`, `DESCRIPCION_OBRA`, `NRO_OBRA` y se cruzan con tablas pre-ingestadas para capturar su `id_compensable` y su `id_gerencia`.
+   - Se aíslan `OBRA_PRONTO`, `DESCRIPCION_OBRA`, `NRO_OBRA` y se cruzan con tablas pre-ingestadas para capturar su
+     `id_compensable` y su `id_gerencia`.
    - Se asegura la regla "Leading Zeros" (ver 3.4.A).
-   - Se insertan las obras en `CATALOGO.obras` que **no existan**, guardando TODOS sus atributos (100% RDP sin desperdicio).
+   - Se insertan las obras en `CATALOGO.obras` que **no existan**, guardando TODOS sus atributos (100% RDP sin
+     desperdicio).
 
-**B. Catálogos Dinámicos desde "BaseCostosPOSE_B52.xlsx" (Fuentes, Cuentas Contables y Comprobantes):**
-Las dimensiones internas de los hechos se auto-completarán escaneando el archivo principal de costos, implementando metodología UPSERT.
+## B. Catálogos Dinámicos desde "BaseCostosPOSE_B52.xlsx" (Fuentes, Cuentas Contables y Comprobantes):
 
-1. **Lectura parcial:** `df_base = pd.read_excel('BaseCostosPOSE_B52.xlsx', usecols=['FUENTE', 'RUBRO_CONTABLE', 'CODIGO_CUENTA', 'CUENTA_CONTABLE', 'TIPO_COMPROBANTE'])`
+Las dimensiones internas de los hechos se auto-completarán escaneando el archivo principal de costos, implementando
+metodología UPSERT.
+
+1. **Lectura parcial:** `df_base = pd.read_excel('BaseCostosPOSE_B52.xlsx', usecols=['FUENTE', 'RUBRO_CONTABLE',
+   'CODIGO_CUENTA', 'CUENTA_CONTABLE', 'TIPO_COMPROBANTE'])`
 2. **Proceso Fuentes:**
    - `.drop_duplicates()` sobre la columna `FUENTE`, se insertan nuevas en `CATALOGO.fuentes` (`es_automatica = 1`).
 3. **Proceso Tipos de Comprobantes (NUEVA DIMENSIÓN):**
-   - `.drop_duplicates()` sobre `TIPO_COMPROBANTE`, se insertan nuevas nomenclaturas (facturas, nd, nc) en `CATALOGO.tipos_comprobantes`.
+   - `.drop_duplicates()` sobre `TIPO_COMPROBANTE`, se insertan nuevas nomenclaturas (facturas, nd, nc) en
+     `CATALOGO.tipos_comprobantes`.
 4. **Proceso Cuentas Contables:**
-   - Se filtran y agrupan estas tres columnas combinadas: `['RUBRO_CONTABLE', 'CODIGO_CUENTA', 'CUENTA_CONTABLE']`, ejecutando un `.drop_duplicates()`.
+   - Se filtran y agrupan estas tres columnas combinadas: `['RUBRO_CONTABLE', 'CODIGO_CUENTA', 'CUENTA_CONTABLE']`,
+     ejecutando un `.drop_duplicates()`.
    - Se asegura que `CODIGO_CUENTA` pueda tratar nulos o ceros adecuadamente.
-   - Se insertan las combinaciones nuevas en la tabla `CATALOGO.cuentas_contables`. El match único se realiza típicAMENTE por `CODIGO_CUENTA` sumado a la descripción. Si el registro cuenta no existe, se inserta enriqueciendo el rubro y código.
+   - Se insertan las combinaciones nuevas en la tabla `CATALOGO.cuentas_contables`. El match único se realiza
+     típicAMENTE por `CODIGO_CUENTA` sumado a la descripción. Si el registro cuenta no existe, se inserta enriqueciendo
+     el rubro y código.
 
-*Con esto logramos mantener un diseño amigable de los archivos mantenidos por los usuarios, pero estructuramos un verdadero esquema de Data Warehouse en estrella.*
+*Con esto logramos mantener un diseño amigable de los archivos mantenidos por los usuarios, pero estructuramos un
+verdadero esquema de Data Warehouse en estrella.*
 
 #### 2.1 Procesamiento de Particiones (Costos/Comprobantes)
 
-**⚠️ CAMBIO IMPORTANTE:**  
-Los metadatos de particionamiento (`anio_dato`, `mes_dato`, `periodo_codigo`) **YA VIENEN calculados desde Power Query B52** (ver Sección 9).  
+## ⚠️ CAMBIO IMPORTANTE:
 
-**Funcionalidad simplificada:**
+Los metadatos de particionamiento (`anio_dato`, `mes_dato`, `periodo_codigo`) **YA VIENEN calculados desde Power Query
+B52** (ver Sección 9).
+
+## Funcionalidad simplificada:
 
 ```python
+
 """
 Adaptador para B52: Distribuye archivos a output_ready_for_B52
 Los metadatos de particionamiento YA VIENEN de Power Query B52
@@ -883,26 +966,26 @@ def validar_metadata_B52(df, archivo_origen):
     """Valida que las columnas de metadata B52 existan (no las agrega)"""
     columnas_requeridas = ['anio_dato', 'mes_dato', 'periodo_codigo']
     faltantes = [col for col in columnas_requeridas if col not in df.columns]
-    
+
     if faltantes:
         raise ValueError(
             f"❌ Archivo {archivo_origen} NO tiene columnas B52: {faltantes}. "
             "Verificar que se usó Power Query B52 (no A2). "
             "Ver Sección 9 del plan para configurar Power Query correctamente."
         )
-    
+
     # Validar tipos de datos
     if df['anio_dato'].dtype not in ['int64', 'float64']:
         raise TypeError(f"❌ anio_dato debe ser numérico, encontrado: {df['anio_dato'].dtype}")
-    
+
     if df['mes_dato'].dtype not in ['int64', 'float64']:
         raise TypeError(f"❌ mes_dato debe ser numérico, encontrado: {df['mes_dato'].dtype}")
-    
+
     # Validar rangos lógicos
     if not df['mes_dato'].between(1, 12).all():
         valores_invalidos = df[~df['mes_dato'].between(1, 12)]['mes_dato'].unique()
         raise ValueError(f"❌ mes_dato contiene valores fuera de rango 1-12: {valores_invalidos}")
-    
+
     logging.info(f"✅ Metadata B52 validada: {archivo_origen}")
     return True
 
@@ -910,47 +993,47 @@ def agregar_metadata_B52(df, archivo_origen):
     """DEPRECATED: Ya no agrega metadata, solo valida (viene de Power Query)"""
     logging.warning("⚠️  agregar_metadata_B52() es deprecated. Metadata viene de Power Query.")
     validar_metadata_B52(df, archivo_origen)
-    
+
     # Asegurar FECHA es datetime
     df['FECHA'] = pd.to_datetime(df['FECHA'], errors='coerce')
-    
+
     # Agregar columnas de particionamiento
     df['anio_dato'] = df['FECHA'].dt.year
     df['mes_dato'] = df['FECHA'].dt.month
     df['periodo_codigo'] = df['FECHA'].dt.strftime('%Y%m')
-    
+
     # Metadata para auditoría
     df['archivo_origen_B52'] = archivo_origen
     df['fecha_procesamiento'] = pd.Timestamp.now()
-    
+
     # Eliminar filas con fechas inválidas
     df_valido = df.dropna(subset=['FECHA', 'anio_dato', 'mes_dato'])
-    
+
     print(f"✅ Metadata B52: {len(df_valido)} registros con partición temporal")
     print(f"   Períodos: {df_valido['periodo_codigo'].nunique()} únicos")
-    
+
     return df_valido
 
 def distribuir_a_output_B52(input_dir, output_dir):
     """Distribuye archivos normalizados a output_ready_for_B52"""
-    
+
     input_path = Path(input_dir)
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
-    
+
     for archivo_excel in input_path.glob('*.xlsx'):
         print(f"\n📂 Procesando: {archivo_excel.name}")
-        
+
         # Leer archivo normalizado
         df = pd.read_excel(archivo_excel)
-        
+
         # Agregar metadata B52
         df_b52 = agregar_metadata_B52(df, archivo_excel.name)
-        
+
         # Guardar en output_ready_for_B52
         output_file = output_path / f"B52_{archivo_excel.name}"
         df_b52.to_excel(output_file, index=False, engine='openpyxl')
-        
+
         print(f"💾 Guardado: {output_file}")
 
 if __name__ == '__main__':
@@ -958,21 +1041,28 @@ if __name__ == '__main__':
         input_dir='../output_normalized',
         output_dir='../output_ready_for_B52'
     )
-```
 
-**Verificación:**
+```text
+
+## Verificación:
 
 ```bash
+
 # Salida esperada:
+
 # ✅ Metadata B52 validada: archivo1.xlsx
+
 # ✅ Copiado: archivo1.xlsx → output_ready_for_B52/archivo1.xlsx
+
 # ✅ Distribución B52 completada: N archivos procesados
 
 # Si falla:
-# ❌ Archivo X.xlsx NO tiene columnas B52: ['anio_dato', 'mes_dato']
-# → Verificar que Power Query B52 esté configurado correctamente (Sección 9)
-```
 
+# ❌ Archivo X.xlsx NO tiene columnas B52: ['anio_dato', 'mes_dato']
+
+# → Verificar que Power Query B52 esté configurado correctamente (Sección 9)
+
+```text
 ---
 
 #### Paso 2.2: Modificar configuración AutomatizacionETL
@@ -980,6 +1070,7 @@ if __name__ == '__main__':
 **Archivo:** `c:\Dev\ProyVS_CodeRick_2026\production\AutomatizacionETL\config_automatizacion_B52.json`
 
 ```json
+
 {
   "metadata": {
     "version": "1.0_B52",
@@ -1011,8 +1102,8 @@ if __name__ == '__main__':
     "formato": "%(asctime)s - %(levelname)s - %(message)s"
   }
 }
-```
 
+```text
 ---
 
 #### Paso 3.1: Estructura de directorio
@@ -1036,11 +1127,11 @@ C:\DW_GrupoPOSE_B52\
 │       ├── 02_indices_B52.sql
 │       └── 03_poblar_referencias_B52.sql
 └── 03_output/
-```
-
+```text
 ---
 
 ```python
+
 """
 Orquestador Maestro de Cargas B52
 Maneja estrategias incrementales mixtas (mensual + anual)
@@ -1053,7 +1144,7 @@ from pathlib import Path
 
     print(f"\n{'='*70}")
     print(f"{'='*70}\n")
-    
+
     try:
         result = subprocess.run(cmd, check=True, capture_output=True, text=True)
         print(result.stdout)
@@ -1086,38 +1177,38 @@ def main():
         help='Omitir carga de catálogos (gerencias, obras)'
     )
     args = parser.parse_args()
-    
+
     # Timestamp de inicio
     inicio_total = datetime.now()
     print(f"\n🏗️  INICIO CARGA DW_GrupoPOSE_B52")
     print(f"📅 Fecha: {inicio_total.strftime('%Y-%m-%d %H:%M:%S')}\n")
-    
+
     exitos = []
     fallos = []
-    
+
     # FASE 1: Catálogos (FULL LOAD)
     if not args.skip_catalogos:
         print("\n" + "="*70)
         print("FASE 1: CATÁLOGOS (FULL LOAD)")
         print("="*70)
-        
+
             exitos.append('gerencias')
         else:
             fallos.append('gerencias')
-        
+
             exitos.append('obras')
         else:
             fallos.append('obras')
-        
+
             exitos.append('proveedores')
         else:
             fallos.append('proveedores')
-    
+
     # FASE 2: Costos (INCREMENTAL MENSUAL)
     print("\n" + "="*70)
     print("FASE 2: COSTOS (INCREMENTAL MENSUAL)")
     print("="*70)
-    
+
     if args.full:
         print("⚠️  Modo FULL: Cargando todos los períodos disponibles")
             exitos.append('costos_full')
@@ -1131,12 +1222,12 @@ def main():
                 fallos.append(f'costos_{periodo}')
     else:
         print("⚠️  Sin períodos especificados para costos. Use --periodos YYYYMM,YYYYMM")
-    
+
     # FASE 3: Comprobantes (INCREMENTAL ANUAL)
     print("\n" + "="*70)
     print("FASE 3: COMPROBANTES (INCREMENTAL ANUAL)")
     print("="*70)
-    
+
     if args.full:
         print("⚠️  Modo FULL: Cargando todos los años disponibles")
             exitos.append('comprobantes_full')
@@ -1148,32 +1239,34 @@ def main():
             fallos.append(f'comprobantes_{args.anio}')
     else:
         print("⚠️  Sin año especificado para comprobantes. Use --anio YYYY")
-    
+
     # RESUMEN FINAL
     fin_total = datetime.now()
     duracion = (fin_total - inicio_total).total_seconds()
-    
+
     print("\n" + "="*70)
     print("📊 RESUMEN DE EJECUCIÓN")
     print("="*70)
     print(f"\n✅ Exitosos ({len(exitos)}):")
-    
+
     if fallos:
         print(f"\n❌ Fallidos ({len(fallos)}):")
-    
+
     print(f"\n⏱️  Duración total: {duracion:.2f} segundos")
     print(f"🏁 Fin: {fin_total.strftime('%Y-%m-%d %H:%M:%S')}\n")
-    
+
     # Exit code
     sys.exit(0 if not fallos else 1)
 
 if __name__ == '__main__':
     main()
-```
 
-**Uso:**
+```text
+
+## Uso:
 
 ```bash
+
 # Cargar marzo 2026 (costos) + año 2026 (comprobantes)
 
 # Cargar múltiples meses
@@ -1181,11 +1274,12 @@ if __name__ == '__main__':
 # Carga completa (todos los períodos)
 
 # Solo hechos (skip catálogos)
-```
 
+```text
 ---
 
 ```python
+
 """
 Carga Incremental MENSUAL de PRODUCCION.costos
 Estrategia: DELETE por período + INSERT
@@ -1198,6 +1292,7 @@ from pathlib import Path
 import sys
 
 # Agregar ruta de utils
+
 sys.path.append(str(Path(__file__).parent.parent / 'utils'))
 from auditoria_incremental import (
     registrar_inicio_periodo,
@@ -1209,36 +1304,37 @@ from conexion import get_connection
 from validaciones import validar_schema_costos
 
 # Constantes
+
 ARCHIVO_COSTOS = Path(r'C:\DW_GrupoPOSE_B52\01_input_raw\BaseCostosPOSE_B52.xlsx')
 BATCH_SIZE = 5000
 
 def leer_datos_costos(archivo_path):
     """Lee  y normaliza datos de costos"""
     print(f"📂 Leyendo archivo: {archivo_path}")
-    
+
     try:
         df = pd.read_excel(archivo_path, engine='openpyxl')
         print(f"✅ Leídos {len(df)} registros del Excel")
-        
+
         # Normalizar columnas
         df.columns = df.columns.str.upper().str.strip()
-        
+
         # Convertir fechas
         df['FECHA'] = pd.to_datetime(df['FECHA'], errors='coerce')
-        
+
         # Agregar columnas de particionamiento
         df['anio_dato'] = df['FECHA'].dt.year
         df['mes_dato'] = df['FECHA'].dt.month
         df['periodo_codigo'] = df['FECHA'].dt.strftime('%Y%m')
-        
+
         # Validar schema
         df_valido = validar_schema_costos(df)
-        
+
         print(f"✅ {len(df_valido)} registros válidos")
         print(f"   Períodos únicos: {df_valido['periodo_codigo'].nunique()}")
-        
+
         return df_valido
-        
+
     except Exception as e:
         print(f"❌ Error leyendo archivo: {e}")
         raise
@@ -1246,57 +1342,57 @@ def leer_datos_costos(archivo_path):
 def borrar_periodo(conn, anio, mes):
     """Borra datos del período especificado (DELETE incremental)"""
     print(f"\n🗑️  Borrando período: {anio:04d}-{mes:02d}")
-    
+
     cursor = conn.cursor()
-    
+
     # Contar registros antes de borrar
     query_count = """
-        SELECT COUNT(*) 
-        FROM PRODUCCION.costos 
+        SELECT COUNT(*)
+        FROM PRODUCCION.costos
         WHERE anio_dato = ? AND mes_dato = ?
     """
     cursor.execute(query_count, anio, mes)
     registros_previos = cursor.fetchone()[0]
-    
+
     if registros_previos > 0:
         print(f"   ⚠️  Encontrados {registros_previos} registros existentes")
-        
+
         # Borrar período
         query_delete = """
-            DELETE FROM PRODUCCION.costos 
+            DELETE FROM PRODUCCION.costos
             WHERE anio_dato = ? AND mes_dato = ?
         """
         cursor.execute(query_delete, anio, mes)
         conn.commit()
-        
+
         print(f"   ✅ Borrados {registros_previos} registros")
     else:
         print(f"   ℹ️  Período vacío (carga inicial)")
-    
+
     return registros_previos
 
 def insertar_datos_batch(conn, df, anio, mes, id_log_carga):
     """Inserta datos en batches con auditoría"""
     print(f"\n💾 Insertando datos del período {anio:04d}-{mes:02d}")
-    
+
     # Filtrar por período
     df_periodo = df[(df['anio_dato'] == anio) & (df['mes_dato'] == mes)].copy()
-    
+
     if len(df_periodo) == 0:
         print(f"   ⚠️  Sin datos para período {anio:04d}-{mes:02d}")
         return 0
-    
+
     print(f"   📊 Registros a insertar: {len(df_periodo)}")
-    
+
     # Agregar metadata de auditoría
     df_periodo['id_log_carga'] = id_log_carga
     df_periodo['fecha_carga'] = datetime.now()
     df_periodo['usuario_carga'] = USUARIO_CARGA
-    
+
     # Inserción por batches
     cursor = conn.cursor()
     total_insertados = 0
-    
+
     query = """
         INSERT INTO PRODUCCION.costos (
             id_log_carga, obra_pronto, fecha, importe, tipo_cambio, importe_usd,
@@ -1311,7 +1407,7 @@ def insertar_datos_batch(conn, df, anio, mes, id_log_carga):
 
         for i in range(0, len(df_periodo), BATCH_SIZE):
             batch = df_periodo.iloc[i:i+BATCH_SIZE]
-            
+
             for _, row in batch.iterrows():
                 cursor.execute(query,
                     id_log_carga, row.get('OBRA_PRONTO'), row.get('FECHA'),
@@ -1325,7 +1421,7 @@ def insertar_datos_batch(conn, df, anio, mes, id_log_carga):
         conn.commit()
         total_insertados += len(batch)
         print(f"   ⏳ Progreso: {total_insertados}/{len(df_periodo)} ({100*total_insertados/len(df_periodo):.1f}%)")
-    
+
     print(f"   ✅ Insertados {total_insertados} registros")
     return total_insertados
 
@@ -1334,9 +1430,9 @@ def cargar_periodo(conn, df, anio, mes, skip_if_processed=True):
     print(f"\n{'='*70}")
     print(f"📅 CARGANDO PERÍODO: {anio:04d}-{mes:02d}")
     print(f"{'='*70}")
-    
+
     periodo_codigo = f"{anio:04d}{mes:02d}"
-    
+
     # Verificar si ya fue procesado
     if skip_if_processed:
         ya_procesado, id_periodo_anterior = verificar_procesado_periodo(
@@ -1345,15 +1441,15 @@ def cargar_periodo(conn, df, anio, mes, skip_if_processed=True):
         if ya_procesado:
             print(f"⚠️  Período ya procesado (id_periodo #{id_periodo_anterior})")
             return
-    
+
     # Medidor de rendimiento
     medidor = MedidorRendimiento(f'costos_{periodo_codigo}')
     medidor.iniciar()
-    
+
     try:
         # Registrar inicio en auditoría
         id_log_carga, id_periodo_carga = registrar_inicio_periodo(
-            conn, 
+            conn,
             tabla='PRODUCCION.costos',
             tipo_particion='MENSUAL',
             anio=anio,
@@ -1361,18 +1457,18 @@ def cargar_periodo(conn, df, anio, mes, skip_if_processed=True):
             periodo_codigo=periodo_codigo,
             usuario=USUARIO_CARGA
         )
-        
+
         print(f"📝 ID Log Carga: {id_log_carga}")
         print(f"📝 ID Período Carga: {id_periodo_carga}")
-        
+
         # DELETE incremental
         medidor.marcar_fase('DELETE')
         registros_borrados = borrar_periodo(conn, anio, mes)
-        
+
         # INSERT por batches
         medidor.marcar_fase('INSERT')
         registros_insertados = insertar_datos_batch(conn, df, anio, mes, id_log_carga)
-        
+
         # Registrar fin exitoso
         medidor.finalizar()
         registrar_fin_periodo(
@@ -1385,10 +1481,10 @@ def cargar_periodo(conn, df, anio, mes, skip_if_processed=True):
             estado='EXITOSO',
             observaciones=f'Carga mensual exitosa. Velocidad: {medidor.velocidad_registros_seg:.2f} reg/seg'
         )
-        
+
         print(f"\n✅ PERÍODO {periodo_codigo} CARGADO EXITOSAMENTE")
         medidor.imprimir_resumen()
-        
+
     except Exception as e:
         medidor.finalizar()
         registrar_fin_periodo(
@@ -1423,53 +1519,55 @@ def main():
         help='Forzar recarga aunque ya esté procesado'
     )
     args = parser.parse_args()
-    
+
     # Leer datos
     df = leer_datos_costos(ARCHIVO_COSTOS)
-    
+
     # Conectar a BD
     conn = get_connection('DW_GrupoPOSE_B52')
-    
+
     try:
         if args.full:
             # Cargar todos los períodos
             periodos_unicos = df[['anio_dato', 'mes_dato']].drop_duplicates().sort_values(['anio_dato', 'mes_dato'])
             print(f"\n🔄 Modo FULL: {len(periodos_unicos)} períodos detectados")
-            
+
             for _, row in periodos_unicos.iterrows():
                 cargar_periodo(conn, df, int(row['anio_dato']), int(row['mes_dato']), skip_if_processed=not args.force)
-        
+
         elif args.periodos:
             # Cargar períodos específicos
             periodos_list = args.periodos.split(',')
-            
+
             for periodo_str in periodos_list:
                 periodo_str = periodo_str.strip()
                 if len(periodo_str) != 6:
                     print(f"⚠️  Formato inválido: {periodo_str} (use YYYYMM)")
                     continue
-                
+
                 anio = int(periodo_str[:4])
                 mes = int(periodo_str[4:6])
-                
+
                 cargar_periodo(conn, df, anio, mes, skip_if_processed=not args.force)
-        
+
         else:
             print("❌ Error: Debe especificar --periodos o --full")
             sys.exit(1)
-        
+
         print(f"\n🏁 PROCESO FINALIZADO")
-        
+
     finally:
         conn.close()
 
 if __name__ == '__main__':
     main()
-```
 
-**Uso:**
+```text
+
+## Uso:
 
 ```bash
+
 # Cargar marzo 2026
 
 # Cargar múltiples meses
@@ -1477,11 +1575,12 @@ if __name__ == '__main__':
 # Cargar todos los períodos
 
 # Forzar recarga (ignora idempotencia)
-```
 
+```text
 ---
 
 ```python
+
 """
 Carga Incremental ANUAL de PRODUCCION.comprobantes
 Estrategia: DELETE por año + INSERT
@@ -1509,13 +1608,13 @@ BATCH_SIZE = 3000
 def borrar_anio(conn, anio):
     """Borra datos del año especificado (DELETE incremental anual)"""
     print(f"\n🗑️  Borrando año: {anio}")
-    
+
     cursor = conn.cursor()
-    
+
     query_count = "SELECT COUNT(*) FROM PRODUCCION.comprobantes WHERE anio_dato = ?"
     cursor.execute(query_count, anio)
     registros_previos = cursor.fetchone()[0]
-    
+
     if registros_previos > 0:
         print(f"   ⚠️  Encontrados {registros_previos} registros existentes")
         query_delete = "DELETE FROM PRODUCCION.comprobantes WHERE anio_dato = ?"
@@ -1524,7 +1623,7 @@ def borrar_anio(conn, anio):
         print(f"   ✅ Borrados {registros_previos} registros")
     else:
         print(f"   ℹ️  Año vacío (carga inicial)")
-    
+
     return registros_previos
 
 def cargar_anio(conn, df, anio, skip_if_processed=True):
@@ -1532,9 +1631,9 @@ def cargar_anio(conn, df, anio, skip_if_processed=True):
     print(f"\n{'='*70}")
     print(f"📅 CARGANDO AÑO: {anio}")
     print(f"{'='*70}")
-    
+
     periodo_codigo = str(anio)
-    
+
     # Verificar procesamiento previo
     if skip_if_processed:
         ya_procesado, _ = verificar_procesado_periodo(
@@ -1543,14 +1642,14 @@ def cargar_anio(conn, df, anio, skip_if_processed=True):
         if ya_procesado:
             print(f"⚠️  Año ya procesado")
             return
-    
+
     medidor = MedidorRendimiento(f'comprobantes_{anio}')
     medidor.iniciar()
-    
+
     try:
         # Registrar inicio
         id_log_carga, id_periodo_carga = registrar_inicio_periodo(
-            conn, 
+            conn,
             tabla='PRODUCCION.comprobantes',
             tipo_particion='ANUAL',
             anio=anio,
@@ -1558,33 +1657,33 @@ def cargar_anio(conn, df, anio, skip_if_processed=True):
             periodo_codigo=periodo_codigo,
             usuario=USUARIO_CARGA
         )
-        
+
         # DELETE incremental
         medidor.marcar_fase('DELETE')
         registros_borrados = borrar_anio(conn, anio)
-        
+
         # Filtrar DataFrame por año
         df_anio = df[df['anio_dato'] == anio].copy()
-        
+
         if len(df_anio) == 0:
             print(f"⚠️  Sin datos para año {anio}")
-            registrar_fin_periodo(conn, id_log_carga, id_periodo_carga, 
-                                registros_borrados, 0, medidor.duracion_total, 
+            registrar_fin_periodo(conn, id_log_carga, id_periodo_carga,
+                                registros_borrados, 0, medidor.duracion_total,
                                 'VACIO', 'Sin datos para el año')
             return
-        
+
         print(f"📊 Registros a insertar: {len(df_anio)}")
-        
+
         # INSERT
         medidor.marcar_fase('INSERT')
         df_anio['id_log_carga'] = id_log_carga
         df_anio['fecha_carga'] = datetime.now()
         df_anio['usuario_carga'] = USUARIO_CARGA
-        
+
         # Inserción (código similar a costos pero para comprobantes)
         cursor = conn.cursor()
         total_insertados = 0
-        
+
         query = """
             INSERT INTO PRODUCCION.comprobantes (
                 id_log_carga, obra_pronto, numero_comprobante, numero_comprobante_norm,
@@ -1594,11 +1693,11 @@ def cargar_anio(conn, df, anio, skip_if_processed=True):
                 fecha_vto, tc, moneda, observacion, anio_dato
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
-        
+
         for i in range(0, len(df_anio), BATCH_SIZE):
             batch = df_anio.iloc[i:i+BATCH_SIZE]
             for _, row in batch.iterrows():
-                cursor.execute(query, 
+                cursor.execute(query,
                     id_log_carga, row.get('OBRA_PRONTO'), row.get('NRO_COMPROBANTE'),
                     row.get('NRO_COMPROBANTE_NORM'), row.get('FECHA_COMPROBANTE'),
                     row.get('COD_PROVEEDOR'), row.get('PROVEEDOR'), row.get('PROVEEDOR_NORM'),
@@ -1611,15 +1710,15 @@ def cargar_anio(conn, df, anio, skip_if_processed=True):
             conn.commit()
             total_insertados += len(batch)
             print(f"   ⏳ {total_insertados}/{len(df_anio)} ({100*total_insertados/len(df_anio):.1f}%)")
-        
+
         medidor.finalizar()
         registrar_fin_periodo(conn, id_log_carga, id_periodo_carga,
                             registros_borrados, total_insertados, medidor.duracion_total,
                             'EXITOSO', f'Velocidad: {medidor.velocidad_registros_seg:.2f} reg/seg')
-        
+
         print(f"\n✅ AÑO {anio} CARGADO EXITOSAMENTE")
         medidor.imprimir_resumen()
-        
+
     except Exception as e:
         medidor.finalizar()
         registrar_fin_periodo(conn, id_log_carga, id_periodo_carga, 0, 0,
@@ -1632,17 +1731,17 @@ def main():
     parser.add_argument('--full', action='store_true', help='Cargar todos los años disponibles')
     parser.add_argument('--force', action='store_true', help='Forzar recarga')
     args = parser.parse_args()
-    
+
     # Leer datos
     df = pd.read_excel(ARCHIVO_COMPROBANTES, engine='openpyxl')
     df.columns = df.columns.str.upper().str.strip()
     df['FECHA_COMPROBANTE'] = pd.to_datetime(df['FECHA_COMPROBANTE'], errors='coerce')
     df['anio_dato'] = df['FECHA_COMPROBANTE'].dt.year
     df = validar_schema_comprobantes(df)
-    
+
     # Conectar
     conn = get_connection('DW_GrupoPOSE_B52')
-    
+
     try:
         if args.full:
             anios_unicos = df['anio_dato'].dropna().unique()
@@ -1655,18 +1754,19 @@ def main():
         else:
             print("❌ Error: Especificar --anio o --full")
             sys.exit(1)
-        
+
         print("\n🏁 PROCESO FINALIZADO")
     finally:
         conn.close()
 
 if __name__ == '__main__':
     main()
-```
 
+```text
 ---
 
 ```python
+
 """
 Carga de CATALOGO.proveedores con estrategia UPSERT
 Mantiene histórico de proveedores activos
@@ -1685,7 +1785,7 @@ ARCHIVO_PROVEEDORES = Path(r'C:\DW_GrupoPOSE_B52\01_input_raw\Proveedores.xlsx')
 def clasificar_proveedor(row):
     """Clasificación automática por análisis de nombre/CUIT"""
     nombre = str(row.get('nombre_proveedor', '')).upper()
-    
+
     # Clasificación por keywords
     if any(x in nombre for x in ['MATERIALES', 'HIERRO', 'CEMENTO', 'LADRILLOS']):
         return 'Materiales'
@@ -1700,11 +1800,11 @@ def tipo_entidad_por_cuit(cuit):
     """Determina tipo de entidad por CUIT"""
     if pd.isna(cuit) or cuit == '':
         return 'Desconocido'
-    
+
     cuit_str = str(cuit).replace('-', '')
     if len(cuit_str) < 2:
         return 'Desconocido'
-    
+
     # Primeros dígitos del CUIT indican tipo
     prefijo = int(cuit_str[:2])
     if prefijo in [20, 23, 24, 27]:
@@ -1717,15 +1817,15 @@ def tipo_entidad_por_cuit(cuit):
 def upsert_proveedores(conn, df):
     """UPSERT: Actualiza existentes, inserta nuevos"""
     print(f"\n💾 Ejecutando UPSERT de proveedores")
-    
+
     cursor = conn.cursor()
     total_actualizados = 0
     total_insertados = 0
-    
+
     for _, row in df.iterrows():
         nombre_norm = row['nombre_proveedor_norm']
         cuit = row.get('cuit')
-        
+
         # Buscar por CUIT o nombre normalizado
         if pd.notna(cuit):
             query_buscar = "SELECT id_proveedor FROM CATALOGO.proveedores WHERE cuit = ?"
@@ -1733,19 +1833,19 @@ def upsert_proveedores(conn, df):
         else:
             query_buscar = "SELECT id_proveedor FROM CATALOGO.proveedores WHERE nombre_proveedor_norm = ?"
             cursor.execute(query_buscar, nombre_norm)
-        
+
         resultado = cursor.fetchone()
-        
+
         if resultado:
             # UPDATE
             id_prov = resultado[0]
             query_update = """
-                UPDATE CATALOGO.proveedores 
-                SET nombre_proveedor = ?, codigo_proveedor = ?, categoria = ?, 
+                UPDATE CATALOGO.proveedores
+                SET nombre_proveedor = ?, codigo_proveedor = ?, categoria = ?,
                     tipo_entidad = ?, fecha_modificacion = ?, activo = 1
                 WHERE id_proveedor = ?
             """
-            cursor.execute(query_update, 
+            cursor.execute(query_update,
                 row['nombre_proveedor'], row.get('codigo_proveedor'),
                 row['categoria'], row['tipo_entidad'], datetime.now(), id_prov
             )
@@ -1763,52 +1863,52 @@ def upsert_proveedores(conn, df):
                 row['categoria'], row['tipo_entidad'], datetime.now(), USUARIO_CARGA
             )
             total_insertados += 1
-    
+
     conn.commit()
     print(f"   ✅ Actualizados: {total_actualizados}")
     print(f"   ✅ Insertados: {total_insertados}")
-    
+
     return total_actualizados, total_insertados
 
 def main():
     print(f"\n{'='*70}")
     print("📦 CARGA DE PROVEEDORES (UPSERT)")
     print(f"{'='*70}\n")
-    
+
     # Leer datos
     df = pd.read_excel(ARCHIVO_PROVEEDORES, engine='openpyxl')
     df.columns = df.columns.str.upper().str.strip()
-    
+
     # Normalizar nombres
     df['nombre_proveedor_norm'] = df['NOMBRE_PROVEEDOR'].str.upper().str.strip()
-    
+
     # Clasificar automáticamente
     df['categoria'] = df.apply(clasificar_proveedor, axis=1)
     df['tipo_entidad'] = df['CUIT'].apply(tipo_entidad_por_cuit)
-    
+
     print(f"📊 Proveedores a procesar: {len(df)}")
     print(f"   Categorías: {df['categoria'].value_counts().to_dict()}")
-    
+
     # Conectar y cargar
     conn = get_connection('DW_GrupoPOSE_B52')
-    
+
     try:
-        id_log_carga = registrar_inicio(conn, 'CATALOGO.proveedores', 
+        id_log_carga = registrar_inicio(conn, 'CATALOGO.proveedores',
                                        str(ARCHIVO_PROVEEDORES), USUARIO_CARGA)
-        
+
         actualizados, insertados = upsert_proveedores(conn, df)
-        
+
         registrar_fin(conn, id_log_carga, len(df), insertados, 0, 'EXITOSO',
                      f'Actualizados: {actualizados}, Insertados: {insertados}')
-        
+
         print(f"\n✅ PROCESO COMPLETADO")
     finally:
         conn.close()
 
 if __name__ == '__main__':
     main()
-```
 
+```text
 ---
 
 ### Fase 4: Sistema ML Observability (Semana 5)
@@ -1816,8 +1916,10 @@ if __name__ == '__main__':
 **Objetivo:** Implementar detección automática de anomalías y generación de alertas
 
 ```python
+
 """
 Calcula features de ML Observability post-carga
+
 - Z-scores por obra/proveedor
 - Percentiles de importes
 - Detección de outliers estadísticos
@@ -1834,7 +1936,7 @@ from conexion import get_connection
 def calcular_z_scores(conn):
     """Calcula Z-scores de importes por obra"""
     print("\n📊 Calculando Z-scores por obra...")
-    
+
     # Leer datos recientes
     query = """
         SELECT id_costo, obra_pronto, importe, fecha,
@@ -1844,31 +1946,31 @@ def calcular_z_scores(conn):
     """
     df = pd.read_sql(query, conn)
     print(f"   Registros a procesar: {len(df)}")
-    
+
     if len(df) == 0:
         print("   ℹ️  Sin registros pendientes")
         return 0
-    
+
     # Calcular media y desv. estándar por obra
     stats = df.groupby('obra_pronto')['importe'].agg(['mean', 'std']).reset_index()
     stats.columns = ['obra_pronto', 'media', 'std']
-    
+
     # Merge con datos originales
     df = df.merge(stats, on='obra_pronto', how='left')
-    
+
     # Calcular Z-score
     df['z_score'] = np.where(
         df['std'] > 0,
         (df['importe'] - df['media']) / df['std'],
         0
     )
-    
+
     # Marcar outliers (|z| > 3)
     df['es_outlier'] = df['z_score'].abs() > 3
-    
+
     # Percentil dentro de la obra
     df['percentil'] = df.groupby('obra_pronto')['importe'].rank(pct=True) * 100
-    
+
     # Categorizar riesgo
     def categorizar_riesgo(z_score):
         abs_z = abs(z_score)
@@ -1880,18 +1982,18 @@ def calcular_z_scores(conn):
             return 'HIGH'
         else:
             return 'CRITICAL'
-    
+
     df['categoria_riesgo'] = df['z_score'].apply(categorizar_riesgo)
-    
+
     # Actualizar BD
     cursor = conn.cursor()
     query_update = """
         UPDATE PRODUCCION.costos
-        SET z_score_importe = ?, percentil_importe = ?, 
+        SET z_score_importe = ?, percentil_importe = ?,
             es_outlier_estadistico = ?, categoria_riesgo = ?
         WHERE id_costo = ?
     """
-    
+
     registros_actualizados = 0
     for _, row in df.iterrows():
         cursor.execute(query_update,
@@ -1899,38 +2001,39 @@ def calcular_z_scores(conn):
             bool(row['es_outlier']), row['categoria_riesgo'], int(row['id_costo'])
         )
         registros_actualizados += 1
-        
+
         if registros_actualizados % 1000 == 0:
             conn.commit()
             print(f"   ⏳ Actualizados: {registros_actualizados}/{len(df)}")
-    
+
     conn.commit()
     print(f"   ✅ Calculados Z-scores: {registros_actualizados} registros")
     print(f"   ⚠️  Outliers detectados: {df['es_outlier'].sum()}")
-    
+
     return registros_actualizados
 
 def main():
     print(f"\n{'='*70}")
     print("🤖 CÁLCULO DE FEATURES ML OBSERVABILITY")
     print(f"{'='*70}\n")
-    
+
     conn = get_connection('DW_GrupoPOSE_B52')
-    
+
     try:
         total_procesados = calcular_z_scores(conn)
-        
+
         print(f"\n✅ PROCESO COMPLETADO: {total_procesados} features calculadas")
     finally:
         conn.close()
 
 if __name__ == '__main__':
     main()
-```
 
+```text
 ---
 
 ```python
+
 """
 Sistema de Alertas ML Observability
 Detecta y registra anomalías automáticamente
@@ -1943,18 +2046,18 @@ import sys
 sys.path.append(str(Path(__file__).parent.parent / 'utils'))
 from conexion import get_connection
 
-def generar_alerta(conn, tipo_alerta, severidad, tabla_origen, id_registro, 
+def generar_alerta(conn, tipo_alerta, severidad, tabla_origen, id_registro,
                    descripcion, valor_detectado, valor_esperado):
     """Inserta alerta en ML.historial_alertas"""
     cursor = conn.cursor()
-    
+
     query = """
         INSERT INTO ML.historial_alertas (
             tipo_alerta, severidad, tabla_origen, id_registro_origen,
             descripcion, valor_detectado, valor_esperado, accion_tomada, estado
         ) VALUES (?, ?, ?, ?, ?, ?, ?, 'AUTO_FLAG', 'ACTIVA')
     """
-    
+
     cursor.execute(query, tipo_alerta, severidad, tabla_origen, id_registro,
                   descripcion, valor_detectado, valor_esperado)
     conn.commit()
@@ -1962,37 +2065,37 @@ def generar_alerta(conn, tipo_alerta, severidad, tabla_origen, id_registro,
 def detectar_outliers_criticos(conn):
     """Alerta por outliers con |z-score| > 3"""
     print("\n⚠️  Detectando outliers críticos...")
-    
+
     query = """
         SELECT id_costo, obra_pronto, importe, z_score_importe, categoria_riesgo
         FROM PRODUCCION.costos
         WHERE categoria_riesgo = 'CRITICAL'
           AND fecha_carga > DATEADD(DAY, -1, GETDATE())
-          AND id_costo NOT IN (SELECT id_registro_origen FROM ML.historial_alertas 
+          AND id_costo NOT IN (SELECT id_registro_origen FROM ML.historial_alertas
                                 WHERE tipo_alerta = 'OUTLIER_CRITICO' AND estado = 'ACTIVA')
     """
     df = pd.read_sql(query, conn)
-    
+
     if len(df) == 0:
         print("   ℹ️  Sin outliers nuevos")
         return 0
-    
+
     print(f"   🚨 Outliers críticos detectados: {len(df)}")
-    
+
     for _, row in df.iterrows():
         generar_alerta(
             conn, 'OUTLIER_CRITICO', 'CRITICAL', 'PRODUCCION.costos', int(row['id_costo']),
             f"Costo anómalo en obra {row['obra_pronto']}: ${row['importe']:,.2f} (Z-score: {row['z_score_importe']:.2f})",
             f"${row['importe']:,.2f}", "Rangovalor típico"
         )
-    
+
     print(f"   ✅ Generadas {len(df)} alertas críticas")
     return len(df)
 
 def detectar_proveedores_nuevos_alto_monto(conn):
     """Alerta por proveedores nuevos con primera factura > $1M"""
     print("\n🆕 Detectando proveedores nuevos con alto monto...")
-    
+
     query = """
         SELECT p.id_proveedor, p.nombre_proveedor, c.importe, c.id_costo
         FROM CATALOGO.proveedores p
@@ -2006,20 +2109,20 @@ def detectar_proveedores_nuevos_alto_monto(conn):
           AND c.max_importe > 1000000
     """
     df = pd.read_sql(query, conn)
-    
+
     if len(df) == 0:
         print("   ℹ️  Sin proveedores nuevos de alto monto")
         return 0
-    
+
     print(f"   🚨 Proveedores nuevos detectados: {len(df)}")
-    
+
     for _, row in df.iterrows():
         generar_alerta(
             conn, 'PROVEEDOR_NUEVO_ALTO_MONTO', 'WARNING', 'PRODUCCION.costos', int(row['id_costo']),
             f"Proveedor nuevo '{row['nombre_proveedor']}' con primera factura de ${row['importe']:,.2f}",
             f"${row['importe']:,.2f}", "< $1,000,000"
         )
-    
+
     print(f"   ✅ Generadas {len(df)} alertas de proveedores")
     return len(df)
 
@@ -2027,28 +2130,29 @@ def main():
     print(f"\n{'='*70}")
     print("🚨 GENERACIÓN DE ALERTAS ML OBSERVABILITY")
     print(f"{'='*70}\n")
-    
+
     conn = get_connection('DW_GrupoPOSE_B52')
-    
+
     try:
         alertas_outliers = detectar_outliers_criticos(conn)
         alertas_proveedores = detectar_proveedores_nuevos_alto_monto(conn)
-        
+
         total_alertas = alertas_outliers + alertas_proveedores
-        
+
         print(f"\n✅ PROCESO COMPLETADO: {total_alertas} alertas generadas")
     finally:
         conn.close()
 
 if __name__ == '__main__':
     main()
-```
 
+```text
 ---
 
 ### Fase 5: Utilidades y Validaciones (Semana 6)
 
 ```python
+
 """
 Utilidades para auditoría de cargas incrementales B52
 """
@@ -2058,15 +2162,15 @@ from datetime import datetime
 def verificar_procesado_periodo(conn, tabla_destino, periodo_codigo):
     """Verifica si un período ya fue procesado exitosamente"""
     cursor = conn.cursor()
-    
+
     query = """
-        SELECT id_periodo_carga 
+        SELECT id_periodo_carga
         FROM AUDITORIA.periodos_carga
         WHERE tabla_destino = ? AND periodo_codigo = ? AND estado = 'EXITOSO'
     """
     cursor.execute(query, tabla_destino, periodo_codigo)
     resultado = cursor.fetchone()
-    
+
     if resultado:
         return True, resultado[0]
     return False, None
@@ -2074,7 +2178,7 @@ def verificar_procesado_periodo(conn, tabla_destino, periodo_codigo):
 def registrar_inicio_periodo(conn, tabla, tipo_particion, anio, mes, periodo_codigo, usuario):
     """Registra inicio de carga de período"""
     cursor = conn.cursor()
-    
+
     # Registro en log_cargas (herencia A2)
     query_log = """
         INSERT INTO AUDITORIA.log_cargas (tabla_destino, archivo_origen, usuario_carga, estado)
@@ -2083,11 +2187,11 @@ def registrar_inicio_periodo(conn, tabla, tipo_particion, anio, mes, periodo_cod
     """
     cursor.execute(query_log, tabla, f'INCREMENTAL_{periodo_codigo}', usuario)
     id_log_carga = cursor.fetchone()[0]
-    
+
     # Registro en periodos_carga (nuevo B52)
     query_periodo = """
         INSERT INTO AUDITORIA.periodos_carga (
-            tabla_destino, tipo_particion, anio, mes, periodo_codigo, 
+            tabla_destino, tipo_particion, anio, mes, periodo_codigo,
             estado, usuario_carga
         )
         OUTPUT INSERTED.id_periodo_carga
@@ -2095,7 +2199,7 @@ def registrar_inicio_periodo(conn, tabla, tipo_particion, anio, mes, periodo_cod
     """
     cursor.execute(query_periodo, tabla, tipo_particion, anio, mes, periodo_codigo, usuario)
     id_periodo_carga = cursor.fetchone()[0]
-    
+
     conn.commit()
     return id_log_carga, id_periodo_carga
 
@@ -2103,9 +2207,9 @@ def registrar_fin_periodo(conn, id_log_carga, id_periodo_carga, registros_borrad
                          registros_insertados, duracion_segundos, estado, observaciones):
     """Registra finalización de carga de período"""
     cursor = conn.cursor()
-    
+
     velocidad = registros_insertados / duracion_segundos if duracion_segundos > 0 else 0
-    
+
     # Actualizar log_cargas
     query_log = """
         UPDATE AUDITORIA.log_cargas
@@ -2113,7 +2217,7 @@ def registrar_fin_periodo(conn, id_log_carga, id_periodo_carga, registros_borrad
         WHERE id_log_carga = ?
     """
     cursor.execute(query_log, registros_insertados, estado, observaciones, id_log_carga)
-    
+
     # Actualizar periodos_carga
     query_periodo = """
         UPDATE AUDITORIA.periodos_carga
@@ -2125,13 +2229,14 @@ def registrar_fin_periodo(conn, id_log_carga, id_periodo_carga, registros_borrad
     cursor.execute(query_periodo, registros_borrados, registros_insertados,
                   datetime.now(), duracion_segundos, velocidad, estado,
                   observaciones, id_periodo_carga)
-    
-    conn.commit()
-```
 
+    conn.commit()
+
+```text
 ---
 
 ```python
+
 """
 Medidor de rendimiento para monitorear tiempos y velocidad de carga
 """
@@ -2147,22 +2252,22 @@ class MedidorRendimiento:
         self.fases = {}
         self.fase_actual = None
         self.proceso = psutil.Process(os.getpid())
-    
+
     def iniciar(self):
         """Inicia medición"""
         self.tiempo_inicio = datetime.now()
         print(f"⏱️  Iniciando medición: {self.nombre_proceso}")
-    
+
     def marcar_fase(self, nombre_fase):
         """Marca inicio de una nueva fase"""
         ahora = datetime.now()
-        
+
         if self.fase_actual:
             # Finalizar fase anterior
             duracion = (ahora - self.fases[self.fase_actual]['inicio']).total_seconds()
             self.fases[self.fase_actual]['fin'] = ahora
             self.fases[self.fase_actual]['duracion'] = duracion
-        
+
         # Iniciar nueva fase
         self.fase_actual = nombre_fase
         self.fases[nombre_fase] = {
@@ -2171,43 +2276,43 @@ class MedidorRendimiento:
             'duracion': None
         }
         print(f"   ▶️  Fase: {nombre_fase}")
-    
+
     def finalizar(self):
         """Finaliza medición"""
         self.tiempo_fin = datetime.now()
-        
+
         if self.fase_actual:
             duracion = (self.tiempo_fin - self.fases[self.fase_actual]['inicio']).total_seconds()
             self.fases[self.fase_actual]['fin'] = self.tiempo_fin
             self.fases[self.fase_actual]['duracion'] = duracion
-    
+
     @property
     def duracion_total(self):
         """Duración total en segundos"""
         if self.tiempo_fin and self.tiempo_inicio:
             return (self.tiempo_fin - self.tiempo_inicio).total_seconds()
         return 0
-    
+
     @property
     def velocidad_registros_seg(self):
         """Calcula velocidad aproximada"""
         # Implementar según registros procesados
         return 0
-    
+
     def imprimir_resumen(self):
         """Imprime resumen de rendimiento"""
         print(f"\n📈 MÉTRICAS DE RENDIMIENTO: {self.nombre_proceso}")
         print(f"   Duración total: {self.duracion_total:.2f} segundos")
-        
+
         for fase, datos in self.fases.items():
             if datos['duracion']:
                 print(f"   - {fase}: {datos['duracion']:.2f}s")
-        
+
         # Memoria
         mem_info = self.proceso.memory_info()
         print(f"   Memoria: {mem_info.rss / 1024 / 1024:.2f} MB")
-```
 
+```text
 ---
 
 ### Fase 6: Testing y Validación (Semana 7)
@@ -2215,9 +2320,11 @@ class MedidorRendimiento:
 #### Test 1: Carga incremental mensual
 
 ```bash
+
 # Test básico: cargar un mes específico
 
 # Validar en BD
+
 SELECT anio_dato, mes_dato, COUNT(*) as total
 FROM PRODUCCION.costos
 GROUP BY anio_dato, mes_dato
@@ -2226,32 +2333,39 @@ ORDER BY anio_dato, mes_dato;
 # Test idempotencia: re-ejecutar mismo mes
 
 # Debe reemplazar datos, mismo count
-```
+
+```text
 
 #### Test 2: Carga incremental anual
 
 ```bash
+
 # Cargar año 2026
 
 # Validar
+
 SELECT anio_dato, COUNT(*) FROM PRODUCCION.comprobantes
 GROUP BY anio_dato;
-```
+
+```text
 
 #### Test 3: ML Observability
 
 ```bash
+
 # Calcular features ML
 
 # Verificar z-scores calculados
+
 SELECT COUNT(*) FROM PRODUCCION.costos WHERE z_score_importe IS NOT NULL;
 
 # Generar alertas
 
 # Ver alertas generadas
-SELECT * FROM ML.historial_alertas ORDER BY fecha_generacion DESC;
-```
 
+SELECT * FROM ML.historial_alertas ORDER BY fecha_generacion DESC;
+
+```text
 ---
 
 ### Fase 7: Documentación y Despliegue (Semana 8)
@@ -2261,6 +2375,7 @@ SELECT * FROM ML.historial_alertas ORDER BY fecha_generacion DESC;
 **Archivo:** `05_documentacion/Manual_Operacion_B52.md`
 
 ```markdown
+
 # Manual de Operación DW_GrupoPOSE_B52
 
 ## Carga Mensual de Costos
@@ -2272,10 +2387,11 @@ SELECT * FROM ML.historial_alertas ORDER BY fecha_generacion DESC;
 
 1. Verificar archivo actualizado en `01_input_raw/BaseCostosPOSE_B52.xlsx`
 2. Ejecutar carga del mes anterior:
+
    ```bash
    ```
 
-3. Verificar log en `00_logs/`
+1. Verificar log en `00_logs/`
 2. Consultar auditoría:
 
    ```sql
@@ -2302,7 +2418,7 @@ SELECT * FROM ML.historial_alertas ORDER BY fecha_generacion DESC;
 
 **Frecuencia:** Diaria (post-carga)
 
-### Procedimiento
+### Pasos de Monitoreo
 
 1. Calcular features ML:
 
@@ -2330,8 +2446,7 @@ En caso de fallo en B52:
 3. Corregir y re-testear
 4. Volver a B52 cuando esté estable
 
-```
-
+```text
 ---
 
 ## 5. Código SQL: Estructura Completa
@@ -2339,6 +2454,7 @@ En caso de fallo en B52:
 ### Archivo: `01_crear_estructura_B52.sql`
 
 ```sql
+
 -- ============================================================================
 -- DW_GrupoPOSE_B52 - Estructura Completa
 -- Fecha: 13 de marzo de 2026
@@ -2514,17 +2630,17 @@ CREATE TABLE CATALOGO.calendario (
 CREATE TABLE PRODUCCION.costos (
     id_costo BIGINT IDENTITY(1,1) PRIMARY KEY,
     id_log_carga BIGINT NOT NULL,
-    
+
     -- Dimensiones
     obra_pronto VARCHAR(50) NOT NULL,
       id_gerencia INT,  -- B52: Ahora la dimensionalidad cruzada Obra-Gerencia ocurre a nivel del Hecho
     fuente_id INT,
-    
+
     -- Métricas
     importe DECIMAL(18,2),
     tipo_cambio DECIMAL(10,6),
     importe_usd DECIMAL(18,2),
-    
+
     nombre_proveedor NVARCHAR(600),
     nombre_proveedor_norm NVARCHAR(600),
     id_tipo_comprobante INT, -- B52: Dimensión Tipos de Comprobantes extraída
@@ -2532,7 +2648,7 @@ CREATE TABLE PRODUCCION.costos (
     numero_comprobante_norm NVARCHAR(200),
     observacion NVARCHAR(MAX),
     detalle NVARCHAR(1000),
-    
+
     -- Clasificación
     taller_reg NVARCHAR(400),
     ut_otros NVARCHAR(400),
@@ -2540,11 +2656,11 @@ CREATE TABLE PRODUCCION.costos (
     -- compensable migrado como atributo directo de la dimensión Obras (id_compensable)
     fuente NVARCHAR(100),
     descripcion_obra NVARCHAR(600),
-    
+
     -- Particionamiento MENSUAL
     anio_dato INT NOT NULL,
     mes_dato INT NOT NULL,
-    
+
     -- ML Observability
     z_score_importe DECIMAL(10,6),
     percentil_importe INT,
@@ -2552,27 +2668,27 @@ CREATE TABLE PRODUCCION.costos (
     es_outlier_estadistico BIT DEFAULT 0,
     es_valor_inusual BIT DEFAULT 0,
     categoria_riesgo VARCHAR(20), -- 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL'
-    
+
     -- Auditoría
     archivo_origen NVARCHAR(510) NOT NULL,
     fila_excel INT,
     fecha_carga DATETIME2 DEFAULT GETDATE(),
     usuario_carga NVARCHAR(200),
-    
+
     FOREIGN KEY (obra_pronto) REFERENCES CATALOGO.obras(obra_pronto),
     FOREIGN KEY (proveedor_id) REFERENCES CATALOGO.proveedores(id_proveedor)
 );
 
 -- Índices para particionamiento mensual
-CREATE NONCLUSTERED INDEX IX_costos_particion 
+CREATE NONCLUSTERED INDEX IX_costos_particion
 ON PRODUCCION.costos (anio_dato, mes_dato, fecha)
 INCLUDE (importe, obra_pronto, proveedor_id);
 
-CREATE NONCLUSTERED INDEX IX_costos_obra 
+CREATE NONCLUSTERED INDEX IX_costos_obra
 ON PRODUCCION.costos (obra_pronto)
 INCLUDE (fecha, importe);
 
-CREATE NONCLUSTERED INDEX IX_costos_ml 
+CREATE NONCLUSTERED INDEX IX_costos_ml
 ON PRODUCCION.costos (categoria_riesgo, es_outlier_estadistico)
 WHERE categoria_riesgo IN ('HIGH', 'CRITICAL');
 
@@ -2580,12 +2696,12 @@ WHERE categoria_riesgo IN ('HIGH', 'CRITICAL');
 CREATE TABLE PRODUCCION.comprobantes (
     id_comprobante BIGINT IDENTITY(1,1) PRIMARY KEY,
     id_log_carga BIGINT NOT NULL,
-    
+
     -- Dimensiones
     obra_pronto VARCHAR(50),
     fecha_comprobante DATE NOT NULL,
     proveedor_id BIGINT,
-    
+
     -- Datos
     numero_comprobante NVARCHAR(200) NOT NULL,
     numero_comprobante_norm NVARCHAR(200) NOT NULL,
@@ -2593,7 +2709,7 @@ CREATE TABLE PRODUCCION.comprobantes (
     nombre_proveedor NVARCHAR(600),
     nombre_proveedor_norm NVARCHAR(600),
     importe DECIMAL(18,2) NOT NULL,
-    
+
     -- Clasificación
     id_tipo_comprobante INT,
     proveedor_ff VARCHAR(200),
@@ -2602,28 +2718,28 @@ CREATE TABLE PRODUCCION.comprobantes (
     tc DECIMAL(10,6),
     moneda VARCHAR(10),
     observacion VARCHAR(500),
-    
+
     -- Particionamiento ANUAL
     anio_dato INT NOT NULL,
-    
+
     -- Auditoría
     archivo_origen NVARCHAR(510) NOT NULL,
     hoja_origen NVARCHAR(200),
     fila_excel INT,
     fecha_carga DATETIME2 DEFAULT GETDATE(),
     usuario_carga NVARCHAR(200),
-    
+
     FOREIGN KEY (obra_pronto) REFERENCES CATALOGO.obras(obra_pronto),
     FOREIGN KEY (proveedor_id) REFERENCES CATALOGO.proveedores(id_proveedor)
 );
 
 -- Índices para particionamiento anual
-CREATE NONCLUSTERED INDEX IX_comprobantes_particion 
+CREATE NONCLUSTERED INDEX IX_comprobantes_particion
 ON PRODUCCION.comprobantes (anio_dato, fecha_comprobante)
 INCLUDE (importe, proveedor_id);
 
 -- Restricción de unicidad
-CREATE UNIQUE INDEX UQ_comprobantes_key 
+CREATE UNIQUE INDEX UQ_comprobantes_key
 ON PRODUCCION.comprobantes (nombre_proveedor_norm, numero_comprobante_norm, fecha_comprobante, obra_pronto);
 
 -- ============================================================================
@@ -2807,8 +2923,8 @@ CREATE TABLE TEMPORAL.comprobantes_carga (
 
 PRINT '✅ Estructura DW_GrupoPOSE_B52 creada exitosamente';
 GO
-```
 
+```text
 ---
 
 ### Estructura de Módulos
@@ -2817,7 +2933,7 @@ GO
 ├── ml/                          # ML Observability
 ├── utils/                       # Utilidades compartidas
     └── ...
-```
+```text
 
 ### Convenciones de Código
 
@@ -2838,7 +2954,7 @@ GO
 
 ```text
 Post-Carga → Calcular Features → Generar Alertas → Registrar en BD
-```
+```text
 
 ### Features Calculados
 
@@ -2862,12 +2978,13 @@ Post-Carga → Calcular Features → Generar Alertas → Registrar en BD
 
 ### 8.1 Prerequisitos Técnicos
 
-**Validar ANTES de iniciar implementación:**
+## Validar ANTES de iniciar implementación:
 
 ```bash
-```
 
-**Checklist automático:**
+```text
+
+## Checklist automático:
 
 | Requisito | Versión Mínima | Comando Verificación |
 |-----------|----------------|---------------------|
@@ -2881,15 +2998,19 @@ Post-Carga → Calcular Features → Generar Alertas → Registrar en BD
 | Memoria RAM | 16 GB | `(Get-CimInstance Win32_PhysicalMemory \| Measure-Object -Property capacity -Sum).sum /1gb` |
 
 ```bash
+
 # Ejecutar en PowerShell como Administrador
+
 pip install --upgrade pandas==2.1.4 pyodbc==5.0.1 openpyxl==3.1.2 psutil==5.9.6
-```
+
+```text
 
 ### 8.2 Estructura de Directorios del Servidor
 
-**Crear estructura base:**
+## Crear estructura base:
 
 ```powershell
+
 $raiz = "C:\DW_GrupoPOSE_B52"
 
 $directorios = @(
@@ -2910,23 +3031,26 @@ foreach ($dir in $directorios) {
 }
 
 Write-Host "`n✅ Estructura de directorios creada exitosamente" -ForegroundColor Green
-```
 
-**Ejecutar:**
+```text
+
+## Ejecutar:
 
 ```powershell
-```
+
+```text
 
 ### 8.3 Archivo de Configuración Principal
 
 **Archivo:** `C:\DW_GrupoPOSE_B52\config_produccion.json`
 
 ```json
+
 {
   "version": "2.0.0",
   "ambiente": "PRODUCCION",
   "fecha_creacion": "2026-03-13",
-  
+
   "servidor_sql": {
     "host": ".\\SQLEXPRESS",
     "base_datos_B52": "DW_GrupoPOSE_B52",
@@ -2937,7 +3061,7 @@ Write-Host "`n✅ Estructura de directorios creada exitosamente" -ForegroundColo
     "usuario": "",
     "password": ""
   },
-  
+
   "rutas": {
     "raiz_proyecto": "C:/DW_GrupoPOSE_B52",
     "logs": "C:/DW_GrupoPOSE_B52/00_logs",
@@ -2945,7 +3069,7 @@ Write-Host "`n✅ Estructura de directorios creada exitosamente" -ForegroundColo
     "output": "C:/DW_GrupoPOSE_B52/03_output",
     "backups": "C:/DW_GrupoPOSE_B52/04_backups"
   },
-  
+
   "archivos_entrada": {
     "costos_B52": "C:/DW_GrupoPOSE_B52/01_input_raw/BaseCostosPOSE_B52.xlsx",
     "comprobantes_B52": "C:/DW_GrupoPOSE_B52/01_input_raw/ComprobantesPOSE_B52.xlsx",
@@ -2953,7 +3077,7 @@ Write-Host "`n✅ Estructura de directorios creada exitosamente" -ForegroundColo
     "obras": "C:/DW_GrupoPOSE_B52/01_input_raw/Obras_Gerencias.xlsx",
     "proveedores": "C:/DW_GrupoPOSE_B52/01_input_raw/Proveedores.xlsx"
   },
-  
+
   "parametros_carga": {
     "batch_size_costos": 5000,
     "batch_size_comprobantes": 3000,
@@ -2963,7 +3087,7 @@ Write-Host "`n✅ Estructura de directorios creada exitosamente" -ForegroundColo
     "habilitar_validacion_schema": true,
     "habilitar_idempotencia": true
   },
-  
+
   "ml_observability": {
     "habilitar": true,
     "umbral_z_score_critico": 3.0,
@@ -2971,7 +3095,7 @@ Write-Host "`n✅ Estructura de directorios creada exitosamente" -ForegroundColo
     "dias_inactividad_obra": 90,
     "ejecutar_post_carga": true
   },
-  
+
   "logging": {
     "nivel": "INFO",
     "formato": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -2979,7 +3103,7 @@ Write-Host "`n✅ Estructura de directorios creada exitosamente" -ForegroundColo
     "max_size_mb": 50,
     "backups_antiguos": 30
   },
-  
+
   "notificaciones": {
     "habilitar_email": false,
     "email_destino": "ops@example.com",
@@ -2987,82 +3111,93 @@ Write-Host "`n✅ Estructura de directorios creada exitosamente" -ForegroundColo
     "smtp_port": 587,
     "habilitar_log_detallado": true
   },
-  
+
   "seguridad": {
     "cifrar_credenciales": false,
     "validar_certificados_ssl": true,
     "auditoria_completa": true
   }
 }
-```
 
+```text
 ```python
+
 import json
 from pathlib import Path
 
 def validar_config():
     """Valida que config_produccion.json sea válido"""
     config_path = Path("C:/DW_GrupoPOSE_B52/config_produccion.json")
-    
+
     if not config_path.exists():
         raise FileNotFoundError(f"❌ No existe: {config_path}")
-    
+
     with open(config_path, 'r', encoding='utf-8') as f:
         config = json.load(f)
-    
+
     # Validar campos requeridos
     assert 'servidor_sql' in config, "❌ Falta sección 'servidor_sql'"
     assert 'rutas' in config, "❌ Falta sección 'rutas'"
     assert 'archivos_entrada' in config, "❌ Falta sección 'archivos_entrada'"
-    
+
     print("✅ Configuración válida")
     return config
 
 if __name__ == '__main__':
     validar_config()
-```
+
+```text
 
 ### 8.4 Variables de Entorno
 
-**Configurar en el servidor (opcional):**
+## Configurar en el servidor (opcional):
 
 ```powershell
+
 # Variables de entorno para seguridad (evita hardcodear credenciales)
-[System.Environment]::SetEnvironmentVariable('DW_B52_CONNECTION_STRING', 
-    'DRIVER={SQL Server};SERVER=.\\SQLEXPRESS;DATABASE=DW_GrupoPOSE_B52;Trusted_Connection=yes', 
+
+[System.Environment]::SetEnvironmentVariable('DW_B52_CONNECTION_STRING',
+    'DRIVER={SQL Server};SERVER=.\\SQLEXPRESS;DATABASE=DW_GrupoPOSE_B52;Trusted_Connection=yes',
     'Machine')
 
 [System.Environment]::SetEnvironmentVariable('DW_B52_LOG_LEVEL', 'INFO', 'Machine')
 
-[System.Environment]::SetEnvironmentVariable('DW_B52_CONFIG_PATH', 
-    'C:\DW_GrupoPOSE_B52\config_produccion.json', 
+[System.Environment]::SetEnvironmentVariable('DW_B52_CONFIG_PATH',
+    'C:\DW_GrupoPOSE_B52\config_produccion.json',
     'Machine')
 
 Write-Host "✅ Variables de entorno configuradas" -ForegroundColor Green
-```
 
-**Leer desde Python:**
+```text
+
+## Leer desde Python:
 
 ```python
+
 import os
 import json
 
 # Opción 1: Variable de entorno
+
 config_path = os.getenv('DW_B52_CONFIG_PATH', 'C:/DW_GrupoPOSE_B52/config_produccion.json')
 
 # Opción 2: Archivo de configuración
+
 with open(config_path, 'r', encoding='utf-8') as f:
     config = json.load(f)
 
 # Obtener connection string
+
 conn_str = config['servidor_sql']
-```
+
+```text
 
 ### 8.5 Permissions y Seguridad
 
-**Permisos del usuario SQL Server:**
+## Permisos del usuario SQL Server:
 
 ```sql
+
 -- Ejecutar como sysadmin en SQL Server
 USE master;
 GO
@@ -3085,11 +3220,13 @@ ALTER ROLE db_owner ADD MEMBER [DOMAIN\Username];  -- Solo para implementación 
 -- ALTER ROLE db_datareader ADD MEMBER [DOMAIN\Username];
 -- ALTER ROLE db_datawriter ADD MEMBER [DOMAIN\Username];
 -- GRANT EXECUTE ON SCHEMA::AUDITORIA TO [DOMAIN\Username];
-```
 
-**Permisos del filesystem:**
+```text
+
+## Permisos del filesystem:
 
 ```powershell
+
 $ruta = "C:\DW_GrupoPOSE_B52"
 $usuario = "$env:USERDOMAIN\$env:USERNAME"
 
@@ -3101,8 +3238,8 @@ $acl.SetAccessRule($regla)
 Set-Acl $ruta $acl
 
 Write-Host "✅ Permisos asignados a $usuario en $ruta" -ForegroundColor Green
-```
 
+```text
 ---
 
 ## 9. Power Query B52 - Configuración de Metadata
@@ -3117,8 +3254,8 @@ Crear consulta Power Query que **agregue las 3 columnas de metadata** necesarias
 
 ### 9.2 Ubicación del Archivo
 
-**Archivo:** `BaseCostosPOSE_B52.xlsx`  
-**Ubicación sugerida:** `C:\DW_GrupoPOSE_B52\01_input_raw\BaseCostosPOSE_B52.xlsx`  
+**Archivo:** `BaseCostosPOSE_B52.xlsx`
+**Ubicación sugerida:** `C:\DW_GrupoPOSE_B52\01_input_raw\BaseCostosPOSE_B52.xlsx`
 **Alternativa:** OneDrive si se requiere acceso compartido
 
 ### 9.3 Código Power Query Completo
@@ -3126,47 +3263,48 @@ Crear consulta Power Query que **agregue las 3 columnas de metadata** necesarias
 **Query Name:** `BaseCostosPOSE_B52_Query`
 
 ```powerquery
+
 let
     // ============================================================
     // FUENTE: BaseCostoUnificada.xlsx (generado por AutomatizacionETL)
     // ============================================================
     Origen = Excel.Workbook(
-        File.Contents("C:\Dev\ProyVS_CodeRick_2026\production\BaseCostoUnificada\BaseCostoUnificada.xlsx"), 
-        null, 
+        File.Contents("C:\Dev\ProyVS_CodeRick_2026\production\BaseCostoUnificada\BaseCostoUnificada.xlsx"),
+        null,
         true
     ),
-    
+
     // Seleccionar tabla consolidada
     Archiv_Consolidado_Final_Table = Origen{[Item="Archiv_Consolidado_Final",Kind="Table"]}[Data],
-    
+
     // ============================================================
     // TIPADO INICIAL (IDÉNTICO A PIPELINE A2)
     // ============================================================
     #"Tipo cambiado" = Table.TransformColumnTypes(
         Archiv_Consolidado_Final_Table,
         {
-            {"Name", type text}, 
-            {"ID_UNICO", type text}, 
-            {"OBRA_PRONTO", type text}, 
+            {"Name", type text},
+            {"ID_UNICO", type text},
+            {"OBRA_PRONTO", type text},
             {"FECHA", type date},               // ⚠️ CRÍTICO: debe ser tipo date
-            {"IMPORTE", type number}, 
-            {"TC", type number}, 
-            {"IMPORTE_USD", type number}, 
-            {"GERENCIA", type text}, 
-            {"FUENTE", type text}, 
-            {"PROVEEDOR", type text}, 
-            {"NRO_COMPROBANTE", type text}, 
-            {"TIPO_COMPROBANTE", type text}, 
-            {"DESCRIPCION_OBRA", type text}, 
-            {"DETALLE", type any}, 
-            {"OBSERVACION", type text}, 
-            {"RUBRO_CONTABLE", type text}, 
-            {"CUENTA_CONTABLE", type text}, 
-            {"CODIGO_CUENTA", Int64.Type}, 
+            {"IMPORTE", type number},
+            {"TC", type number},
+            {"IMPORTE_USD", type number},
+            {"GERENCIA", type text},
+            {"FUENTE", type text},
+            {"PROVEEDOR", type text},
+            {"NRO_COMPROBANTE", type text},
+            {"TIPO_COMPROBANTE", type text},
+            {"DESCRIPCION_OBRA", type text},
+            {"DETALLE", type any},
+            {"OBSERVACION", type text},
+            {"RUBRO_CONTABLE", type text},
+            {"CUENTA_CONTABLE", type text},
+            {"CODIGO_CUENTA", Int64.Type},
             {"COMPENSABLE", type text}
         }
     ),
-    
+
     // ============================================================
     // LIMPIEZA (IDÉNTICO A PIPELINE A2)
     // ============================================================
@@ -3174,48 +3312,49 @@ let
         #"Tipo cambiado",
         {"Name", "ID_UNICO"}
     ),
-    
+
     // ============================================================
     // ⭐ AGREGAR METADATOS B52 (DIFERENCIA CON A2) ⭐
     // ============================================================
-    
+
     // 1. anio_dato (INT): Año de la fecha
     #"anio_dato agregado" = Table.AddColumn(
-        #"Columnas quitadas", 
-        "anio_dato", 
-        each Date.Year([FECHA]), 
+        #"Columnas quitadas",
+        "anio_dato",
+        each Date.Year([FECHA]),
         Int64.Type
     ),
-    
+
     // 2. mes_dato (INT): Mes de la fecha (1-12)
     #"mes_dato agregado" = Table.AddColumn(
-        #"anio_dato agregado", 
-        "mes_dato", 
-        each Date.Month([FECHA]), 
+        #"anio_dato agregado",
+        "mes_dato",
+        each Date.Month([FECHA]),
         Int64.Type
     ),
-    
+
     // 3. periodo_codigo (TEXT): Concatenación "YYYYMM"
     #"periodo_codigo agregado" = Table.AddColumn(
-        #"mes_dato agregado", 
-        "periodo_codigo", 
-        each 
-            Number.ToText(Date.Year([FECHA])) & 
-            Text.PadStart(Number.ToText(Date.Month([FECHA])), 2, "0"), 
+        #"mes_dato agregado",
+        "periodo_codigo",
+        each
+            Number.ToText(Date.Year([FECHA])) &
+            Text.PadStart(Number.ToText(Date.Month([FECHA])), 2, "0"),
         type text
     ),
-    
+
     // ============================================================
     // RESULTADO FINAL: 20 columnas (17 originales + 3 metadata)
     // ============================================================
     #"Output B52" = #"periodo_codigo agregado"
 in
     #"Output B52"
-```
+
+```text
 
 ### 9.4 Columnas del Output
 
-**Total: 20 columnas**
+## Total: 20 columnas
 
 | # | Columna | Tipo | Origen |
 |---|---------|------|--------|
@@ -3242,13 +3381,14 @@ in
 
 ### 9.5 Validación del Query
 
-**En Power Query Editor:**
+## En Power Query Editor:
 
 ```powerquery
+
 // Agregar paso de validación al final
-#"Validación B52" = 
-    if List.Count(Table.ColumnNames(#"periodo_codigo agregado")) <> 20 
-    then error "❌ Error: se esperan 20 columnas, encontradas: " & 
+#"Validación B52" =
+    if List.Count(Table.ColumnNames(#"periodo_codigo agregado")) <> 20
+    then error "❌ Error: se esperan 20 columnas, encontradas: " &
                Number.ToText(List.Count(Table.ColumnNames(#"periodo_codigo agregado")))
     else if not List.Contains(Table.ColumnNames(#"periodo_codigo agregado"), "anio_dato")
     then error "❌ Error: columna 'anio_dato' no encontrada"
@@ -3257,22 +3397,25 @@ in
     else if not List.Contains(Table.ColumnNames(#"periodo_codigo agregado"), "periodo_codigo")
     then error "❌ Error: columna 'periodo_codigo' no encontrada"
     else #"periodo_codigo agregado"
-```
+
+```text
 
 ### 9.6 Refresh del Archivo Excel
 
-**Opción 1: Manual (Power Query Desktop)**
+## Opción 1: Manual (Power Query Desktop)
 
 1. Abrir `BaseCostosPOSE_B52.xlsx` en Excel
 2. Data → Refresh All
 3. Guardar y cerrar
 
-**Opción 2: Automatizado (PowerShell)**
+## Opción 2: Automatizado (PowerShell)
 
 ```powershell
+
 $excelPath = "C:\DW_GrupoPOSE_B52\01_input_raw\BaseCostosPOSE_B52.xlsx"
 
 # Abrir Excel
+
 $excel = New-Object -ComObject Excel.Application
 $excel.Visible = $false
 $excel.DisplayAlerts = $false
@@ -3280,17 +3423,17 @@ $excel.DisplayAlerts = $false
 try {
     Write-Host "📊 Abriendo: $excelPath" -ForegroundColor Cyan
     $workbook = $excel.Workbooks.Open($excelPath)
-    
+
     Write-Host "🔄 Refrescando consultas Power Query..." -ForegroundColor Cyan
     $workbook.RefreshAll()
-    
+
     # Esperar a que termine refresh
     $excel.CalculateUntilAsyncQueriesDone()
-    
+
     Write-Host "💾 Guardando cambios..." -ForegroundColor Cyan
     $workbook.Save()
     $workbook.Close()
-    
+
     Write-Host "✅ Refresh completado exitosamente" -ForegroundColor Green
 }
 catch {
@@ -3301,12 +3444,15 @@ finally {
     $excel.Quit()
     [System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel) | Out-Null
 }
-```
 
-**Opción 3: Desde Python (usando win32com)**
+```text
+
+## Opción 3: Desde Python (usando win32com)
 
 ```python
+
 # Incluido en AutomatizacionETL
+
 import win32com.client
 import time
 
@@ -3315,29 +3461,30 @@ def refresh_power_query_B52(archivo_excel):
     excel = win32com.client.Dispatch("Excel.Application")
     excel.Visible = False
     excel.DisplayAlerts = False
-    
+
     try:
         print(f"📊 Abriendo: {archivo_excel}")
         workbook = excel.Workbooks.Open(archivo_excel)
-        
+
         print("🔄 Refrescando Power Query...")
         workbook.RefreshAll()
         excel.CalculateUntilAsyncQueriesDone()
-        
+
         print("💾 Guardando...")
         workbook.Save()
         workbook.Close()
-        
+
         print("✅ Refresh completado")
         return True
-        
+
     except Exception as e:
         print(f"❌ Error: {e}")
         return False
-        
+
     finally:
         excel.Quit()
-```
+
+```text
 
 ### 9.7 Ejemplo de Datos de Salida
 
@@ -3347,31 +3494,35 @@ def refresh_power_query_B52(archivo_excel):
 | G01-001     | 2026-03-15 | 125000.50| 2026      | 3        | 202603         |
 | G02-045     | 2026-03-20 | 87500.00 | 2026      | 3        | 202603         |
 | G01-002     | 2026-04-05 | 230000.75| 2026      | 4        | 202604         |
-```
+```text
 
 ### 9.8 Troubleshooting
 
-**Error: "Columna FECHA no es tipo date"**
+## Error: "Columna FECHA no es tipo date"
 
 ```powerquery
+
 // Solución: Forzar conversión
 #"Fecha corregida" = Table.TransformColumns(
     #"Columnas quitadas",
     {{"FECHA", each Date.From(_), type date}}
 )
-```
 
-**Error: "periodo_codigo tiene valores null"**
+```text
+
+## Error: "periodo_codigo tiene valores null"
 
 ```powerquery
+
 // Solución: Filtrar nulls antes de agregar metadata
 #"Filas filtradas" = Table.SelectRows(
-    #"Columnas quitadas", 
+    #"Columnas quitadas",
     each [FECHA] <> null
 )
-```
 
-**Error: "Refresh muy lento (>10 min)"**
+```text
+
+## Error: "Refresh muy lento (>10 min)"
 
 - Verificar que BaseCostoUnificada.xlsx no tenga >500K filas
 - Considerar segmentar por período en fuente
@@ -3382,6 +3533,7 @@ def refresh_power_query_B52(archivo_excel):
 ### 10.1 Validador de Prerequisitos
 
 ```python
+
 """
 Validador de Prerequisitos para Implementación B52
 Ejecutar ANTES de iniciar Fase 1
@@ -3409,7 +3561,7 @@ def validar_librerias():
         'openpyxl': '3.0.0',
         'psutil': '5.9.0'
     }
-    
+
     for lib, version_min in librerias_requeridas.items():
         try:
             resultado = subprocess.run(
@@ -3436,7 +3588,7 @@ def validar_sql_server():
         cursor.execute("SELECT @@VERSION")
         version = cursor.fetchone()[0]
         conn.close()
-        
+
         print(f"✅ SQL Server accesible")
         print(f"   Versión: {version[:50]}...")
         return True
@@ -3451,14 +3603,14 @@ def validar_permisos_sql():
             'DRIVER={SQL Server};SERVER=.\\SQLEXPRESS;Trusted_Connection=yes'
         )
         cursor = conn.cursor()
-        
+
         # Verificar si usuario puede crear BD
         cursor.execute("""
             SELECT HAS_PERMS_BY_NAME(NULL, NULL, 'CREATE DATABASE')
         """)
         tiene_permiso = cursor.fetchone()[0]
         conn.close()
-        
+
         if tiene_permiso:
             print(f"✅ Usuario tiene permiso CREATE DATABASE")
             return True
@@ -3474,7 +3626,7 @@ def validar_espacio_disco():
     import psutil
     disk = psutil.disk_usage('C:\\')
     gb_disponibles = disk.free / (1024**3)
-    
+
     if gb_disponibles < 50:
         print(f"❌ Espacio insuficiente: {gb_disponibles:.1f} GB (se requieren 50 GB)")
         return False
@@ -3489,18 +3641,18 @@ def validar_directorios():
         "01_input_raw",
         "03_output"
     ]
-    
+
     if not raiz.exists():
         print(f"❌ Directorio raíz no existe: {raiz}")
         print(f"   Ejecutar: 01_crear_estructura_directorios.ps1")
         return False
-    
+
     for dir_rel in dirs_requeridos:
         dir_path = raiz / dir_rel
         if not dir_path.exists():
             print(f"❌ Falta directorio: {dir_path}")
             return False
-    
+
     print(f"✅ Estructura de directorios completa")
     return True
 
@@ -3508,7 +3660,7 @@ def main():
     print("\n" + "="*70)
     print("🔍 VALIDADOR DE PREREQUISITOS - DW_GrupoPOSE_B52")
     print("="*70 + "\n")
-    
+
     validaciones = [
         ("Python 3.9+", validar_python),
         ("Librerías Python", validar_librerias),
@@ -3517,17 +3669,17 @@ def main():
         ("Espacio en disco", validar_espacio_disco),
         ("Estructura directorios", validar_directorios)
     ]
-    
+
     resultados = []
     for nombre, funcion in validaciones:
         print(f"\n🔹 Validando: {nombre}")
         resultado = funcion()
         resultados.append(resultado)
-    
+
     print("\n" + "="*70)
     total = len(resultados)
     pasadas = sum(resultados)
-    
+
     if pasadas == total:
         print(f"✅ TODAS las validaciones pasaron ({pasadas}/{total})")
         print("="*70)
@@ -3541,11 +3693,13 @@ def main():
 
 if __name__ == '__main__':
     sys.exit(main())
-```
+
+```text
 
 ### 10.2 Validador Fase 1
 
 ```python
+
 """
 Valida que Fase 1 (Estructura BD) se completó correctamente
 """
@@ -3560,7 +3714,7 @@ def validar_base_datos_existe():
         cursor.execute("SELECT name FROM sys.databases WHERE name = 'DW_GrupoPOSE_B52'")
         resultado = cursor.fetchone()
         conn.close()
-        
+
         if resultado:
             print("✅ Base de datos DW_GrupoPOSE_B52 existe")
             return True
@@ -3578,13 +3732,13 @@ def validar_esquemas():
             'DRIVER={SQL Server};SERVER=.\\SQLEXPRESS;DATABASE=DW_GrupoPOSE_B52;Trusted_Connection=yes'
         )
         cursor = cursor.execute("""
-            SELECT name FROM sys.schemas 
+            SELECT name FROM sys.schemas
             WHERE name IN ('CATALOGO','PRODUCCION','AUDITORIA','ML','TEMPORAL')
             ORDER BY name
         """)
         esquemas = [row[0] for row in cursor.fetchall()]
         conn.close()
-        
+
         esperados = ['AUDITORIA', 'CATALOGO', 'ML', 'PRODUCCION', 'TEMPORAL']
         if esquemas == esperados:
             print(f"✅ {len(esquemas)} esquemas creados: {', '.join(esquemas)}")
@@ -3610,13 +3764,13 @@ def validar_tablas_criticas():
         'AUDITORIA.periodos_carga',
         'ML.historial_alertas'
     ]
-    
+
     try:
         conn = pyodbc.connect(
             'DRIVER={SQL Server};SERVER=.\\SQLEXPRESS;DATABASE=DW_GrupoPOSE_B52;Trusted_Connection=yes'
         )
         cursor = conn.cursor()
-        
+
         for tabla in tablas_criticas:
             schema, nombre = tabla.split('.')
             cursor.execute(f"""
@@ -3625,16 +3779,16 @@ def validar_tablas_criticas():
                 WHERE s.name = '{schema}' AND t.name = '{nombre}'
             """)
             existe = cursor.fetchone()[0] > 0
-            
+
             if not existe:
                 print(f"❌ Tabla faltante: {tabla}")
                 conn.close()
                 return False
-        
+
         conn.close()
         print(f"✅ {len(tablas_criticas)} tablas críticas creadas")
         return True
-        
+
     except Exception as e:
         print(f"❌ Error verificando tablas: {e}")
         return False
@@ -3650,12 +3804,12 @@ def validar_indices():
             SELECT COUNT(*) FROM sys.indexes i
             JOIN sys.tables t ON i.object_id = t.object_id
             JOIN sys.schemas s ON t.schema_id = s.schema_id
-            WHERE s.name = 'PRODUCCION' AND t.name = 'costos' 
+            WHERE s.name = 'PRODUCCION' AND t.name = 'costos'
               AND i.name = 'IX_costos_particion'
         """)
         tiene_indice_particion = cursor.fetchone()[0] > 0
         conn.close()
-        
+
         if tiene_indice_particion:
             print("✅ Índice IX_costos_particion creado")
             return True
@@ -3670,16 +3824,16 @@ def main():
     print("\n" + "="*70)
     print("🔍 VALIDACIÓN FASE 1 - Estructura de Base de Datos")
     print("="*70 + "\n")
-    
+
     validaciones = [
         validar_base_datos_existe,
         validar_esquemas,
         validar_tablas_criticas,
         validar_indices
     ]
-    
+
     resultados = [val() for val in validaciones]
-    
+
     print("\n" + "="*70)
     if all(resultados):
         print(f"✅ Fase 1 VALIDADA: {sum(resultados)}/{len(resultados)} checks pasados")
@@ -3692,8 +3846,8 @@ def main():
 
 if __name__ == '__main__':
     sys.exit(main())
-```
 
+```text
 ---
 
 ## 11. Procedimientos de Rollback y Recuperación
@@ -3703,8 +3857,11 @@ if __name__ == '__main__':
 **Situación:** B52 falla completamente, necesitas volver a operar con A2.
 
 ```powershell
+
 # ============================================================================
+
 # ROLLBACK COMPLETO: Restaurar Operación en A2
+
 # ============================================================================
 
 Write-Host "`n============================================================" -ForegroundColor Yellow
@@ -3712,6 +3869,7 @@ Write-Host "🔄 INICIANDO ROLLBACK COMPLETO A DW_GrupoPOSE_A2" -ForegroundColor
 Write-Host "============================================================`n" -ForegroundColor Yellow
 
 # 1. Verificar que A2 está operativa
+
 Write-Host "📋 Paso 1: Verificando estado de A2..." -ForegroundColor Cyan
 $queryTest = "SELECT COUNT(*) FROM PRODUCCION.costos"
 $resultadoA2 = sqlcmd -S ".\SQLEXPRESS" -d "DW_GrupoPOSE_A2" -Q $queryTest -h -1
@@ -3725,11 +3883,12 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "✅ A2 está operativa: $resultadoA2 registros en costos" -ForegroundColor Green
 
 # 2. Crear backup de B52 (por si se necesita investigar)
+
 Write-Host "`n📋 Paso 2: Creando backup de B52..." -ForegroundColor Cyan
 $backupPath = "C:\DW_GrupoPOSE_B52\04_backups\DW_GrupoPOSE_B52_ROLLBACK_$(Get-Date -Format 'yyyyMMdd_HHmmss').bak"
 
 $backupQuery = @"
-BACKUP DATABASE [DW_GrupoPOSE_B52] 
+BACKUP DATABASE [DW_GrupoPOSE_B52]
 TO DISK = '$backupPath'
 WITH FORMAT, INIT, SKIP, NOREWIND, NOUNLOAD, STATS = 10;
 "@
@@ -3743,9 +3902,11 @@ if ($LASTEXITCODE -eq 0) {
 }
 
 # 3. Apuntar aplicaciones/reportes a A2 (actualizar connection strings)
+
 Write-Host "`n📋 Paso 3: Redirigiendo conexiones a A2..." -ForegroundColor Cyan
 
 # Actualizar archivo de configuración (si existe)
+
 $configPath = "C:\DW_GrupoPOSE_B52\config_produccion.json"
 if (Test-Path $configPath) {
     $config = Get-Content $configPath | ConvertFrom-Json
@@ -3753,7 +3914,7 @@ if (Test-Path $configPath) {
     $config.servidor_sql.usar_B52 = $false
     $config.servidor_sql.rollback_activado = $true
     $config | ConvertTo-Json -Depth 10 | Set-Content $configPath
-    
+
     Write-Host "✅ Configuración actualizada para usar A2" -ForegroundColor Green
 } else {
     Write-Host "⚠️  Archivo configuración no encontrado: $configPath" -ForegroundColor Yellow
@@ -3764,11 +3925,12 @@ if (Test-Path $configPath) {
 }
 
 # 5. Registrar rollback en log
+
 Write-Host "`n📋 Paso 5: Registrando rollback en auditoría..." -ForegroundColor Cyan
 $logEntry = @"
-INSERT INTO AUDITORIA.log_cargas 
-(tabla_destino, archivo_origen, estado, observaciones, fecha_carga) 
-VALUES 
+INSERT INTO AUDITORIA.log_cargas
+(tabla_destino, archivo_origen, estado, observaciones, fecha_carga)
+VALUES
 ('ROLLBACK_A2', 'OPERACION_MANUAL', 'ROLLBACK_EJECUTADO',
  'Rollback completo a A2 ejecutado desde PowerShell. B52 deshabilitado.',
  GETDATE());
@@ -3777,6 +3939,7 @@ VALUES
 sqlcmd -S ".\SQLEXPRESS" -d "DW_GrupoPOSE_A2" -Q $logEntry
 
 # 6. Resumen final
+
 Write-Host "`n============================================================" -ForegroundColor Green
 Write-Host "✅ ROLLBACK COMPLETADO EXITOSAMENTE" -ForegroundColor Green
 Write-Host "============================================================`n" -ForegroundColor Green
@@ -3790,13 +3953,15 @@ Write-Host "  3. Re-testear B52 en ambiente de prueba" -ForegroundColor White
 Write-Host "  4. Cuando esté estable, ejecutar restauración a B52`n" -ForegroundColor White
 
 exit 0
-```
+
+```text
 
 ### 11.2 Rollback Parcial (Solo Período Específico)
 
 **Situación:** Una carga incremental específica falló, necesitas revertir solo ese período.
 
 ```python
+
 """
 Rollback de período específico en B52
 """
@@ -3810,75 +3975,75 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 def rollback_costos_periodo(conn, anio, mes, periodo_codigo):
     """Rollback de período mensual en PRODUCCION.costos"""
     cursor = conn.cursor()
-    
+
     # 1. Verificar si El período existe
     cursor.execute("""
-        SELECT COUNT(*) FROM PRODUCCION.costos 
+        SELECT COUNT(*) FROM PRODUCCION.costos
         WHERE anio_dato = ? AND mes_dato = ?
     """, (anio, mes))
     count_actual = cursor.fetchone()[0]
-    
+
     if count_actual == 0:
         logging.warning(f"⚠️  Período {periodo_codigo} ya está vacío (0 registros)")
         return 0
-    
+
     logging.info(f"📊 Período {periodo_codigo} tiene {count_actual:,} registros")
-    
+
     # 2. Borrar registros del período
     logging.info(f"🗑️  Borrando registros de {periodo_codigo}...")
     cursor.execute("""
-        DELETE FROM PRODUCCION.costos 
+        DELETE FROM PRODUCCION.costos
         WHERE anio_dato = ? AND mes_dato = ?
     """, (anio, mes))
-    
+
     registros_borrados = cursor.rowcount
-    
+
     # 3. Registrar rollback en auditoría
     cursor.execute("""
-        INSERT INTO AUDITORIA.periodos_carga 
-        (tabla_destino, tipo_particion, anio, mes, periodo_codigo, 
+        INSERT INTO AUDITORIA.periodos_carga
+        (tabla_destino, tipo_particion, anio, mes, periodo_codigo,
          registros_borrados, registros_insertados, estado, observaciones, usuario_carga)
-        VALUES 
+        VALUES
         (?, ?, ?, ?, ?, ?, 0, 'ROLLBACK_MANUAL', ?, ?)
-    """, ('PRODUCCION.costos', 'MENSUAL', anio, mes, periodo_codigo, 
-    
+    """, ('PRODUCCION.costos', 'MENSUAL', anio, mes, periodo_codigo,
+
     conn.commit()
-    
+
     logging.info(f"✅ Rollback completado: {registros_borrados:,} registros borrados")
     return registros_borrados
 
 def rollback_comprobantes_anio(conn, anio):
     """Rollback de año completo en PRODUCCION.comprobantes"""
     cursor = conn.cursor()
-    
+
     cursor.execute("""
         SELECT COUNT(*) FROM PRODUCCION.comprobantes WHERE anio_dato = ?
     """, (anio,))
     count_actual = cursor.fetchone()[0]
-    
+
     if count_actual == 0:
         logging.warning(f"⚠️  Año {anio} ya está vacío (0 registros)")
         return 0
-    
+
     logging.info(f"📊 Año {anio} tiene {count_actual:,} registros")
     logging.info(f"🗑️  Borrando registros de {anio}...")
-    
+
     cursor.execute("""
         DELETE FROM PRODUCCION.comprobantes WHERE anio_dato = ?
     """, (anio,))
-    
+
     registros_borrados = cursor.rowcount
-    
+
     cursor.execute("""
-        INSERT INTO AUDITORIA.periodos_carga 
-        (tabla_destino, tipo_particion, anio, mes, periodo_codigo, 
+        INSERT INTO AUDITORIA.periodos_carga
+        (tabla_destino, tipo_particion, anio, mes, periodo_codigo,
          registros_borrados, registros_insertados, estado, observaciones, usuario_carga)
-        VALUES 
+        VALUES
         (?, ?, ?, NULL, ?, ?, 0, 'ROLLBACK_MANUAL', ?, ?)
-    """, ('PRODUCCION.comprobantes', 'ANUAL', anio, str(anio), 
-    
+    """, ('PRODUCCION.comprobantes', 'ANUAL', anio, str(anio),
+
     conn.commit()
-    
+
     logging.info(f"✅ Rollback completado: {registros_borrados:,} registros borrados")
     return registros_borrados
 
@@ -3887,47 +4052,47 @@ def main():
                        help='Tabla destino (costos o comprobantes)')
     parser.add_argument('--periodo', help='Período mensual YYYYMM (para costos)')
     parser.add_argument('--anio', type=int, help='Año YYYY (para comprobantes)')
-    
+
     args = parser.parse_args()
-    
+
     print("\n" + "="*70)
     print("🔄 ROLLBACK DE PERÍODO - DW_GrupoPOSE_B52")
     print("="*70 + "\n")
-    
+
     # Conectar a BD
     conn = pyodbc.connect(
         'DRIVER={SQL Server};SERVER=.\\SQLEXPRESS;DATABASE=DW_GrupoPOSE_B52;Trusted_Connection=yes'
     )
-    
+
     try:
         if args.tabla == 'costos':
             if not args.periodo or len(args.periodo) != 6:
                 print("❌ Error: --periodo requerido para costos (formato: YYYYMM)")
                 return 1
-            
+
             anio = int(args.periodo[:4])
             mes = int(args.periodo[4:])
-            
+
             logging.info(f"🎯 Tabla: PRODUCCION.costos")
             logging.info(f"📅 Período: {args.periodo} (anio={anio}, mes={mes})")
-            
+
             borrados = rollback_costos_periodo(conn, anio, mes, args.periodo)
-            
+
         elif args.tabla == 'comprobantes':
             if not args.anio:
                 print("❌ Error: --anio requerido para comprobantes")
                 return 1
-            
+
             logging.info(f"🎯 Tabla: PRODUCCION.comprobantes")
             logging.info(f"📅 Año: {args.anio}")
-            
+
             borrados = rollback_comprobantes_anio(conn, args.anio)
-        
+
         print("\n" + "="*70)
         print(f"✅ ROLLBACK EXITOSO: {borrados:,} registros borrados")
         print("="*70 + "\n")
         return 0
-        
+
     except Exception as e:
         logging.error(f"❌ Error durante rollback: {e}")
         conn.rollback()
@@ -3938,21 +4103,25 @@ def main():
 if __name__ == '__main__':
     import sys
     sys.exit(main())
-```
 
-**Uso:**
+```text
+
+## Uso:
 
 ```bash
+
 # Rollback período mensual de costos
 
 # Rollback año completo de comprobantes
-```
+
+```text
 
 ### 11.3 Restauración desde Backup
 
 **Situación:** Base de datos B52 corrupta, necesitas restaurar desde backup.
 
 ```powershell
+
 param(
     [Parameter(Mandatory=$true)]
     [string]$BackupFile
@@ -3967,13 +4136,15 @@ if (-not (Test-Path $BackupFile)) {
 }
 
 # 1. Cerrar conexiones activas
+
 sqlcmd -S ".\SQLEXPRESS" -Q @"
 ALTER DATABASE [DW_GrupoPOSE_B52] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
 "@
 
 # 2. Restaurar backup
+
 $restoreQuery = @"
-RESTORE DATABASE [DW_GrupoPOSE_B52] 
+RESTORE DATABASE [DW_GrupoPOSE_B52]
 FROM DISK = '$BackupFile'
 WITH REPLACE, RECOVERY;
 "@
@@ -3982,19 +4153,19 @@ sqlcmd -S ".\SQLEXPRESS" -Q $restoreQuery
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "✅ Restauración completada exitosamente" -ForegroundColor Green
-    
+
     # 3. Volver a modo multi-usuario
     sqlcmd -S ".\SQLEXPRESS" -Q @"
     ALTER DATABASE [DW_GrupoPOSE_B52] SET MULTI_USER;
 "@
-    
+
     exit 0
 } else {
     Write-Host "❌ Error en restauración" -ForegroundColor Red
     exit 1
 }
-```
 
+```text
 ---
 
 ## 12. Testing y Validación
@@ -4002,6 +4173,7 @@ if ($LASTEXITCODE -eq 0) {
 ### Suite de Tests de Integración
 
 ```python
+
 """
 Test Suite para validar carga incremental B52
 """
@@ -4012,66 +4184,66 @@ from datetime import datetime
 def test_carga_mensual_costos():
     """Test: cargar período mensual y verificar idempotencia"""
     print("\n🧪 TEST 1: Carga Mensual Costos - Idempotencia")
-    
+
     # Ejecutar carga
     import subprocess
     resultado = subprocess.run([
     ], capture_output=True, text=True)
-    
+
     assert resultado.returncode == 0, "Carga falló"
-    
+
     # Verificar volumetría
     conn = pyodbc.connect('DRIVER={SQL Server};SERVER=.\\SQLEXPRESS;DATABASE=DW_GrupoPOSE_B52')
     query = "SELECT COUNT(*) FROM PRODUCCION.costos WHERE anio_dato=2026 AND mes_dato=3"
     count_1 = pd.read_sql(query, conn).iloc[0,0]
-    
+
     # Re-ejecutar (idempotencia)
     resultado2 = subprocess.run([
     ], capture_output=True, text=True)
-    
+
     count_2 = pd.read_sql(query, conn).iloc[0,0]
-    
+
     assert count_1 == count_2, f"Idempotencia fallada: {count_1} != {count_2}"
     print(f"   ✅ Idempotencia OK: {count_1} registros consistentes")
-    
+
     conn.close()
 
 def test_ml_features():
     """Test: calcular z-scores y verificar alertas"""
     print("\n🧪 TEST 2: ML Features - Z-scores y Alertas")
-    
+
     # Ejecutar cálculo de ML
     import subprocess
     resultado = subprocess.run([
     ], capture_output=True, text=True)
-    
+
     assert resultado.returncode == 0, "Cálculo ML falló"
-    
+
     # Verificar z-scores calculados
     conn = pyodbc.connect('DRIVER={SQL Server};SERVER=.\\SQLEXPRESS;DATABASE=DW_GrupoPOSE_B52')
     query = "SELECT COUNT(*) FROM PRODUCCION.costos WHERE z_score_importe IS NOT NULL"
     count_z = pd.read_sql(query, conn).iloc[0,0]
-    
+
     assert count_z > 0, "No se calcularon z-scores"
     print(f"   ✅ Z-scores calculados: {count_z} registros")
-    
+
     # Generar alertas
     resultado2 = subprocess.run([
     ], capture_output=True, text=True)
-    
+
     query_alertas = "SELECT COUNT(*) FROM ML.historial_alertas"
     count_alertas = pd.read_sql(query_alertas, conn).iloc[0,0]
-    
+
     print(f"   ℹ️  Alertas generadas: {count_alertas}")
-    
+
     conn.close()
 
 if __name__ == '__main__':
     test_carga_mensual_costos()
     test_ml_features()
     print("\n✅ TODOS LOS TESTS PASARON")
-```
 
+```text
 ---
 
 ## 13. Anexos
@@ -4089,7 +4261,7 @@ if __name__ == '__main__':
 
 ### B. Checklist de Entrega
 
-**Infraestructura:**
+## Infraestructura:
 
 - [ ] Base de datos B52 creada en SQL Server
 - [ ] Esquemas CATALOGO, PRODUCCION, AUDITORIA, ML, TEMPORAL
@@ -4097,16 +4269,16 @@ if __name__ == '__main__':
 - [ ] Tabla calendario poblada (2019-2030)
 - [ ] Fuentes iniciales cargadas
 
-**Utilidades:**
+## Utilidades:
 
-**Testing:**
+## Testing:
 
 - [ ] Suite de tests de integración
 - [ ] Tests de idempotencia
 - [ ] Tests de ML features
 - [ ] Validación de rendimiento
 
-**Documentación:**
+## Documentación:
 
 - [ ] Manual de Operación B52
 - [ ] Guía de Despliegue
@@ -4133,20 +4305,20 @@ if __name__ == '__main__':
 
 ---
 
-**FIN DEL PLAN MAESTRO DW_GrupoPOSE_B52 v2.0**
+## FIN DEL PLAN MAESTRO DW_GrupoPOSE_B52 v2.0
 
-**Optimizado para Ejecución por GitHub Copilot**
+## Optimizado para Ejecución por GitHub Copilot
 
 Documento completo actualizado:
 
-- **Versión:** 2.0  
+- **Versión:** 2.0
 - **Líneas:** 3,500+ (expandido desde 2,368)
 - **Nuevas secciones:** 7 (0, 6, 7, 8, 9, 10, 11)
-- **Fecha actualización:** 13 de marzo de 2026  
-- **Autor:** Richard + GitHub Copilot  
+- **Fecha actualización:** 13 de marzo de 2026
+- **Autor:** Richard + GitHub Copilot
 - **Listo para:** Implementación en servidor de producción
 
-**Cambios principales v2.0:**
+## Cambios principales v2.0:
 
 - ✅ Sección 0: Instrucciones completas para agente IA ejecutor
 - ✅ Sección 8: Configuración del servidor de producción

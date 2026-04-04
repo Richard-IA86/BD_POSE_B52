@@ -1,6 +1,7 @@
 # Análisis de Implementación — DW_GrupoPOSE_B52
-**Fecha:** 14 de marzo de 2026  
-**Basado en:** PLAN_MAESTRO_B52.md v2.0  
+
+**Fecha:** 14 de marzo de 2026
+**Basado en:** PLAN_MAESTRO_B52.md v2.0
 **Estado del análisis:** Listo para revisión y decisión
 
 ---
@@ -33,6 +34,8 @@
 
 Hay una divergencia en cómo se vincula `PRODUCCION.costos` con la dimensión de obras:
 
+<!-- pyml disable md013 -->
+<!-- pyml disable md013 -->
 | Elemento | DDL Actual (`00_ddl_inicial_B52.sql`) | Plan Maestro (Sección 5) |
 |---|---|---|
 | Clave natural en `CATALOGO.obras` | `codigo_obra_origen VARCHAR(20)` | `obra_pronto VARCHAR(50)` |
@@ -40,24 +43,34 @@ Hay una divergencia en cómo se vincula `PRODUCCION.costos` con la dimensión de
 | FK en `PRODUCCION.comprobantes` | `id_obra INT` (igual) | `obra_pronto VARCHAR(50)` (igual) |
 | Columnas de importe en costos | `importe_original` + `importe_actualizado_12no_mes` | `importe` + `tipo_cambio` + `importe_usd` |
 | `proveedor_id` en costos | ❌ Ausente | ✅ `BIGINT FK → proveedores` |
+<!-- pyml enable md013 -->
+<!-- pyml enable md013 -->
 
-Los scripts Python actuales (`03_` y `04_`) **siguen el DDL implementado**, es decir, mapean `OBRA_PRONTO → id_obra INT` antes de insertar.
+Los scripts Python actuales (`03_` y `04_`) **siguen el DDL implementado**, es decir, mapean `OBRA_PRONTO → id_obra INT`
+antes de insertar.
 
 ### Opciones de Decisión
 
 #### Opción A — Mantener DDL actual (Star Schema puro con `id_obra INT`)
+
 - ✅ Más correcto en teoría de DW: la FK numérica es más eficiente en joins y storage
 - ✅ Los scripts Python existentes ya están alineados
-- ⚠️ Requiere renombrar `codigo_obra_origen` a `obra_pronto` en la tabla `CATALOGO.obras` para alinear con Plan (cambio menor)
+- ⚠️ Requiere renombrar `codigo_obra_origen` a `obra_pronto` en la tabla `CATALOGO.obras` para alinear con Plan (cambio
+  menor)
+
 - ⚠️ El Plan Maestro deberá considerarse la referencia conceptual pero la FK física seguirá siendo `id_obra INT`
 
 #### Opción B — Adoptar diseño del Plan Maestro (`obra_pronto VARCHAR` como FK)
+
 - ✅ FK legible directamente en la tabla de hechos sin necesidad de join a catálogo para identificar la obra
-- ❌ Rompe el Star Schema estricto declarado en el principio mandatorio del Plan ("NUNCA deben contener strings/varchar excepto descripciones crudas")
+- ❌ Rompe el Star Schema estricto declarado en el principio mandatorio del Plan ("NUNCA deben contener strings/varchar
+  excepto descripciones crudas")
+
 - ❌ Requiere reescribir los scripts `03_` y `04_` que ya mapean a `id_obra INT`
 - ❌ Mayor storage y menor performance en queries analíticas grandes
 
-> **Recomendación técnica:** Opción A, manteniendo `id_obra INT` como FK (Star Schema puro). Renombrar `codigo_obra_origen` → `obra_pronto` para alinear la nomenclatura con el resto del sistema.
+> **Recomendación técnica:** Opción A, manteniendo `id_obra INT` como FK (Star Schema puro). Renombrar
+`codigo_obra_origen` → `obra_pronto` para alinear la nomenclatura con el resto del sistema.
 
 ---
 
@@ -66,11 +79,13 @@ Los scripts Python actuales (`03_` y `04_`) **siguen el DDL implementado**, es d
 El `00_ddl_inicial_B52.sql` existente **no crea** los siguientes objetos definidos en el Plan:
 
 ### Esquemas faltantes
+
 - `AUDITORIA` — Bloqueante para auditoría de cargas
 - `ML` — Bloqueante para Fase 4 (Observability)
 - `TEMPORAL` — Staging para cargas
 
 ### Tablas faltantes en CATALOGO
+
 | Tabla | Plan (Sección) | Prioridad |
 |---|---|---|
 | `CATALOGO.proveedores` | Sección 3.3 / 5 | Alta |
@@ -78,10 +93,13 @@ El `00_ddl_inicial_B52.sql` existente **no crea** los siguientes objetos definid
 | `CATALOGO.jerarquia_org` | Sección 3.3 | Media |
 | `CATALOGO.calendario` | Sección 4 Paso 1.3 | Media |
 
-> **Nota:** `CATALOGO.fuentes` ya tiene estructura en el DDL actual como parte del CATALOGO pero **sin datos iniciales** (los 6 registros del INSERT en Sección 3.3 no están ejecutados).
+> **Nota:** `CATALOGO.fuentes` ya tiene estructura en el DDL actual como parte del CATALOGO pero **sin datos iniciales**
+(los 6 registros del INSERT en Sección 3.3 no están ejecutados).
 
 ### Columnas ML faltantes en `PRODUCCION.costos`
+
 Según Sección 3.2, la tabla de hechos debe tener estas columnas que hoy no existen:
+
 ```sql
 z_score_importe       DECIMAL(10,6)
 percentil_importe     INT
@@ -89,9 +107,10 @@ dias_desde_ultima_carga INT
 es_outlier_estadistico  BIT DEFAULT 0
 es_valor_inusual        BIT DEFAULT 0
 categoria_riesgo        VARCHAR(20)   -- 'LOW','MEDIUM','HIGH','CRITICAL'
-```
+```text
 
 ### Tablas AUDITORIA faltantes
+
 | Tabla | Descripción |
 |---|---|
 | `AUDITORIA.log_cargas` | Herencia A2 — requerida por scripts actuales |
@@ -100,6 +119,7 @@ categoria_riesgo        VARCHAR(20)   -- 'LOW','MEDIUM','HIGH','CRITICAL'
 | `AUDITORIA.rechazos` | Versión B52 con `anio_dato`, `mes_dato`, `estado_resolucion` |
 
 ### Tablas ML faltantes
+
 | Tabla | Descripción |
 |---|---|
 | `ML.parametros_calidad` | Umbrales por obra/proveedor (media, stddev) |
@@ -108,13 +128,16 @@ categoria_riesgo        VARCHAR(20)   -- 'LOW','MEDIUM','HIGH','CRITICAL'
 | `ML.anomalias_detectadas` | Registros flaggeados como outliers |
 
 ### Tablas TEMPORAL faltantes
+
 | Tabla | Descripción |
 |---|---|
 | `TEMPORAL.costos_carga` | Staging de costos |
 | `TEMPORAL.comprobantes_carga` | Staging de comprobantes |
 
 ### Índices faltantes (Paso 1.2 del Plan)
+
 Los índices actuales son `CLUSTERED` básicos. Faltan los `NONCLUSTERED` del Plan:
+
 ```sql
 IX_costos_particion          -- (anio_dato, mes_dato, fecha) INCLUDE (importe, obra_pronto)
 IX_costos_ml                 -- (categoria_riesgo, es_outlier_estadistico) WHERE criticos
@@ -123,7 +146,7 @@ IX_proveedores_nombre_norm   -- (nombre_proveedor_norm)
 IX_proveedores_cuit          -- (cuit) WHERE cuit IS NOT NULL
 IX_periodos_tabla_fecha      -- en AUDITORIA.periodos_carga
 IX_alertas_fecha_tipo        -- en ML.historial_alertas
-```
+```text
 
 ---
 
@@ -131,20 +154,32 @@ IX_alertas_fecha_tipo        -- en ML.historial_alertas
 
 ### `01_cargar_catalogos_B52.py` — Incompleto
 
-**Bloque 1 — `procesar_obras_gerencias()`:**
-```python
-# Estado actual: termina con `pass` — las obras NUNCA se insertan
-pass
-# ... código de cruce y guardado ...
-```
-Falta implementar el cruce de `id_compensable` + `id_gerencia` para construir las filas de obras y ejecutar el upsert en `CATALOGO.obras`.
+## Bloque 1 — `procesar_obras_gerencias()`:
 
-**Bloque 2 — `procesar_dimensiones_dinamicas()`:**
 ```python
+
+# Estado actual: termina con `pass` — las obras NUNCA se insertan
+
+pass
+
+# ... código de cruce y guardado ...
+
+```text
+
+Falta implementar el cruce de `id_compensable` + `id_gerencia` para construir las filas de obras y ejecutar el upsert en
+`CATALOGO.obras`.
+
+## Bloque 2 — `procesar_dimensiones_dinamicas()`:
+
+```python
+
 # El upsert de cuentas_contables no tiene cierre
+
 cc_data = [(str(row['CODIGO_CUENTA']), str(row['RUBRO_CONTABLE']), str(row['CUENTA_CONTABLE'])) for ...]
+
 # Implementar insert lógico...   ← comentario sin código
-```
+
+```text
 
 ### `03_cargar_costos_B52.py` — Funcional pero incompleto
 
@@ -190,8 +225,7 @@ cc_data = [(str(row['CODIGO_CUENTA']), str(row['RUBRO_CONTABLE']), str(row['CUEN
 └── validaciones/
     ├── validar_prerequisitos.py   ← Sección 10.1 del Plan
     └── validar_fase1.py           ← Sección 10.2 del Plan
-```
-
+```text
 ---
 
 ## 6. Archivos de configuración faltantes
@@ -205,9 +239,11 @@ cc_data = [(str(row['CODIGO_CUENTA']), str(row['RUBRO_CONTABLE']), str(row['CUEN
 
 ## 7. Pendiente de Diseño registrado (Memoria Repo)
 
-El archivo de memoria del repositorio documenta el siguiente pendiente que **depende** de completar la infraestructura de auditoría:
+El archivo de memoria del repositorio documenta el siguiente pendiente que **depende** de completar la infraestructura
+de auditoría:
 
-> **Obra `00000365`** (gerencia CALDERON): tiene 3 registros en `AUDITORIA.rechazos` (periodos 2021-01, 2021-12, 2022-01, importe ~$20M ARS) que no se reprocesarán automáticamente al dar de alta la obra en el catálogo.
+> **Obra `00000365`** (gerencia CALDERON): tiene 3 registros en `AUDITORIA.rechazos` (periodos 2021-01, 2021-12,
+2022-01, importe ~$20M ARS) que no se reprocesarán automáticamente al dar de alta la obra en el catálogo.
 >
 > **Solución propuesta:** Agregar argumento `--recuperar-obra OBRA_PRONTO` a `03_cargar_costos_B52.py`.
 >
@@ -268,8 +304,7 @@ El archivo de memoria del repositorio documenta el siguiente pendiente que **dep
 │  • config_produccion.json                          │
 │  • validaciones/                                   │
 └─────────────────────────────────────────────────────┘
-```
-
+```text
 ---
 
 ## 9. Resumen Ejecutivo
@@ -282,14 +317,17 @@ El archivo de memoria del repositorio documenta el siguiente pendiente que **dep
 | **Configuración** | 0% — ningún archivo de config creado |
 | **Decisión bloqueante** | Pendiente confirmación de FK design |
 
-**Estimación de trabajo restante para pipeline operativo básico (Fases 1–3):**
+## Estimación de trabajo restante para pipeline operativo básico (Fases 1–3):
+
 - DDL completo: ~3–4 hs
 - Completar catálogos: ~1–2 hs
 - Auditoría + robustez en cargas: ~4–6 hs
 
-**Estimación para ML Observability (Fase 4):**
+## Estimación para ML Observability (Fase 4):
+
 - ~6–8 hs adicionales
 
 ---
 
-*Documento generado por GitHub Copilot el 14/03/2026 a partir del análisis de PLAN_MAESTRO_B52.md y los artefactos existentes en el workspace.*
+*Documento generado por GitHub Copilot el 14/03/2026 a partir del análisis de PLAN_MAESTRO_B52.md y los artefactos
+existentes en el workspace.*

@@ -30,8 +30,7 @@ COPILOT LOCAL                   GIT (main)             COPILOT SERVIDOR
 1. Diseña / modifica   →push→                  →pull→  2. Lee instrucciones
 4. Analiza resultados  ←pull←                  ←push→  3. Ejecuta y documenta
 5. Decide próximo paso          │
-```
-
+```text
 ---
 
 ## Ciclo de trabajo
@@ -48,18 +47,21 @@ Antes de cada tarea, el Copilot Local actualiza `estado_implementacion.json` con
 Luego hace commit y push:
 
 ```powershell
+
 git add .
 git commit -m "instruccion: <descripción breve>"
 git push origin main
-```
+
+```text
 
 ### Paso 2 — Copilot Servidor recibe y ejecuta
 
 ```powershell
+
 cd C:\Dev\BD_POSE_B52
 git pull origin main
-```
 
+```text
 Lee `estado_implementacion.json`, ejecuta los comandos en el orden indicado
 y documenta el resultado en el mismo archivo bajo `ultimo_resultado`.
 
@@ -75,17 +77,20 @@ Actualiza `estado_implementacion.json` con:
 Luego hace commit y push:
 
 ```powershell
+
 git add estado_implementacion.json
 git commit -m "resultado: <descripción breve>"
 git push origin main
-```
+
+```text
 
 ### Paso 4 — Copilot Local analiza y decide
 
 ```powershell
-git pull origin main
-```
 
+git pull origin main
+
+```text
 Lee `estado_implementacion.json`, analiza el resultado y define el próximo paso.
 Vuelve al Paso 1.
 
