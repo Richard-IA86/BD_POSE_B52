@@ -1,3 +1,13 @@
+# Principio Operativo #1 — NO NEGOCIABLE
+
+> **"Diagnósticos cortos, claros, breves y efectivos."**
+
+- Ver el error → identificar archivo/línea → fix → verificar. Una pasada.
+- Si el mismo análisis se repite: parar, cambiar enfoque.
+- **"Tenemos que salir de la rotonda."**
+
+---
+
 # Instrucciones Copilot — bd_pose_b52
 
 ## Protocolo de Scripts Temporales — Obligatorio
