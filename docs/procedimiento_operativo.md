@@ -2,7 +2,7 @@
 
 > **Proyecto:** BD_POSE_B52
 > **Repositorio:** `Richard-IA86/BD_POSE_B52`
-> **Actualizado:** 2026-03-19
+> **Actualizado:** 2026-04-05
 
 ---
 
@@ -14,8 +14,11 @@
 | **Copilot Servidor** | Servidor (`C:\Dev\BD_POSE_B52`) | Ejecución, documentación de resultados y reporte |
 
 > **Regla fundamental:** El Copilot Servidor **nunca decide** por cuenta propia.
-> Solo ejecuta lo que está documentado como instrucción en `estado_implementacion.json`.
+> Solo ejecuta lo que está documentado como instrucción en `config/estado_proyecto.json`.
 > Ante cualquier duda o error inesperado, documenta y espera instrucción del Copilot Local.
+>
+> Ver también: `.github/copilot-instructions.md` — **Principio Operativo #2**
+> (tabla definitiva de qué se ejecuta en LOCAL y qué en SERVIDOR).
 
 ---
 
@@ -38,7 +41,7 @@ COPILOT LOCAL                   GIT (main)             COPILOT SERVIDOR
 
 ### Paso 1 — Copilot Local prepara instrucción
 
-Antes de cada tarea, el Copilot Local actualiza `estado_implementacion.json` con:
+Antes de cada tarea, el Copilot Local actualiza `config/estado_proyecto.json` con:
 
 - `fase_actual`: fase en curso
 - `siguiente_accion`: descripción exacta de qué ejecutar
@@ -64,7 +67,7 @@ git pull origin main
 
 ```text
 
-Lee `estado_implementacion.json`, ejecuta los comandos en el orden indicado
+Lee `config/estado_proyecto.json`, ejecuta los comandos en el orden indicado
 y documenta el resultado en el mismo archivo bajo `ultimo_resultado`.
 
 ### Paso 3 — Copilot Servidor reporta
@@ -80,7 +83,7 @@ Luego hace commit y push:
 
 ```powershell
 
-git add estado_implementacion.json
+git add config/estado_proyecto.json
 git commit -m "resultado: <descripción breve>"
 git push origin main
 
@@ -94,7 +97,7 @@ git pull origin main
 
 ```text
 
-Lee `estado_implementacion.json`, analiza el resultado y define el próximo paso.
+Lee `config/estado_proyecto.json`, analiza el resultado y define el próximo paso.
 Vuelve al Paso 1.
 
 ---
@@ -104,7 +107,7 @@ Vuelve al Paso 1.
 Si el Copilot Servidor encuentra un error **no previsto**:
 
 1. **Detener** — no continuar con pasos siguientes
-2. **Documentar** en `estado_implementacion.json`:
+2. **Documentar** en `config/estado_proyecto.json`:
    - Comando exacto que falló
    - Mensaje de error completo
    - Estado de la base de datos al momento del fallo
@@ -119,7 +122,8 @@ Si el Copilot Servidor encuentra un error **no previsto**:
 
 | Archivo | Propósito |
 |---------|-----------|
-| `estado_implementacion.json` | Estado actual + instrucción activa + último resultado |
+| `config/estado_proyecto.json` | Estado actual + instrucción activa + último resultado |
+| `.github/copilot-instructions.md` | Principios operativos — reglas LOCAL vs SERVIDOR |
 | `docs/plan_maestro_b52.md` | Diseño completo del DW — fuente de verdad técnica |
 | `docs/analisis_implementacion.md` | Brechas identificadas y decisiones tomadas |
 | `docs/git_instructivo_basico.md` | Comandos git de inicio/cierre de jornada |
