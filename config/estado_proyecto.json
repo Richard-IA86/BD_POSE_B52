@@ -147,12 +147,20 @@
                 "6. Validar Fase 1 BD: python 02_scripts/python/validaciones/validar_fase1.py"
             ],
             "siguiente_accion": {
-                "responsable": "DEV",
-                "descripcion": "Iniciar validación formal de FASE_1 (00_validar_prerequisitos.py + validar_fase1.py).",
+                "responsable": "Copilot Servidor",
+                "descripcion": "Crear BD DW_GrupoPOSE_B52 ejecutando los 4 scripts SQL en orden, luego validar prerequisitos y estructura Fase 1.",
                 "estado": "APROBADO_EN_CURSO",
-                "comandos_a_ejecutar": [],
-                "resultado_esperado": "Ejecutar validadores de BD y confirmar cumplimiento estructural.",
-                "ante_error": "Documentar error en bitácora QA."
+                "comandos_a_ejecutar": [
+                    "git pull origin main",
+                    "sqlcmd -S .\\SQLEXPRESS -i 02_scripts\\sql\\01_crear_estructura_B52.sql",
+                    "sqlcmd -S .\\SQLEXPRESS -i 02_scripts\\sql\\02_indices_B52.sql",
+                    "sqlcmd -S .\\SQLEXPRESS -i 02_scripts\\sql\\03_poblar_referencias_B52.sql",
+                    "sqlcmd -S .\\SQLEXPRESS -i 02_scripts\\sql\\04_tipo_cambio_B52.sql",
+                    "python 02_scripts\\python\\validaciones\\00_validar_prerequisitos.py",
+                    "python 02_scripts\\python\\validaciones\\validar_fase1.py"
+                ],
+                "resultado_esperado": "Ambos scripts retornan exit code 0. BD creada con 5 esquemas, mínimo 12 tablas, CATALOGO.fuentes >= 6 filas, CATALOGO.calendario > 4000 filas.",
+                "ante_error": "Documentar error en ultimo_resultado con detalle del script fallido. No continuar al siguiente script si el anterior falla."
             },
             "ultimo_resultado": {
                 "estado": "OK",
