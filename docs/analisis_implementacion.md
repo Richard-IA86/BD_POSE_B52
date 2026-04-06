@@ -226,6 +226,7 @@ cc_data = [(str(row['CODIGO_CUENTA']), str(row['RUBRO_CONTABLE']), str(row['CUEN
     ├── validar_prerequisitos.py   ← Sección 10.1 del Plan
     └── validar_fase1.py           ← Sección 10.2 del Plan
 ```text
+
 ---
 
 ## 6. Archivos de configuración faltantes
@@ -305,6 +306,7 @@ de auditoría:
 │  • validaciones/                                   │
 └─────────────────────────────────────────────────────┘
 ```text
+
 ---
 
 ## 9. Resumen Ejecutivo

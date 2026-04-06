@@ -175,6 +175,7 @@ ramas:
 main          ← versión estable
 └── feature/nombre-tarea   ← desarrollo de cada tarea nueva
 ```text
+
 Se documentará en este instructivo cuando se defina la estrategia.
 
 ---

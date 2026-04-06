@@ -31,6 +31,7 @@ COPILOT LOCAL                   GIT (main)             COPILOT SERVIDOR
 4. Analiza resultados  ←pull←                  ←push→  3. Ejecuta y documenta
 5. Decide próximo paso          │
 ```text
+
 ---
 
 ## Ciclo de trabajo
@@ -62,6 +63,7 @@ cd C:\Dev\BD_POSE_B52
 git pull origin main
 
 ```text
+
 Lee `estado_implementacion.json`, ejecuta los comandos en el orden indicado
 y documenta el resultado en el mismo archivo bajo `ultimo_resultado`.
 
@@ -91,6 +93,7 @@ git push origin main
 git pull origin main
 
 ```text
+
 Lee `estado_implementacion.json`, analiza el resultado y define el próximo paso.
 Vuelve al Paso 1.
 

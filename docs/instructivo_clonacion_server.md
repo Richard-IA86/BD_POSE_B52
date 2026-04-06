@@ -74,6 +74,7 @@ El script realiza automáticamente:
   SETUP COMPLETADO
 ============================================================
 ```text
+
 ---
 
 ## Paso 5 — Verificar config\conexion.json
@@ -85,6 +86,7 @@ El script realiza automáticamente:
 notepad config\conexion.json
 
 ```text
+
 Confirmar que el archivo contiene:
 
 ```json
@@ -94,6 +96,7 @@ Confirmar que el archivo contiene:
 }
 
 ```text
+
 > El setup crea este archivo automáticamente desde el template con el valor correcto. Solo verificar — normalmente no
 requiere edición.
 
@@ -118,6 +121,7 @@ python 02_scripts\python\validaciones\00_validar_prerequisitos.py
 [OK] Conexion SQL Server exitosa: DEV-DIRECTORIO\SQLEXPRESS
 [OK] Espacio en disco suficiente
 ```text
+
 **Si falla la conexión SQL:** verificar que el servicio `SQLEXPRESS` esté corriendo en el servidor:
 
 ```powershell
@@ -125,6 +129,7 @@ python 02_scripts\python\validaciones\00_validar_prerequisitos.py
 Get-Service -Name 'MSSQL$SQLEXPRESS'
 
 ```text
+
 ---
 
 ## Verificación final — estado del entorno
@@ -145,6 +150,7 @@ On branch main
 Your branch is up to date with 'origin/main'.
 nothing to commit, working tree clean
 ```text
+
 ---
 
 ## Flujo de actualización diaria (post-clonación)
@@ -157,6 +163,7 @@ cd C:\Dev\BD_POSE_B52
 git pull origin main
 
 ```text
+
 > Todo el desarrollo se hace en la **PC local**. El servidor solo ejecuta `git pull`.
 
 ---

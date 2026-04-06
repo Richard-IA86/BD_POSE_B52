@@ -431,11 +431,13 @@ DELETE FROM PRODUCCION.costos WHERE anio_dato = @anio AND mes_dato = @mes;
 INSERT INTO PRODUCCION.costos (...) VALUES (...);
 
 ```text
+
 **Ejemplo:** Cargar marzo 2026
 
 ```bash
 
 ```text
+
 → Borra solo `WHERE anio_dato = 2026 AND mes_dato = 3`
 → Inserta datos de marzo 2026
 
@@ -467,11 +469,13 @@ DELETE FROM PRODUCCION.comprobantes WHERE anio_dato = @anio;
 INSERT INTO PRODUCCION.comprobantes (...) VALUES (...);
 
 ```text
+
 **Ejemplo:** Cargar año 2026
 
 ```bash
 
 ```text
+
 → Borra solo `WHERE anio_dato = 2026`
 → Inserta datos del año completo
 
@@ -746,6 +750,7 @@ CREATE INDEX IX_alertas_fecha ON ML.historial_alertas(fecha_generacion);
 CREATE INDEX IX_alertas_tipo ON ML.historial_alertas(tipo_alerta, severidad);
 
 ```text
+
 ---
 
 ## 4. Plan de Implementación por Fases
@@ -779,6 +784,7 @@ GROUP BY s.name, t.name
 ORDER BY s.name, t.name;
 
 ```text
+
 **Entregable:** BD B52 creada con 0 registros, estructura completa
 
 ---
@@ -835,6 +841,7 @@ WHERE SCHEMA_NAME(t.schema_id) IN ('CATALOGO', 'PRODUCCION', 'AUDITORIA', 'ML')
 ORDER BY esquema, tabla, indice;
 
 ```text
+
 ---
 
 #### Paso 1.3: Poblar dimensiones de referencia
@@ -888,13 +895,14 @@ INSERT INTO ML.umbrales_alertas (tipo_alerta, campo_medicion, valor_min, valor_m
 ('DIAS_SIN_ACTIVIDAD', 'dias_desde_ultima', 90, 9999, NULL);      -- Alerta si > 90 días
 
 ```text
+
 ---
 
 ### Fase 2: Adaptación del Pipeline ETL (Semana 2)
 
 **Objetivo:** Adaptar scripts Python para procesar Catálogos duales y manejar metadatos de particionamiento.
 
-#### 2.0 Ingesta de Catálogos Dinámica (Obras, Gerencias, Compensables, Fuentes, Cuentas Contables y Tipos de Comprobantes)
+#### 2.0 Ingesta de Catálogos Dinámica (Obras, Gerencias, Compensables y Fuentes)
 
 La arquitectura de B52 promueve la auto-generación y normalización de catálogos sin requerir trabajo extra del usuario.
 
@@ -1063,6 +1071,7 @@ if __name__ == '__main__':
 # → Verificar que Power Query B52 esté configurado correctamente (Sección 9)
 
 ```text
+
 ---
 
 #### Paso 2.2: Modificar configuración AutomatizacionETL
@@ -1104,6 +1113,7 @@ if __name__ == '__main__':
 }
 
 ```text
+
 ---
 
 #### Paso 3.1: Estructura de directorio
@@ -1128,6 +1138,7 @@ C:\DW_GrupoPOSE_B52\
 │       └── 03_poblar_referencias_B52.sql
 └── 03_output/
 ```text
+
 ---
 
 ```python
@@ -1276,6 +1287,7 @@ if __name__ == '__main__':
 # Solo hechos (skip catálogos)
 
 ```text
+
 ---
 
 ```python
@@ -1577,6 +1589,7 @@ if __name__ == '__main__':
 # Forzar recarga (ignora idempotencia)
 
 ```text
+
 ---
 
 ```python
@@ -1763,6 +1776,7 @@ if __name__ == '__main__':
     main()
 
 ```text
+
 ---
 
 ```python
@@ -1909,6 +1923,7 @@ if __name__ == '__main__':
     main()
 
 ```text
+
 ---
 
 ### Fase 4: Sistema ML Observability (Semana 5)
@@ -2030,6 +2045,7 @@ if __name__ == '__main__':
     main()
 
 ```text
+
 ---
 
 ```python
@@ -2147,6 +2163,7 @@ if __name__ == '__main__':
     main()
 
 ```text
+
 ---
 
 ### Fase 5: Utilidades y Validaciones (Semana 6)
@@ -2233,6 +2250,7 @@ def registrar_fin_periodo(conn, id_log_carga, id_periodo_carga, registros_borrad
     conn.commit()
 
 ```text
+
 ---
 
 ```python
@@ -2313,6 +2331,7 @@ class MedidorRendimiento:
         print(f"   Memoria: {mem_info.rss / 1024 / 1024:.2f} MB")
 
 ```text
+
 ---
 
 ### Fase 6: Testing y Validación (Semana 7)
@@ -2366,6 +2385,7 @@ SELECT COUNT(*) FROM PRODUCCION.costos WHERE z_score_importe IS NOT NULL;
 SELECT * FROM ML.historial_alertas ORDER BY fecha_generacion DESC;
 
 ```text
+
 ---
 
 ### Fase 7: Documentación y Despliegue (Semana 8)
@@ -2389,14 +2409,17 @@ SELECT * FROM ML.historial_alertas ORDER BY fecha_generacion DESC;
 2. Ejecutar carga del mes anterior:
 
    ```bash
+
    ```
 
 1. Verificar log en `00_logs/`
 2. Consultar auditoría:
 
    ```sql
+
    SELECT * FROM AUDITORIA.periodos_carga
    WHERE periodo_codigo = '202603';
+
    ```
 
 ## Carga Anual de Comprobantes
@@ -2410,6 +2433,7 @@ SELECT * FROM ML.historial_alertas ORDER BY fecha_generacion DESC;
 2. Ejecutar carga del año completo:
 
    ```bash
+
    ```
 
 3. Verificar volumetría anual
@@ -2423,18 +2447,22 @@ SELECT * FROM ML.historial_alertas ORDER BY fecha_generacion DESC;
 1. Calcular features ML:
 
    ```bash
+
    ```
 
 2. Generar alertas:
 
    ```bash
+
    ```
 
 3. Revisar alertas críticas:
 
    ```sql
+
    SELECT * FROM ML.historial_alertas
    WHERE severidad = 'CRITICAL' AND estado = 'ACTIVA';
+
    ```
 
 ## Rollback a A2
@@ -2447,6 +2475,7 @@ En caso de fallo en B52:
 4. Volver a B52 cuando esté estable
 
 ```text
+
 ---
 
 ## 5. Código SQL: Estructura Completa
@@ -2925,6 +2954,7 @@ PRINT '✅ Estructura DW_GrupoPOSE_B52 creada exitosamente';
 GO
 
 ```text
+
 ---
 
 ### Estructura de Módulos
@@ -3120,6 +3150,7 @@ Write-Host "`n✅ Estructura de directorios creada exitosamente" -ForegroundColo
 }
 
 ```text
+
 ```python
 
 import json
@@ -3240,6 +3271,7 @@ Set-Acl $ruta $acl
 Write-Host "✅ Permisos asignados a $usuario en $ruta" -ForegroundColor Green
 
 ```text
+
 ---
 
 ## 9. Power Query B52 - Configuración de Metadata
@@ -3848,6 +3880,7 @@ if __name__ == '__main__':
     sys.exit(main())
 
 ```text
+
 ---
 
 ## 11. Procedimientos de Rollback y Recuperación
@@ -4166,6 +4199,7 @@ if ($LASTEXITCODE -eq 0) {
 }
 
 ```text
+
 ---
 
 ## 12. Testing y Validación
@@ -4244,6 +4278,7 @@ if __name__ == '__main__':
     print("\n✅ TODOS LOS TESTS PASARON")
 
 ```text
+
 ---
 
 ## 13. Anexos
