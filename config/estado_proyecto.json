@@ -61,20 +61,21 @@
                 },
                 "FASE_2_catalogos": {
                     "estado": "PENDIENTE",
-                    "descripcion": "Carga full de gerencias, obras, proveedores desde ETL externo",
+                    "responsable": "SERVIDOR",
+                    "descripcion": "Carga full de catálogos (gerencias, obras, proveedores, fuentes) desde ETL externo",
                     "scripts_disponibles": [
-                        "02_scripts/python/cargas/01_cargar_gerencias_B52.py",
-                        "02_scripts/python/cargas/02_cargar_obras_B52.py",
-                        "02_scripts/python/cargas/05_cargar_proveedores_B52.py",
-                        "02_scripts/python/cargas/06_cargar_fuentes_B52.py"
+                        "02_scripts/python/cargas/01_cargar_catalogos_B52_v2.py"
                     ],
+                    "nota": "01_cargar_catalogos_B52_v2.py consolida gerencias, obras, proveedores y fuentes. v1 deprecado.",
                     "prerequisitos": [
+                        "FASE_1 validada (validar_fase1.py exit 0)",
                         "Archivos de datos en 01_input_raw/",
                         "Validar 00_validar_prerequisitos.py"
                     ]
                 },
                 "FASE_3_historico": {
                     "estado": "PENDIENTE",
+                    "responsable": "SERVIDOR",
                     "descripcion": "Carga incremental histórica costos/comprobantes 2019-2024",
                     "scripts_disponibles": [
                         "02_scripts/python/cargas/03_cargar_costos_B52.py",
@@ -86,13 +87,18 @@
                 },
                 "FASE_4_ml_observability": {
                     "estado": "PENDIENTE",
+                    "responsable": "LOCAL → SERVIDOR",
                     "descripcion": "Activación de ML Observability: z-scores, percentiles, detección de anomalías",
+                    "nota": "02_scripts/python/ml/ está VACÍO. LOCAL debe crear los scripts antes de que SERVIDOR los ejecute.",
+                    "scripts_disponibles": [],
                     "prerequisitos": [
-                        "FASE_3_historico con >1000 registros en costos"
+                        "FASE_3_historico con >1000 registros en costos",
+                        "Scripts ML creados en LOCAL y pusheados"
                     ]
                 },
                 "FASE_5_validacion_final": {
                     "estado": "PENDIENTE",
+                    "responsable": "SERVIDOR",
                     "descripcion": "Validación integral y generación de reporte de implementación",
                     "scripts_disponibles": [
                         "02_scripts/python/validaciones/00_validar_prerequisitos.py",
