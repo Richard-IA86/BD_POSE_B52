@@ -1,0 +1,44 @@
+name: QA Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  qa:
+    name: black + flake8 + mypy + pytest
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Instalar driver ODBC (pyodbc)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y python3-pyodbc libodbc2
+
+      - name: Instalar dependencias
+        run: |
+          pip install --upgrade pip
+          pip install black flake8 mypy pytest
+          pip install -r requirements.txt
+
+      - name: black
+        run: black --check .
+
+      - name: flake8
+        run: flake8 .
+
+      - name: mypy
+        run: mypy .
+
+      - name: pytest
+        run: pytest
