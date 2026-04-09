@@ -20,12 +20,10 @@ jobs:
           python-version: "3.12"
           cache: "pip"
 
-      - name: Instalar driver ODBC (pyodbc)
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y python3-pyodbc libodbc2
+      - name: Instalar dependencias del sistema (pyodbc)
+        run: sudo apt-get update -qq && sudo apt-get install -y unixodbc-dev
 
-      - name: Instalar dependencias
+      - name: Instalar dependencias Python
         run: |
           pip install --upgrade pip
           pip install black flake8 mypy pytest
