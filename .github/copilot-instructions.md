@@ -128,3 +128,48 @@ Todo código generado debe pasar sin errores ni advertencias.
 - Módulos Python siempre en `snake_case`: `validador_a4`, no `validador_A4`.
 - Imports no usados → eliminar (no `# noqa: F401` salvo en bloques
   `try/except` que verifican disponibilidad de dependencias opcionales).
+
+---
+
+## Protocolo de Jornada — Obligatorio
+
+Copilot actualiza `config/estado_proyecto.json` ÚNICAMENTE ante los
+triggers explícitos del desarrollador. No en ningún otro momento.
+
+### Trigger: "inicio de jornada"
+
+1. Leer `config/estado_proyecto.json` → sección `jornada.fin`.
+2. Reportar al desarrollador:
+   - `tareas_pendientes_manana` (lo que quedó pendiente ayer)
+   - `notas_qa` (observación del cierre anterior)
+   - `estado_pipeline` (VERDE / AMARILLO / ROJO)
+3. **No modificar el archivo en este trigger.**
+
+### Trigger: "fin de jornada"
+
+Actualizar `config/estado_proyecto.json` — sección `jornada`:
+
+```json
+"jornada": {
+  "fin": {
+    "fecha": "YYYY-MM-DD",
+    "tareas_completadas": ["lo realizado hoy"],
+    "tareas_pendientes_manana": ["lo que queda"],
+    "notas_qa": "observación para El Ojo de Sauron",
+    "estado_pipeline": "VERDE | AMARILLO | ROJO"
+  }
+}
+```
+
+También actualizar (retrocompatibilidad):
+
+- `desarrollo_local.fecha_actualizacion` → fecha de hoy
+- `desarrollo_local.punto_de_partida_manana` → resumen en 1 línea
+
+Luego:
+
+```bash
+git add config/estado_proyecto.json
+git commit -m "chore(jornada): cierre YYYY-MM-DD"
+git push
+```
