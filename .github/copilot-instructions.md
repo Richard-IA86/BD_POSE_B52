@@ -138,12 +138,15 @@ triggers explícitos del desarrollador. No en ningún otro momento.
 
 ### Trigger: "inicio de jornada"
 
-1. Leer `config/estado_proyecto.json` → sección `jornada.fin`.
-2. Reportar al desarrollador:
+1. Leer `config/estado_proyecto.json` → sección `jornada.fin`
+   (archivos locales — estado al cierre de ayer).
+2. Ejecutar `git pull` para bajar novedades del remoto.
+3. Recién entonces reportar al desarrollador:
    - `tareas_pendientes_manana` (lo que quedó pendiente ayer)
    - `notas_qa` (observación del cierre anterior)
    - `estado_pipeline` (VERDE / AMARILLO / ROJO)
-3. **No modificar el archivo en este trigger.**
+   - Commits nuevos descargados (si los hay)
+4. **No modificar el archivo en este trigger.**
 
 ### Trigger: "fin de jornada"
 
