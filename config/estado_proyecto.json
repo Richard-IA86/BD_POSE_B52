@@ -177,5 +177,21 @@
                 "errores": []
             }
         }
-    ]
+    ],
+    "jornada": {
+        "fin": {
+            "fecha": "2026-04-16",
+            "tareas_completadas": [
+                "Code review PR#7 (WIP feat/pg — migración SQL Server → PostgreSQL 16)",
+                "Revisión completa: 01_crear_estructura_pg.sql (5 esquemas, 15+ tablas), 02_indices_pg.sql, 03_poblar_referencias_pg.sql, conexion_pg.py, MIGRACION.md"
+            ],
+            "tareas_pendientes_manana": [
+                "Completar Pasos C/D/E del PR#7: adaptar cargas Python (?→%s), requirements.txt (pyodbc→psycopg2-binary), conexion.template.json PostgreSQL",
+                "Ejecutar 01_crear_estructura_pg.sql en servidor CX33 (cuando esté activo)",
+                "Merge PR#7 feature/postgresql-migration → main (condición: CX33 activo)"
+            ],
+            "notas_qa": "PR#7 en draft — no mergear hasta CX33 activo. Estructura SQL validada visualmente, pendiente ejecución real en PostgreSQL 16.",
+            "estado_pipeline": "VERDE"
+        }
+    }
 }
