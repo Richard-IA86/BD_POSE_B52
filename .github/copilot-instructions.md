@@ -14,6 +14,7 @@
 - NO puedes agregar nuevas **carpetas** ni modificar la arquitectura base del repo.
 - Cualquier cambio estructural de carpetas requiere **aprobación explícita de QA**.
 - Si el usuario requiere un cambio de estructura de carpetas, debes advertirle por esta regla y pedir **confirmación explícita de QA**.
+- Si QA aprueba crear una carpeta, es **OBLIGATORIO** crear un archivo `.gitkeep` en su interior para asegurar su versionado en Git.
 
 ---
 
