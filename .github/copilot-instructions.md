@@ -7,6 +7,16 @@
 - **"Tenemos que salir de la rotonda."**
 
 ---
+# Principio Operativo: Arquitectura y Estructura — NO NEGOCIABLE
+
+> **"Prohibida la reestructuración sin evaluación QA."**
+
+- NO puedes agregar nuevas **carpetas** ni modificar la arquitectura base del repo.
+- Cualquier cambio estructural de carpetas requiere **aprobación explícita de QA**.
+- Si el usuario requiere un cambio de estructura de carpetas, debes advertirle por esta regla y pedir **confirmación explícita de QA**.
+
+---
+
 
 # Principio Operativo #2 — Flujo Local / Servidor — NO NEGOCIABLE
 
