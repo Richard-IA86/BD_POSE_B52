@@ -7,7 +7,9 @@
             "descripcion": "Durante corrida del servidor se detectaron 227 rechazos por OBRA_PRONTO no encontrada en catálogo. Implementar validación previa a la carga que cruce OBRA_PRONTO de los datos contra el catálogo Obras_Gerencias y reporte las obras faltantes ANTES de intentar insertar en BD.",
             "contexto": {
                 "archivo_datos": "01_input_raw/BaseCostosPOSE.xlsx",
-                "archivo_catalogo": "01_input_raw/Obras_Gerencias.xlsx",
+                "archivo_catalogo": "C:/Dev/Dev_Richard_IA86/projects/report_direccion/report_gerencias/input_raw/common/loockups",
+                "archivo_catalogo_hoja": "Obras_Gerencias",
+                "nota_catalogo": "Este es el archivo MAESTRO de referencia. No copiar al repo; referenciar por ruta absoluta en el script de validación.",
                 "obras_faltantes_detectadas": [
                     { "obra_pronto": "SIN OBRA",     "registros_afectados": 189 },
                     { "obra_pronto": "IMPUESTOS",    "registros_afectados": 37  },
