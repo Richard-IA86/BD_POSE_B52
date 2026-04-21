@@ -7,17 +7,19 @@
 - **"Tenemos que salir de la rotonda."**
 
 ---
+
 # Principio Operativo: Arquitectura y Estructura — NO NEGOCIABLE
 
 > **"Prohibida la reestructuración sin evaluación QA."**
 
 - NO puedes agregar nuevas **carpetas** ni modificar la arquitectura base del repo.
 - Cualquier cambio estructural de carpetas requiere **aprobación explícita de QA**.
-- Si el usuario requiere un cambio de estructura de carpetas, debes advertirle por esta regla y pedir **confirmación explícita de QA**.
-- Si QA aprueba crear una carpeta, es **OBLIGATORIO** crear un archivo `.gitkeep` en su interior para asegurar su versionado en Git.
+- Si el usuario requiere un cambio de estructura de carpetas, debes advertirle por esta regla
+  y pedir **confirmación explícita de QA**.
+- Si QA aprueba crear una carpeta, es **OBLIGATORIO** crear un archivo `.gitkeep` en su interior
+  para asegurar su versionado en Git.
 
 ---
-
 
 # Principio Operativo #2 — Flujo Local / Servidor — NO NEGOCIABLE
 
@@ -139,6 +141,30 @@ Todo código generado debe pasar sin errores ni advertencias.
 - Módulos Python siempre en `snake_case`: `validador_a4`, no `validador_A4`.
 - Imports no usados → eliminar (no `# noqa: F401` salvo en bloques
   `try/except` que verifican disponibilidad de dependencias opcionales).
+
+---
+
+## Protocolo de Sincronización — OBLIGATORIO ANTES DE EDITAR
+
+> **REGLA DE ORO:** Antes de modificar CUALQUIER archivo en este repo,
+> ejecutar `prefetch_check.sh` para detectar si origin tiene commits
+> que el local desconoce. Si detecta divergencia → `git pull` primero.
+> Ignorar esta regla puede causar sobreescritura silenciosa o conflictos
+> en el push de cierre.
+
+```bash
+# Verificar repo antes de editar
+bash /home/richard/Dev/auditoria_ecosauron/scripts/prefetch_check.sh \
+    /home/richard/Dev/auditoria_ecosauron/workspaces/bd_pose_b52
+
+# Verificar archivo específico
+bash /home/richard/Dev/auditoria_ecosauron/scripts/prefetch_check.sh \
+    /home/richard/Dev/auditoria_ecosauron/workspaces/bd_pose_b52 \
+    <ruta_archivo>
+```
+
+- Salida `✔` = seguro editar.
+- Salida `✘ DIVERGENCIA` = hacer `git pull` primero, sin excepción.
 
 ---
 
