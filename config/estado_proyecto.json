@@ -1,6 +1,28 @@
 {
     "auditoria_qa": [
         {
+            "sprint": "Sprint 14 — PENDIENTE",
+            "fecha": "2026-04-15",
+            "tipo": "feature/validacion-previa-carga",
+            "descripcion": "Durante corrida del servidor se detectaron 227 rechazos por OBRA_PRONTO no encontrada en catálogo. Implementar validación previa a la carga que cruce OBRA_PRONTO de los datos contra el catálogo Obras_Gerencias y reporte las obras faltantes ANTES de intentar insertar en BD.",
+            "contexto": {
+                "archivo_datos": "01_input_raw/BaseCostosPOSE.xlsx",
+                "archivo_catalogo": "C:/Dev/Dev_Richard_IA86/projects/report_direccion/report_gerencias/input_raw/common/loockups",
+                "archivo_catalogo_hoja": "Obras_Gerencias",
+                "nota_catalogo": "Este es el archivo MAESTRO de referencia. No copiar al repo; referenciar por ruta absoluta en el script de validación.",
+                "obras_faltantes_detectadas": [
+                    { "obra_pronto": "SIN OBRA",     "registros_afectados": 189 },
+                    { "obra_pronto": "IMPUESTOS",    "registros_afectados": 37  },
+                    { "obra_pronto": "ACTIVOS PERON","registros_afectados": 1   }
+                ],
+                "total_rechazos": 227,
+                "total_registros_datos": 438144
+            },
+            "accion_requerida": "LOCAL debe agregar función de validación previa en el script de carga (03_cargar_costos_B52.py o utils/validaciones.py) que: 1) lea OBRA_PRONTO únicos del Excel de datos, 2) cruce contra catálogo, 3) imprima listado de faltantes con conteo y aborte la carga si existen faltantes no mapeados.",
+            "responsable": "Copilot Local",
+            "estado": "PENDIENTE_IMPLEMENTACION"
+        },
+        {
             "sprint": "Sprint 13",
             "fecha": "2026-04-05",
             "tipo": "fix/docs-md031-md013",
