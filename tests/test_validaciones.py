@@ -8,6 +8,7 @@ import pandas as pd
 from utils.validaciones import (
     validar_schema_costos,
     validar_schema_comprobantes,
+    validar_obras_en_datos,
 )
 
 
@@ -96,3 +97,51 @@ class TestValidarSchemaComprobantes:
         df_out = validar_schema_comprobantes(df_con_nulos)
         # La fila con nulo se borra, debe quedar 1
         assert len(df_out) == 1
+
+
+# ---------------------------------------------------------------------------
+# TestValidarObrasEnDatos
+# ---------------------------------------------------------------------------
+
+
+class TestValidarObrasEnDatos:
+    def test_pasa_si_todas_mapeadas(self):
+        catalogo = {"OBRA_01", "OBRA_02", "OBRA_03"}
+        df = pd.DataFrame({"OBRA_PRONTO": ["OBRA_01", "OBRA_02", "OBRA_01"]})
+        validar_obras_en_datos(catalogo, df)  # no debe lanzar
+
+    def test_aborta_si_hay_faltantes(self):
+        catalogo = {"OBRA_01"}
+        df = pd.DataFrame({"OBRA_PRONTO": ["OBRA_01", "SIN OBRA"] * 5})
+        with pytest.raises(ValueError, match="ABORT"):
+            validar_obras_en_datos(catalogo, df)
+
+    def test_reporte_incluye_conteo_filas(self):
+        catalogo = {"OBRA_01"}
+        df = pd.DataFrame({"OBRA_PRONTO": ["SIN OBRA"] * 3 + ["OBRA_01"]})
+        with pytest.raises(ValueError, match="3"):
+            validar_obras_en_datos(catalogo, df)
+
+    def test_multiples_obras_faltantes(self):
+        catalogo = {"OBRA_01"}
+        df = pd.DataFrame(
+            {"OBRA_PRONTO": ["SIN OBRA", "IMPUESTOS", "OBRA_01"]}
+        )
+        with pytest.raises(ValueError, match="2"):
+            validar_obras_en_datos(catalogo, df)
+
+    def test_ignora_nulos_y_vacios(self):
+        catalogo = {"OBRA_01"}
+        df = pd.DataFrame({"OBRA_PRONTO": ["OBRA_01", None, ""]})
+        validar_obras_en_datos(catalogo, df)  # no debe lanzar
+
+    def test_sin_columna_obra_pronto_no_lanza(self):
+        catalogo: set[str] = set()
+        df = pd.DataFrame({"OTRA_COL": [1, 2, 3]})
+        validar_obras_en_datos(catalogo, df)  # no debe lanzar
+
+    def test_catalogo_vacio_aborta(self):
+        catalogo: set[str] = set()
+        df = pd.DataFrame({"OBRA_PRONTO": ["OBRA_01"]})
+        with pytest.raises(ValueError, match="ABORT"):
+            validar_obras_en_datos(catalogo, df)
