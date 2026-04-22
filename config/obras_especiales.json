@@ -1,0 +1,23 @@
+{
+  "_comentario": "Obras que no existen en ProntoNet pero aparecen en los datos de costos. Se cargan con UPSERT idempotente antes de la carga de costos. Para agregar una nueva obra especial: agregar un objeto al array 'obras' con los campos requeridos.",
+  "obras": [
+    {
+      "obra_pronto": "SIN OBRA",
+      "descripcion_obra": "SIN OBRA ASIGNADA",
+      "gerencia": "SIN OBRA ASIGNADA",
+      "nota": "Registros sin obra asignada en archivo origen"
+    },
+    {
+      "obra_pronto": "IMPUESTOS",
+      "descripcion_obra": "IMPUESTOS",
+      "gerencia": "ADMINISTRACION",
+      "nota": "Gastos de impuestos no asociados a obra especifica"
+    },
+    {
+      "obra_pronto": "ACTIVOS PERON",
+      "descripcion_obra": "ACTIVOS PERON",
+      "gerencia": "FRANCISCO DI LISIO",
+      "nota": "Activos vinculados a Peron - no dado de alta en ProntoNet"
+    }
+  ]
+}
