@@ -23,6 +23,7 @@ from auditoria_incremental import (  # noqa: E402
 )
 from conexion import get_connection  # noqa: E402
 from metricas_rendimiento import MedidorRendimiento  # noqa: E402
+from validaciones import validar_obras_en_datos  # noqa: E402
 
 # Raíz del repositorio: resuelve independientemente del directorio de instalación  # noqa: E501
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -714,6 +715,9 @@ def main():
         logging.info(
             "Catálogo: %d obras activas cargadas.", len(obras_validas)
         )
+
+        # Validación fail-fast: abortar si hay obras sin catálogo
+        validar_obras_en_datos(obras_validas, df)
 
         # Cargar mapeo obra_pronto → id_obra (Star Schema v2.1)
         obra_map = cargar_mapeo_obras(conn)
