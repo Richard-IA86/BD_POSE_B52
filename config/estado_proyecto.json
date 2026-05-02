@@ -35,7 +35,10 @@
                 "docs/plan_maestro_b52.md",
                 "docs/procedimiento_operativo.md"
             ],
-            "reglas_corregidas": ["MD031", "MD013"],
+            "reglas_corregidas": [
+                "MD031",
+                "MD013"
+            ],
             "tests_post_fix": "7/7 PASSED",
             "auditoria_final": "OK — QA aprueba los cambios de documentos. NOTA: Se impidió la creación esporádica de ramas desmarcando 'require pull request' en las protecciones para forzar flujo directo sobre este fix.",
             "estado": "APROBADO_POR_QA"
@@ -48,7 +51,7 @@
             "instancia_sql": "DEV-DIRECTORIO\\SQLEXPRESS",
             "base_de_datos": "DW_GrupoPOSE_B52",
             "fecha_inicio": "2026-03-13",
-            "fecha_ultima_actualizacion": "2026-04-05",
+            "fecha_ultima_actualizacion": "2026-05-02",
             "fase_actual": "FASE_1_AJUSTE",
             "progreso_porcentaje": 45,
             "fases": {
@@ -198,7 +201,23 @@
                 "script_ejecutado": "N/A — LOCAL",
                 "instancia": "DEV-DIRECTORIO\\SQLEXPRESS",
                 "errores": []
-            }
+            },
+            "fecha_actualizacion": "2026-05-02",
+            "punto_de_partida_manana": "Retomar según el cierre automático"
         }
-    ]
+    ],
+    "jornada": {
+        "fin": {
+            "fecha": "2026-05-02",
+            "tareas_completadas": [
+                "Ejecución de sincronización de jornada",
+                "Actualización de estado_proyecto.json"
+            ],
+            "tareas_pendientes_manana": [
+                "Reanudación de los sprints en curso"
+            ],
+            "notas_qa": "Cierre de jornada automático de la IA.",
+            "estado_pipeline": "VERDE"
+        }
+    }
 }
