@@ -181,7 +181,7 @@
             "siguiente_accion": {
                 "responsable": "Copilot Servidor",
                 "descripcion": "Crear BD DW_GrupoPOSE_B52 ejecutando los 4 scripts SQL en orden, luego validar prerequisitos y estructura Fase 1.",
-                "estado": "APROBADO_EN_CURSO",
+                "estado": "COMPLETADA",
                 "comandos_a_ejecutar": [
                     "git pull origin main",
                     "sqlcmd -S .\\SQLEXPRESS -i 02_scripts\\sql\\01_crear_estructura_B52.sql",
