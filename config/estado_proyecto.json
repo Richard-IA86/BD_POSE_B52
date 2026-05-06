@@ -225,7 +225,7 @@
                 "script_ejecutado": "N/A — LOCAL",
                 "instancia": "DEV-DIRECTORIO\\SQLEXPRESS",
                 "errores": []
-            },
+            }
     },
     "jornada": {
         "fin": {
