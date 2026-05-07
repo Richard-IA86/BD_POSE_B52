@@ -92,3 +92,58 @@ def validar_schema_comprobantes(df: pd.DataFrame) -> pd.DataFrame:
 
     logging.info("Comprobantes validados: %d registros OK", len(df_valido))
     return df_valido
+
+
+def validar_obras_en_datos(
+    obras_en_catalogo: set[str],
+    df: pd.DataFrame,
+) -> None:
+    """
+    Valida que todos los OBRA_PRONTO del DataFrame existan en el
+    catálogo activo antes de iniciar cualquier carga.
+
+    Estrategia fail-fast: aborta con ValueError y reporte detallado
+    si hay obras no mapeadas. No modifica la BD.
+    Llamar en 03_cargar_costos_B52.py, antes de cualquier INSERT.
+
+    Args:
+        obras_en_catalogo: set de obra_pronto activas en CATALOGO.obras.
+        df: DataFrame normalizado con columna OBRA_PRONTO.
+
+    Raises:
+        ValueError: si hay obras en el Excel sin registro
+            en CATALOGO.obras activo.
+    """
+    if "OBRA_PRONTO" not in df.columns:
+        return
+
+    en_datos: set[str] = {
+        str(v).strip()
+        for v in df["OBRA_PRONTO"].dropna().unique()
+        if str(v).strip().lower() not in ("", "nan")
+    }
+
+    faltantes = en_datos - obras_en_catalogo
+    if not faltantes:
+        logging.info(
+            "Validacion obras: %d unicas en datos — todas en catalogo.",
+            len(en_datos),
+        )
+        return
+
+    conteos = (
+        df[df["OBRA_PRONTO"].isin(faltantes)]
+        .groupby("OBRA_PRONTO")
+        .size()
+        .sort_values(ascending=False)
+    )
+    lineas = [
+        f"  {obra:<30} -> {cnt:>6} registros" for obra, cnt in conteos.items()
+    ]
+    detalle = "\n".join(lineas)
+    raise ValueError(
+        f"ABORT — {len(faltantes)} obra(s) no en catalogo:\n"
+        f"{detalle}\n"
+        "Accion: ejecutar 05_insertar_obras_especiales.py "
+        "o agregar a config/obras_especiales.json."
+    )
