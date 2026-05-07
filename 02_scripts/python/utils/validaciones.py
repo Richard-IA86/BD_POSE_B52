@@ -126,7 +126,7 @@ def validar_obras_en_datos(
     faltantes = en_datos - obras_en_catalogo
     if not faltantes:
         logging.info(
-            "Validacion obras: %d unicas en datos — todas en catalogo.",
+            "Validación obras: %d únicas en datos — todas en catálogo.",
             len(en_datos),
         )
         return
@@ -142,8 +142,8 @@ def validar_obras_en_datos(
     ]
     detalle = "\n".join(lineas)
     raise ValueError(
-        f"ABORT — {len(faltantes)} obra(s) no en catalogo:\n"
+        f"ABORT — {len(faltantes)} obra(s) no en catálogo:\n"
         f"{detalle}\n"
-        "Accion: ejecutar 05_insertar_obras_especiales.py "
+        "Acción: ejecutar 05_insertar_obras_especiales.py "
         "o agregar a config/obras_especiales.json."
     )

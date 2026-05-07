@@ -71,7 +71,7 @@ def upsert_gerencia(cursor: Any, nombre: str) -> int:
     nombre = nombre.strip().upper()
     cursor.execute(
         "SELECT id_gerencia FROM CATALOGO.gerencias"
-        " WHERE codigo_gerencia = ?",
+        " WHERE codigo_gerencia = %s",
         (nombre,),
     )
     row = cursor.fetchone()
@@ -80,12 +80,12 @@ def upsert_gerencia(cursor: Any, nombre: str) -> int:
     cursor.execute(
         "INSERT INTO CATALOGO.gerencias"
         " (codigo_gerencia, nombre_gerencia)"
-        " VALUES (?, ?)",
+        " VALUES (%s, %s)",
         (nombre, nombre),
     )
     cursor.execute(
         "SELECT id_gerencia FROM CATALOGO.gerencias"
-        " WHERE codigo_gerencia = ?",
+        " WHERE codigo_gerencia = %s",
         (nombre,),
     )
     fila = cursor.fetchone()
@@ -112,7 +112,7 @@ def upsert_obra(
     """
     obra_pronto = obra_pronto.strip()
     cursor.execute(
-        "SELECT id_obra FROM CATALOGO.obras" " WHERE obra_pronto = ?",
+        "SELECT id_obra FROM CATALOGO.obras" " WHERE obra_pronto = %s",
         (obra_pronto,),
     )
     if cursor.fetchone():
@@ -121,7 +121,7 @@ def upsert_obra(
     cursor.execute(
         "INSERT INTO CATALOGO.obras"
         " (obra_pronto, descripcion_obra, id_gerencia, activo)"
-        " VALUES (?, ?, ?, 1)",
+        " VALUES (%s, %s, %s, 1)",
         (obra_pronto, descripcion.strip(), id_gerencia),
     )
     logging.info("Obra especial insertada: %s", obra_pronto)
