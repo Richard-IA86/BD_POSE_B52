@@ -1,7 +1,7 @@
 {
     "schema_version": "1.0",
     "repo": "bd_pose_b52",
-    "ultima_actualizacion": "2026-05-06",
+    "ultima_actualizacion": "2026-05-12",
     "auditoria_qa": [
         {
             "sprint": "Sprint 14 — COMPLETADO",
@@ -56,20 +56,19 @@
         }
     ],
     "desarrollo_local": {
-        "fecha_actualizacion": "2026-05-02",
-        "punto_de_partida_manana": "Retomar según el cierre automático",
+        "fecha_actualizacion": "2026-05-12",
+        "punto_de_partida_manana": "Continuar solo con los pendientes reales del flujo PostgreSQL; las tareas heredadas de SQL Server quedaron cerradas.",
         "tareas_completadas": [
             "Sprint 14 — UPSERT obras especiales (PR #8, commit a13a15c): config/obras_especiales.json + 15 tests",
-            "Sprint 14 — Validación previa fail-fast (PR #9, commit ac2611d): validar_obras_en_datos() + 7 tests"
+            "Sprint 14 — Validación previa fail-fast (PR #9, commit ac2611d): validar_obras_en_datos() + 7 tests",
+            "Tareas heredadas de SQL Server marcadas como obsoletas: Copiar archivos de datos de producción a 01_input_raw/",
+            "Tareas heredadas de SQL Server marcadas como obsoletas: Verificar driver ODBC: python -c 'import pyodbc; print(pyodbc.drivers())'",
+            "Tareas heredadas de SQL Server marcadas como obsoletas: Instalar dependencias si faltan: pip install pyodbc pandas openpyxl",
+            "Tareas heredadas de SQL Server marcadas como obsoletas: Ejecutar validaciones: python 02_scripts/python/validaciones/00_validar_prerequisitos.py",
+            "Tareas heredadas de SQL Server marcadas como obsoletas: Ejecutar Fase 2: python 02_scripts/python/cargas/00_ejecutar_cargas_B52.py --full --skip-costos",
+            "Tareas heredadas de SQL Server marcadas como obsoletas: Validar Fase 1 BD: python 02_scripts/python/validaciones/validar_fase1.py"
         ],
-        "tareas_pendientes": [
-            "Copiar archivos de datos de producción a 01_input_raw/",
-            "Verificar driver ODBC: python -c 'import pyodbc; print(pyodbc.drivers())'",
-            "Instalar dependencias si faltan: pip install pyodbc pandas openpyxl",
-            "Ejecutar validaciones: python 02_scripts/python/validaciones/00_validar_prerequisitos.py",
-            "Ejecutar Fase 2: python 02_scripts/python/cargas/00_ejecutar_cargas_B52.py --full --skip-costos",
-            "Validar Fase 1 BD: python 02_scripts/python/validaciones/validar_fase1.py"
-        ],
+        "tareas_pendientes": [],
         "version_plan": "1.1",
             "proyecto": "DW_GrupoPOSE_B52",
             "instancia_sql": "DEV-DIRECTORIO\\SQLEXPRESS",
@@ -195,28 +194,15 @@
                 ]
             },
             "proximos_pasos": [
-                "1. Copiar archivos de datos de producción a 01_input_raw/",
-                "2. Verificar driver ODBC: python -c \"import pyodbc; print(pyodbc.drivers())\"",
-                "3. Instalar dependencias si faltan: pip install pyodbc pandas openpyxl",
-                "4. Ejecutar validaciones: python 02_scripts/python/validaciones/00_validar_prerequisitos.py",
-                "5. Ejecutar Fase 2: python 02_scripts/python/cargas/00_ejecutar_cargas_B52.py --full --skip-costos",
-                "6. Validar Fase 1 BD: python 02_scripts/python/validaciones/validar_fase1.py"
+                "Continuar solo con el flujo PostgreSQL vigente y revisar los pendientes reales del sprint"
             ],
             "siguiente_accion": {
                 "responsable": "Copilot Servidor",
-                "descripcion": "Crear BD DW_GrupoPOSE_B52 ejecutando los 4 scripts SQL en orden, luego validar prerequisitos y estructura Fase 1.",
+                "descripcion": "No ejecutar bootstrap SQL Server heredado; continuar con los pendientes reales del flujo PostgreSQL.",
                 "estado": "COMPLETADA",
-                "comandos_a_ejecutar": [
-                    "git pull origin main",
-                    "sqlcmd -S .\\SQLEXPRESS -i 02_scripts\\sql\\01_crear_estructura_B52.sql",
-                    "sqlcmd -S .\\SQLEXPRESS -i 02_scripts\\sql\\02_indices_B52.sql",
-                    "sqlcmd -S .\\SQLEXPRESS -i 02_scripts\\sql\\03_poblar_referencias_B52.sql",
-                    "sqlcmd -S .\\SQLEXPRESS -i 02_scripts\\sql\\04_tipo_cambio_B52.sql",
-                    "python 02_scripts\\python\\validaciones\\00_validar_prerequisitos.py",
-                    "python 02_scripts\\python\\validaciones\\validar_fase1.py"
-                ],
-                "resultado_esperado": "Ambos scripts retornan exit code 0. BD creada con 5 esquemas, mínimo 12 tablas, CATALOGO.fuentes >= 6 filas, CATALOGO.calendario > 4000 filas.",
-                "ante_error": "Documentar error en ultimo_resultado con detalle del script fallido. No continuar al siguiente script si el anterior falla."
+                "comandos_a_ejecutar": [],
+                "resultado_esperado": "Sin tareas heredadas de SQL Server en el backlog activo.",
+                "ante_error": "Documentar cualquier reaparición de tareas obsoletas en ultimo_resultado."
             },
             "ultimo_resultado": {
                 "estado": "OK",
