@@ -8,42 +8,14 @@
 
 ---
 
-# Principio Operativo #2 — Flujo Local / Servidor — NO NEGOCIABLE
+# Flujo M1 / M2 — Referencia
 
-> **AVISO PARA QA:** Antes de revisar cualquier tarea, confirmar en qué entorno
-> estás operando (LOCAL o SERVIDOR). Las reglas de la tabla siguiente son
-> **obligatorias** y no negociables. Toda discrepancia con este flujo debe
-> reportarse antes de ejecutar cualquier acción.
-
-## Arquitectura de dos entornos
-
-```text
-[LOCAL]  diseña, crea scripts, actualiza estado_proyecto.json
-   │
-   └── git push → GitHub (main)
-                      │
-                      └── git pull → [SERVIDOR] ejecuta, documenta, push
-```
-
-## Reglas de ejecución — OBLIGATORIAS
-
-| Acción | LOCAL | SERVIDOR |
-|--------|-------|----------|
-| Crear/editar scripts Python | ✅ | ❌ |
-| Crear/editar scripts SQL | ✅ | ❌ |
-| Actualizar `estado_proyecto.json` (`siguiente_accion`) | ✅ | ❌ |
-| Ejecutar scripts SQL contra la BD | ❌ | ✅ |
-| Ejecutar scripts de carga/validación Python | ❌ | ✅ |
-| Documentar `ultimo_resultado` en `estado_proyecto.json` | ❌ | ✅ |
-| Ejecutar `pytest` (tests unitarios) | ✅ | ✅ |
-| Diagnósticos de archivos locales (MD, JSON, PY) | ✅ | ❌ |
-
-## Señales de error de contexto
-
-- Si Copilot intenta ejecutar `sqlcmd` o scripts de carga estando en LOCAL
-  → **PARAR**. Actualizar `siguiente_accion` y hacer push para el servidor.
-- Si Copilot intenta editar scripts estando en el SERVIDOR
-  → **PARAR**. Reportar en `ultimo_resultado` y esperar instrucción del LOCAL.
+- **M1 (iMac/Linux):** diseña, escribe scripts, ejecuta CI/CD, hace commit + push.
+- **M2 (Asus/Windows):** ejecuta scripts SQL contra SQL Server, carga datos,
+  documenta `ultimo_resultado` en `estado_proyecto.json`, hace commit + push
+  de logs/estado.
+- Scripts SQL → ejecutar siempre en M2 (SQL Server `RICHARD_ASUS\SQLEXPRESS`).
+- `pytest` → se puede ejecutar en ambas máquinas.
 
 ---
 
