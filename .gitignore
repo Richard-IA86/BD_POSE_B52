@@ -463,3 +463,6 @@ FodyWeavers.xsd
 _temp_*.py
 _temp_*.sh
 .pytest_cache/
+
+# Copias de seguridad locales y de referencia de la IA
+*.original.md
