@@ -1,230 +1,230 @@
 {
-    "schema_version": "1.0",
-    "repo": "bd_pose_b52",
-    "ultima_actualizacion": "2026-05-12",
-    "auditoria_qa": [
+  "schema_version": "1.0",
+  "repo": "bd_pose_b52",
+  "ultima_actualizacion": "2026-05-12",
+  "auditoria_qa": [
+    {
+      "sprint": "Sprint 14 — COMPLETADO",
+      "fecha_inicio": "2026-04-15",
+      "fecha_cierre": "2026-04-22",
+      "tipo": "feature/obras-especiales + feature/validacion-previa-carga",
+      "descripcion": "Resolución de 227 rechazos silenciosos por OBRA_PRONTO no mapeada. Solución en dos capas: UPSERT de obras especiales en catálogo + validación fail-fast antes de cualquier INSERT.",
+      "tareas_completadas": [
         {
-            "sprint": "Sprint 14 — COMPLETADO",
-            "fecha_inicio": "2026-04-15",
-            "fecha_cierre": "2026-04-22",
-            "tipo": "feature/obras-especiales + feature/validacion-previa-carga",
-            "descripcion": "Resolución de 227 rechazos silenciosos por OBRA_PRONTO no mapeada. Solución en dos capas: UPSERT de obras especiales en catálogo + validación fail-fast antes de cualquier INSERT.",
-            "tareas_completadas": [
-                {
-                    "tarea": "Tarea 1 — UPSERT obras especiales",
-                    "commit": "a13a15c",
-                    "pr": "PR #8",
-                    "descripcion": "config/obras_especiales.json (3 obras: SIN OBRA, IMPUESTOS, ACTIVOS PERON) + utils/obras_especiales.py (UPSERT idempotente) + cargas/05_insertar_obras_especiales.py (lanzador) + 15 tests"
-                },
-                {
-                    "tarea": "Tarea 2 — Validación previa fail-fast",
-                    "commit": "ac2611d",
-                    "pr": "PR #9",
-                    "descripcion": "utils/validaciones.py: validar_obras_en_datos(obras_en_catalogo, df) levanta ValueError con reporte obra→conteo. 03_cargar_costos_B52.py: llamada justo después de cargar obras_validas, antes de cualquier INSERT. 7 tests nuevos (14/14 total). mypy.ini: namespace_packages=False."
-                }
-            ],
-            "tests_post_sprint": "14/14 PASSED",
-            "resultado": "APROBADO",
-            "hallazgos": [
-                "Tarea 1 — UPSERT obras especiales (PR #8, commit a13a15c): config/obras_especiales.json + utils/obras_especiales.py + 15 tests",
-                "Tarea 2 — Validación previa fail-fast (PR #9, commit ac2611d): validar_obras_en_datos() en utils/validaciones.py + 7 tests"
-            ]
+          "tarea": "Tarea 1 — UPSERT obras especiales",
+          "commit": "a13a15c",
+          "pr": "PR #8",
+          "descripcion": "config/obras_especiales.json (3 obras: SIN OBRA, IMPUESTOS, ACTIVOS PERON) + utils/obras_especiales.py (UPSERT idempotente) + cargas/05_insertar_obras_especiales.py (lanzador) + 15 tests"
         },
         {
-            "sprint": "Sprint 13",
-            "fecha": "2026-04-05",
-            "tipo": "fix/docs-md031-md013",
-            "descripcion": "Corrección automática MD031 (blank line después de cierre de code fence) y MD013 (heading >120 chars) en docs/. 54 issues resueltos en 5 archivos.",
-            "archivos_modificados": [
-                "docs/analisis_implementacion.md",
-                "docs/git_instructivo_basico.md",
-                "docs/instructivo_clonacion_server.md",
-                "docs/plan_maestro_b52.md",
-                "docs/procedimiento_operativo.md"
-            ],
-            "reglas_corregidas": [
-                "MD031",
-                "MD013"
-            ],
-            "tests_post_fix": "7/7 PASSED",
-            "auditoria_final": "OK — QA aprueba los cambios de documentos. NOTA: Se impidió la creación esporádica de ramas desmarcando 'require pull request' en las protecciones para forzar flujo directo sobre este fix.",
-            "resultado": "APROBADO",
-            "hallazgos": [
-                "MD031 y MD013 corregidos en 5 archivos docs/: analisis_implementacion, git_instructivo_basico, instructivo_clonacion_server, plan_maestro_b52, procedimiento_operativo",
-                "54 issues de documentación resueltos"
-            ]
+          "tarea": "Tarea 2 — Validación previa fail-fast",
+          "commit": "ac2611d",
+          "pr": "PR #9",
+          "descripcion": "utils/validaciones.py: validar_obras_en_datos(obras_en_catalogo, df) levanta ValueError con reporte obra→conteo. 03_cargar_costos_B52.py: llamada justo después de cargar obras_validas, antes de cualquier INSERT. 7 tests nuevos (14/14 total). mypy.ini: namespace_packages=False."
         }
-    ],
-    "desarrollo_local": {
-        "fecha_actualizacion": "2026-05-12",
-        "punto_de_partida_manana": "Continuar solo con los pendientes reales del flujo PostgreSQL; las tareas heredadas de SQL Server quedaron cerradas.",
-        "tareas_completadas": [
-            "Sprint 14 — UPSERT obras especiales (PR #8, commit a13a15c): config/obras_especiales.json + 15 tests",
-            "Sprint 14 — Validación previa fail-fast (PR #9, commit ac2611d): validar_obras_en_datos() + 7 tests",
-            "Tareas heredadas de SQL Server marcadas como obsoletas: Copiar archivos de datos de producción a 01_input_raw/",
-            "Tareas heredadas de SQL Server marcadas como obsoletas: Verificar driver ODBC: python -c 'import pyodbc; print(pyodbc.drivers())'",
-            "Tareas heredadas de SQL Server marcadas como obsoletas: Instalar dependencias si faltan: pip install pyodbc pandas openpyxl",
-            "Tareas heredadas de SQL Server marcadas como obsoletas: Ejecutar validaciones: python 02_scripts/python/validaciones/00_validar_prerequisitos.py",
-            "Tareas heredadas de SQL Server marcadas como obsoletas: Ejecutar Fase 2: python 02_scripts/python/cargas/00_ejecutar_cargas_B52.py --full --skip-costos",
-            "Tareas heredadas de SQL Server marcadas como obsoletas: Validar Fase 1 BD: python 02_scripts/python/validaciones/validar_fase1.py"
-        ],
-        "tareas_pendientes": [],
-        "version_plan": "1.1",
-            "proyecto": "DW_GrupoPOSE_B52",
-            "instancia_sql": "DEV-DIRECTORIO\\SQLEXPRESS",
-            "base_de_datos": "DW_GrupoPOSE_B52",
-            "fecha_inicio": "2026-03-13",
-            "fecha_ultima_actualizacion": "2026-05-02",
-            "fase_actual": "FASE_1_AJUSTE",
-            "progreso_porcentaje": 45,
-            "fases": {
-                "FASE_0_prerequisitos": {
-                    "estado": "COMPLETADA",
-                    "descripcion": "Verificación de entorno (Python 3.11.9, sqlcmd 16, SQL Server 2022 Express)",
-                    "fecha_completada": "2026-03-13",
-                    "observaciones": "Python OK, sqlcmd OK, instancia .\\.SQLEXPRESS OK"
-                },
-                "FASE_1_estructura": {
-                    "estado": "EN_VALIDACION",
-                    "descripcion": "BD + esquemas + tablas + índices + datos semilla + CATALOGO.tipo_cambio creada.",
-                    "fecha_completada": "2026-03-19",
-                    "scripts_ejecutados": [
-                        "02_scripts/sql/01_crear_estructura_B52.sql",
-                        "02_scripts/sql/02_indices_B52.sql",
-                        "02_scripts/sql/03_poblar_referencias_B52.sql",
-                        "02_scripts/sql/04_tipo_cambio_B52.sql"
-                    ],
-                    "pendientes": [],
-                    "resultados": {
-                        "esquemas_creados": 5,
-                        "tablas_creadas": 18,
-                        "registros_fuentes": 6,
-                        "registros_calendario": 4383,
-                        "registros_umbrales_ml": 4
-                    },
-                    "datos_prueba": {
-                        "PRODUCCION.costos": "8204 filas — test: 2 años parciales + 2021 y 2022 completos",
-                        "PRODUCCION.comprobantes": "70055 filas — test: carga 2021 y 2022",
-                        "decision": "CONSERVAR — son datos de prueba válidos. Borrar solo si se detecta corrupción."
-                    }
-                },
-                "FASE_2_catalogos": {
-                    "estado": "PENDIENTE",
-                    "responsable": "SERVIDOR",
-                    "descripcion": "Carga full de catálogos (gerencias, obras, proveedores, fuentes) desde ETL externo",
-                    "scripts_disponibles": [
-                        "02_scripts/python/cargas/01_cargar_catalogos_B52_v2.py"
-                    ],
-                    "nota": "01_cargar_catalogos_B52_v2.py consolida gerencias, obras, proveedores y fuentes. v1 deprecado.",
-                    "prerequisitos": [
-                        "FASE_1 validada (validar_fase1.py exit 0)",
-                        "Archivos de datos en 01_input_raw/",
-                        "Validar 00_validar_prerequisitos.py"
-                    ]
-                },
-                "FASE_3_historico": {
-                    "estado": "PENDIENTE",
-                    "responsable": "SERVIDOR",
-                    "descripcion": "Carga incremental histórica costos/comprobantes 2019-2024",
-                    "scripts_disponibles": [
-                        "02_scripts/python/cargas/03_cargar_costos_B52.py",
-                        "02_scripts/python/cargas/04_cargar_comprobantes_B52.py"
-                    ],
-                    "prerequisitos": [
-                        "FASE_2_catalogos completada"
-                    ]
-                },
-                "FASE_4_ml_observability": {
-                    "estado": "PENDIENTE",
-                    "responsable": "LOCAL → SERVIDOR",
-                    "descripcion": "Activación de ML Observability: z-scores, percentiles, detección de anomalías",
-                    "nota": "02_scripts/python/ml/ está VACÍO. LOCAL debe crear los scripts antes de que SERVIDOR los ejecute.",
-                    "scripts_disponibles": [],
-                    "prerequisitos": [
-                        "FASE_3_historico con >1000 registros en costos",
-                        "Scripts ML creados en LOCAL y pusheados"
-                    ]
-                },
-                "FASE_5_validacion_final": {
-                    "estado": "PENDIENTE",
-                    "responsable": "SERVIDOR",
-                    "descripcion": "Validación integral y generación de reporte de implementación",
-                    "scripts_disponibles": [
-                        "02_scripts/python/validaciones/00_validar_prerequisitos.py",
-                        "02_scripts/python/validaciones/validar_fase1.py"
-                    ]
-                }
-            },
-            "infraestructura_creada": {
-                "directorios": [
-                    "00_logs/",
-                    "00_logs/errores/",
-                    "01_input_raw/",
-                    "02_scripts/sql/",
-                    "02_scripts/python/cargas/",
-                    "02_scripts/python/ml/",
-                    "02_scripts/python/utils/",
-                    "02_scripts/python/validaciones/",
-                    "03_output/"
-                ],
-                "scripts_sql": [
-                    "02_scripts/sql/01_crear_estructura_B52.sql",
-                    "02_scripts/sql/02_indices_B52.sql",
-                    "02_scripts/sql/03_poblar_referencias_B52.sql"
-                ],
-                "utils_python": [
-                    "02_scripts/python/utils/__init__.py",
-                    "02_scripts/python/utils/conexion.py",
-                    "02_scripts/python/utils/auditoria_incremental.py",
-                    "02_scripts/python/utils/metricas_rendimiento.py",
-                    "02_scripts/python/utils/validaciones.py"
-                ],
-                "cargas_python": [
-                    "02_scripts/python/cargas/00_ejecutar_cargas_B52.py",
-                    "02_scripts/python/cargas/01_cargar_gerencias_B52.py",
-                    "02_scripts/python/cargas/02_cargar_obras_B52.py",
-                    "02_scripts/python/cargas/03_cargar_costos_B52.py",
-                    "02_scripts/python/cargas/04_cargar_comprobantes_B52.py",
-                    "02_scripts/python/cargas/05_cargar_proveedores_B52.py",
-                    "02_scripts/python/cargas/06_cargar_fuentes_B52.py"
-                ],
-                "validaciones_python": [
-                    "02_scripts/python/validaciones/00_validar_prerequisitos.py",
-                    "02_scripts/python/validaciones/validar_fase1.py"
-                ]
-            },
-            "proximos_pasos": [
-                "Continuar solo con el flujo PostgreSQL vigente y revisar los pendientes reales del sprint"
-            ],
-            "siguiente_accion": {
-                "responsable": "Copilot Servidor",
-                "descripcion": "No ejecutar bootstrap SQL Server heredado; continuar con los pendientes reales del flujo PostgreSQL.",
-                "estado": "COMPLETADA",
-                "comandos_a_ejecutar": [],
-                "resultado_esperado": "Sin tareas heredadas de SQL Server en el backlog activo.",
-                "ante_error": "Documentar cualquier reaparición de tareas obsoletas en ultimo_resultado."
-            },
-            "ultimo_resultado": {
-                "estado": "OK",
-                "detalle": "Sprint 14 COMPLETADO — PR #8 (UPSERT obras especiales, 15 tests) + PR #9 (fail-fast validar_obras_en_datos, 7 tests). 14/14 tests. black+flake8+mypy sin errores.",
-                "fecha": "2026-04-22",
-                "script_ejecutado": "N/A — LOCAL",
-                "instancia": "DEV-DIRECTORIO\\SQLEXPRESS",
-                "errores": []
-            }
+      ],
+      "tests_post_sprint": "14/14 PASSED",
+      "resultado": "APROBADO",
+      "hallazgos": [
+        "Tarea 1 — UPSERT obras especiales (PR #8, commit a13a15c): config/obras_especiales.json + utils/obras_especiales.py + 15 tests",
+        "Tarea 2 — Validación previa fail-fast (PR #9, commit ac2611d): validar_obras_en_datos() en utils/validaciones.py + 7 tests"
+      ]
     },
-    "jornada": {
-        "fin": {
-            "fecha": "2026-05-02",
-            "tareas_completadas": [
-                "Ejecución de sincronización de jornada",
-                "Actualización de estado_proyecto.json"
-            ],
-            "tareas_pendientes_manana": [
-                "Reanudación de los sprints en curso"
-            ],
-            "notas_qa": "Cierre de jornada automático de la IA.",
-            "estado_pipeline": "VERDE"
-        }
+    {
+      "sprint": "Sprint 13",
+      "fecha": "2026-04-05",
+      "tipo": "fix/docs-md031-md013",
+      "descripcion": "Corrección automática MD031 (blank line después de cierre de code fence) y MD013 (heading >120 chars) en docs/. 54 issues resueltos en 5 archivos.",
+      "archivos_modificados": [
+        "docs/analisis_implementacion.md",
+        "docs/git_instructivo_basico.md",
+        "docs/instructivo_clonacion_server.md",
+        "docs/plan_maestro_b52.md",
+        "docs/procedimiento_operativo.md"
+      ],
+      "reglas_corregidas": [
+        "MD031",
+        "MD013"
+      ],
+      "tests_post_fix": "7/7 PASSED",
+      "auditoria_final": "OK — QA aprueba los cambios de documentos. NOTA: Se impidió la creación esporádica de ramas desmarcando 'require pull request' en las protecciones para forzar flujo directo sobre este fix.",
+      "resultado": "APROBADO",
+      "hallazgos": [
+        "MD031 y MD013 corregidos en 5 archivos docs/: analisis_implementacion, git_instructivo_basico, instructivo_clonacion_server, plan_maestro_b52, procedimiento_operativo",
+        "54 issues de documentación resueltos"
+      ]
     }
+  ],
+  "desarrollo_local": {
+    "fecha_actualizacion": "2026-05-12",
+    "punto_de_partida_manana": "Continuar solo con los pendientes reales del flujo PostgreSQL; las tareas heredadas de SQL Server quedaron cerradas.",
+    "tareas_completadas": [
+      "Sprint 14 — UPSERT obras especiales (PR #8, commit a13a15c): config/obras_especiales.json + 15 tests",
+      "Sprint 14 — Validación previa fail-fast (PR #9, commit ac2611d): validar_obras_en_datos() + 7 tests",
+      "Tareas heredadas de SQL Server marcadas como obsoletas: Copiar archivos de datos de producción a 01_input_raw/",
+      "Tareas heredadas de SQL Server marcadas como obsoletas: Verificar driver ODBC: python -c 'import pyodbc; print(pyodbc.drivers())'",
+      "Tareas heredadas de SQL Server marcadas como obsoletas: Instalar dependencias si faltan: pip install pyodbc pandas openpyxl",
+      "Tareas heredadas de SQL Server marcadas como obsoletas: Ejecutar validaciones: python 02_scripts/python/validaciones/00_validar_prerequisitos.py",
+      "Tareas heredadas de SQL Server marcadas como obsoletas: Ejecutar Fase 2: python 02_scripts/python/cargas/00_ejecutar_cargas_B52.py --full --skip-costos",
+      "Tareas heredadas de SQL Server marcadas como obsoletas: Validar Fase 1 BD: python 02_scripts/python/validaciones/validar_fase1.py"
+    ],
+    "tareas_pendientes": [],
+    "version_plan": "1.1",
+    "proyecto": "DW_GrupoPOSE_B52",
+    "instancia_sql": "DEV-DIRECTORIO\\SQLEXPRESS",
+    "base_de_datos": "DW_GrupoPOSE_B52",
+    "fecha_inicio": "2026-03-13",
+    "fecha_ultima_actualizacion": "2026-05-02",
+    "fase_actual": "FASE_1_AJUSTE",
+    "progreso_porcentaje": 45,
+    "fases": {
+      "FASE_0_prerequisitos": {
+        "estado": "COMPLETADA",
+        "descripcion": "Verificación de entorno (Python 3.11.9, sqlcmd 16, SQL Server 2022 Express)",
+        "fecha_completada": "2026-03-13",
+        "observaciones": "Python OK, sqlcmd OK, instancia .\\.SQLEXPRESS OK"
+      },
+      "FASE_1_estructura": {
+        "estado": "EN_VALIDACION",
+        "descripcion": "BD + esquemas + tablas + índices + datos semilla + CATALOGO.tipo_cambio creada.",
+        "fecha_completada": "2026-03-19",
+        "scripts_ejecutados": [
+          "02_scripts/sql/01_crear_estructura_B52.sql",
+          "02_scripts/sql/02_indices_B52.sql",
+          "02_scripts/sql/03_poblar_referencias_B52.sql",
+          "02_scripts/sql/04_tipo_cambio_B52.sql"
+        ],
+        "pendientes": [],
+        "resultados": {
+          "esquemas_creados": 5,
+          "tablas_creadas": 18,
+          "registros_fuentes": 6,
+          "registros_calendario": 4383,
+          "registros_umbrales_ml": 4
+        },
+        "datos_prueba": {
+          "PRODUCCION.costos": "8204 filas — test: 2 años parciales + 2021 y 2022 completos",
+          "PRODUCCION.comprobantes": "70055 filas — test: carga 2021 y 2022",
+          "decision": "CONSERVAR — son datos de prueba válidos. Borrar solo si se detecta corrupción."
+        }
+      },
+      "FASE_2_catalogos": {
+        "estado": "PENDIENTE",
+        "responsable": "SERVIDOR",
+        "descripcion": "Carga full de catálogos (gerencias, obras, proveedores, fuentes) desde ETL externo",
+        "scripts_disponibles": [
+          "02_scripts/python/cargas/01_cargar_catalogos_B52_v2.py"
+        ],
+        "nota": "01_cargar_catalogos_B52_v2.py consolida gerencias, obras, proveedores y fuentes. v1 deprecado.",
+        "prerequisitos": [
+          "FASE_1 validada (validar_fase1.py exit 0)",
+          "Archivos de datos en 01_input_raw/",
+          "Validar 00_validar_prerequisitos.py"
+        ]
+      },
+      "FASE_3_historico": {
+        "estado": "PENDIENTE",
+        "responsable": "SERVIDOR",
+        "descripcion": "Carga incremental histórica costos/comprobantes 2019-2024",
+        "scripts_disponibles": [
+          "02_scripts/python/cargas/03_cargar_costos_B52.py",
+          "02_scripts/python/cargas/04_cargar_comprobantes_B52.py"
+        ],
+        "prerequisitos": [
+          "FASE_2_catalogos completada"
+        ]
+      },
+      "FASE_4_ml_observability": {
+        "estado": "PENDIENTE",
+        "responsable": "LOCAL → SERVIDOR",
+        "descripcion": "Activación de ML Observability: z-scores, percentiles, detección de anomalías",
+        "nota": "02_scripts/python/ml/ está VACÍO. LOCAL debe crear los scripts antes de que SERVIDOR los ejecute.",
+        "scripts_disponibles": [],
+        "prerequisitos": [
+          "FASE_3_historico con >1000 registros en costos",
+          "Scripts ML creados en LOCAL y pusheados"
+        ]
+      },
+      "FASE_5_validacion_final": {
+        "estado": "PENDIENTE",
+        "responsable": "SERVIDOR",
+        "descripcion": "Validación integral y generación de reporte de implementación",
+        "scripts_disponibles": [
+          "02_scripts/python/validaciones/00_validar_prerequisitos.py",
+          "02_scripts/python/validaciones/validar_fase1.py"
+        ]
+      }
+    },
+    "infraestructura_creada": {
+      "directorios": [
+        "00_logs/",
+        "00_logs/errores/",
+        "01_input_raw/",
+        "02_scripts/sql/",
+        "02_scripts/python/cargas/",
+        "02_scripts/python/ml/",
+        "02_scripts/python/utils/",
+        "02_scripts/python/validaciones/",
+        "03_output/"
+      ],
+      "scripts_sql": [
+        "02_scripts/sql/01_crear_estructura_B52.sql",
+        "02_scripts/sql/02_indices_B52.sql",
+        "02_scripts/sql/03_poblar_referencias_B52.sql"
+      ],
+      "utils_python": [
+        "02_scripts/python/utils/__init__.py",
+        "02_scripts/python/utils/conexion.py",
+        "02_scripts/python/utils/auditoria_incremental.py",
+        "02_scripts/python/utils/metricas_rendimiento.py",
+        "02_scripts/python/utils/validaciones.py"
+      ],
+      "cargas_python": [
+        "02_scripts/python/cargas/00_ejecutar_cargas_B52.py",
+        "02_scripts/python/cargas/01_cargar_gerencias_B52.py",
+        "02_scripts/python/cargas/02_cargar_obras_B52.py",
+        "02_scripts/python/cargas/03_cargar_costos_B52.py",
+        "02_scripts/python/cargas/04_cargar_comprobantes_B52.py",
+        "02_scripts/python/cargas/05_cargar_proveedores_B52.py",
+        "02_scripts/python/cargas/06_cargar_fuentes_B52.py"
+      ],
+      "validaciones_python": [
+        "02_scripts/python/validaciones/00_validar_prerequisitos.py",
+        "02_scripts/python/validaciones/validar_fase1.py"
+      ]
+    },
+    "proximos_pasos": [
+      "Continuar solo con el flujo PostgreSQL vigente y revisar los pendientes reales del sprint"
+    ],
+    "siguiente_accion": {
+      "responsable": "Copilot Servidor",
+      "descripcion": "No ejecutar bootstrap SQL Server heredado; continuar con los pendientes reales del flujo PostgreSQL.",
+      "estado": "COMPLETADA",
+      "comandos_a_ejecutar": [],
+      "resultado_esperado": "Sin tareas heredadas de SQL Server en el backlog activo.",
+      "ante_error": "Documentar cualquier reaparición de tareas obsoletas en ultimo_resultado."
+    },
+    "ultimo_resultado": {
+      "estado": "OK",
+      "detalle": "Sprint 14 COMPLETADO — PR #8 (UPSERT obras especiales, 15 tests) + PR #9 (fail-fast validar_obras_en_datos, 7 tests). 14/14 tests. black+flake8+mypy sin errores.",
+      "fecha": "2026-04-22",
+      "script_ejecutado": "N/A — LOCAL",
+      "instancia": "DEV-DIRECTORIO\\SQLEXPRESS",
+      "errores": []
+    }
+  },
+  "jornada": {
+    "fin": {
+      "fecha": "2026-05-27",
+      "tareas_completadas": [
+        "Ejecución de sincronización de jornada",
+        "Actualización de estado_proyecto.json"
+      ],
+      "tareas_pendientes_manana": [
+        "Reanudación de los sprints en curso"
+      ],
+      "notas_qa": "Cierre de jornada automático de la IA.",
+      "estado_pipeline": "VERDE"
+    }
+  }
 }
