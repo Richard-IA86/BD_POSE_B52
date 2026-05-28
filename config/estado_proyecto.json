@@ -215,16 +215,7 @@
   },
   "jornada": {
     "fin": {
-      "fecha": "2026-05-27",
-      "tareas_completadas": [
-        "Ejecución de sincronización de jornada",
-        "Actualización de estado_proyecto.json"
-      ],
-      "tareas_pendientes_manana": [
-        "Reanudación de los sprints en curso"
-      ],
-      "notas_qa": "Cierre de jornada automático de la IA.",
-      "estado_pipeline": "VERDE"
+      "fecha": "2026-05-28"
     }
   }
 }
