@@ -8,14 +8,14 @@
 
 ---
 
-# Flujo M1 / M2 — Referencia
+# Flujo Sauron / M2 — Referencia
 
-- **M1 (iMac/Linux):** diseña, escribe scripts, ejecuta CI/CD, hace commit + push.
+- **Sauron (Hetzner/M3):** diseña, escribe scripts, ejecuta CI/CD, hace commit + push. M1 iMac FUERA DE SERVICIO.
 - **M2 (Asus/Windows):** ejecuta scripts SQL contra SQL Server, carga datos,
   documenta `ultimo_resultado` en `estado_proyecto.json`, hace commit + push
   de logs/estado.
 - Scripts SQL → ejecutar siempre en M2 (SQL Server `RICHARD_ASUS\SQLEXPRESS`).
-- `pytest` → se puede ejecutar en ambas máquinas.
+- `pytest` → se puede ejecutar en M2 o en Hetzner/M3.
 
 ---
 
